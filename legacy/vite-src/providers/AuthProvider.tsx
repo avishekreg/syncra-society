@@ -1,0 +1,612 @@
+import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react'
+import supabase from '../api/supabaseSdk'
+import { restGet } from '../api/supabaseClient'
+import type { Society, UserAndFlat } from '../types/db'
+import { resolveResidentProfile, getLocalResidentProfile } from '../api/residentMapping'
+import { seedDemoActivities } from '../lib/activityLog'
+import { DEV_SUPER_ADMIN, DEMO_AUTH_KEY, DEMO_LOGINS, DEMO_SOCIETY_ID, isSuperAdminEmail, seedDemoBillingStatus } from '../config/devSeed'
+
+type SubscriptionTier = 'tier1' | 'tier2' | 'tier3'
+
+type User = {
+  id: string
+  email: string
+  roles: string[]
+  flatNumber?: string | null
+  tier: SubscriptionTier
+  role: string
+  user_metadata?: {
+    role: string
+    tier: string
+  }
+  app_metadata?: {
+    provider: string
+  }
+}
+
+export type ShowcaseUserRole = 'rwa_owner' | 'rwa_accountant' | 'resident'
+
+export interface ShowcaseData {
+  society: {
+    id: string
+    name: string
+    subscription: string
+    totalFlats: number
+  }
+  units: Array<{
+    flat_number: string
+    owner_name: string
+    owner_email: string
+    balance_status: 'paid' | 'due' | 'defaulter'
+    balance_due: number
+    last_payment: string
+    payment_history: Array<{ date: string; amount: number; method: string }>
+  }>
+  defaulters: Array<{
+    id: string
+    society_id: string
+    society_name: string
+    building: string
+    flat_number: string
+    tenant_name: string
+    amount_due: number
+    overdue_days: number
+    penalty: number
+    status: 'unpaid' | 'paid'
+    notes?: string | null
+    created_at: string
+  }>
+  ledgerEntries: Array<{
+    id: string
+    society_id: string
+    date: string
+    type: 'credit' | 'debit'
+    amount: number
+    description?: string | null
+    invoice_url?: string | null
+  }>
+}
+
+const AuthContext = createContext<
+  | {
+      user: User | null
+      setUser: (u: User | null) => void
+      currentSocietyId: string | null
+      setCurrentSocietyId: (s: string | null) => void
+      showcaseData: ShowcaseData | null
+      setShowcaseData: (data: ShowcaseData | null) => void
+      signUp: (email: string, password: string, options?: { fullName?: string; role?: string }) => Promise<any>
+      signIn: (email: string, password: string) => Promise<any>
+      signOut: () => Promise<void>
+      refreshSocietyProfile: () => Promise<void>
+    }
+  | undefined
+>(undefined)
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null)
+  const [currentSocietyId, setCurrentSocietyId] = useState<string | null>(null)
+  const [showcaseData, setShowcaseData] = useState<ShowcaseData | null>(null)
+
+  const demoShowcaseData: ShowcaseData = {
+    society: {
+      id: DEMO_SOCIETY_ID,
+      name: 'Syncra Windsor Castle',
+      subscription: 'Tier 2',
+      totalFlats: 120
+    },
+    units: [
+      {
+        flat_number: '101',
+        owner_name: 'Naveen Kumar',
+        owner_email: 'naveen.kumar@windsorcastle.com',
+        balance_status: 'paid',
+        balance_due: 0,
+        last_payment: '02 Jul 2026',
+        payment_history: [
+          { date: '02 Jul 2026', amount: 3500, method: 'UPI transfer' }
+        ]
+      },
+      {
+        flat_number: '204',
+        owner_name: 'Priya Menon',
+        owner_email: 'priya.menon@windsorcastle.com',
+        balance_status: 'due',
+        balance_due: 4500,
+        last_payment: '04 Jun 2026',
+        payment_history: [
+          { date: '04 Jun 2026', amount: 0, method: 'No recent payment' }
+        ]
+      },
+      {
+        flat_number: '402',
+        owner_name: 'Raghav Sharma',
+        owner_email: 'raghav.sharma@windsorcastle.com',
+        balance_status: 'paid',
+        balance_due: 0,
+        last_payment: '28 Jun 2026',
+        payment_history: [
+          { date: '28 Jun 2026', amount: 4100, method: 'Cheque deposit' }
+        ]
+      },
+      {
+        flat_number: '501',
+        owner_name: 'Aarti Joshi',
+        owner_email: 'aarti.joshi@windsorcastle.com',
+        balance_status: 'defaulter',
+        balance_due: 8300,
+        last_payment: '17 May 2026',
+        payment_history: [
+          { date: '17 May 2026', amount: 0, method: 'No payment received' }
+        ]
+      }
+    ],
+    defaulters: [
+      {
+        id: 'defaulter-204',
+        society_id: DEMO_SOCIETY_ID,
+        society_name: 'Syncra Windsor Castle',
+        building: 'B',
+        flat_number: '204',
+        tenant_name: 'Priya Menon',
+        amount_due: 4500,
+        overdue_days: 60,
+        penalty: 360,
+        status: 'unpaid',
+        notes: 'Late fee = ₹100 fixed + compound interest',
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'defaulter-501',
+        society_id: DEMO_SOCIETY_ID,
+        society_name: 'Syncra Windsor Castle',
+        building: 'C',
+        flat_number: '501',
+        tenant_name: 'Aarti Joshi',
+        amount_due: 8300,
+        overdue_days: 45,
+        penalty: 740,
+        status: 'unpaid',
+        notes: 'Defaulter since 45 days with fixed + compound interest',
+        created_at: new Date().toISOString()
+      }
+    ],
+    ledgerEntries: [
+      {
+        id: 'ledger-01',
+        society_id: DEMO_SOCIETY_ID,
+        date: '30 Jun 2026',
+        type: 'credit',
+        amount: 4100,
+        description: 'Resident maintenance collection - Flat 402',
+        invoice_url: null
+      },
+      {
+        id: 'ledger-02',
+        society_id: DEMO_SOCIETY_ID,
+        date: '28 Jun 2026',
+        type: 'credit',
+        amount: 3500,
+        description: 'Resident maintenance collection - Flat 101',
+        invoice_url: null
+      },
+      {
+        id: 'ledger-03',
+        society_id: DEMO_SOCIETY_ID,
+        date: '25 Jun 2026',
+        type: 'debit',
+        amount: 2800,
+        description: 'Diesel for Generator',
+        invoice_url: null
+      },
+      {
+        id: 'ledger-04',
+        society_id: DEMO_SOCIETY_ID,
+        date: '24 Jun 2026',
+        type: 'debit',
+        amount: 5200,
+        description: 'Security Staff Salary',
+        invoice_url: null
+      }
+    ]
+  }
+
+  function restoreDemoSession() {
+    const storedDemo = localStorage.getItem(DEMO_AUTH_KEY)
+    if (!storedDemo) return false
+
+    try {
+      const parsed = JSON.parse(storedDemo) as {
+        email: string
+        roles: string[]
+        tier: SubscriptionTier
+        currentSocietyId: string | null
+        flatNumber?: string | null
+      }
+      const nextUser = buildUser(
+        {
+          id: `demo-${parsed.email}`,
+          email: parsed.email,
+          role: parsed.roles[0],
+          user_metadata: { role: parsed.roles[0], tier: parsed.tier }
+        },
+        parsed.roles,
+        parsed.tier,
+        parsed.flatNumber ?? null
+      )
+      setUser(nextUser)
+      setCurrentSocietyId(parsed.currentSocietyId)
+      setShowcaseData(demoShowcaseData)
+      if (parsed.currentSocietyId) {
+        seedDemoBillingStatus(parsed.currentSocietyId, demoShowcaseData.society.name)
+      }
+      return true
+    } catch {
+      localStorage.removeItem(DEMO_AUTH_KEY)
+      return false
+    }
+  }
+
+  async function resolveSocietyId(userId: string, email?: string) {
+    if (userId.startsWith('demo-') || localStorage.getItem(DEMO_AUTH_KEY)) {
+      return
+    }
+
+    const userEmail = email ?? user?.email ?? ''
+
+    try {
+      const residentProfile = await resolveResidentProfile(userId, userEmail)
+      if (residentProfile) {
+        setCurrentSocietyId(residentProfile.societyId)
+        setUser((prev) =>
+          prev
+            ? {
+                ...prev,
+                flatNumber: residentProfile.flatNumber,
+                role: 'resident',
+                roles: ['resident'],
+                user_metadata: { role: 'resident', tier: prev.user_metadata?.tier ?? 'tier1' }
+              }
+            : prev
+        )
+        seedDemoActivities(residentProfile.societyId, residentProfile.flatNumber)
+        await resolveSocietySubscriptionTier(residentProfile.societyId)
+        return
+      }
+
+      const rows = await restGet<UserAndFlat[]>(`user_and_flats?user_id=eq.${userId}&limit=1`)
+      const profile = rows?.[0]
+      setCurrentSocietyId(profile?.society_id ?? null)
+      if (profile) {
+        setUser((prev) =>
+          prev
+            ? {
+                ...prev,
+                flatNumber: profile.flat_number,
+                role: profile.role ?? prev.role,
+                roles:
+                  profile.role === 'rwa_owner'
+                    ? ['rwa_owner']
+                    : profile.role === 'rwa_accountant'
+                      ? ['rwa_accountant']
+                      : prev.roles,
+                user_metadata: {
+                  role: profile.role ?? prev.user_metadata?.role ?? 'resident',
+                  tier: prev.user_metadata?.tier ?? 'tier1'
+                }
+              }
+            : prev
+        )
+        seedDemoActivities(profile.society_id, profile.flat_number)
+        await resolveSocietySubscriptionTier(profile.society_id)
+      }
+    } catch {
+      const local = getLocalResidentProfile(userId)
+      if (local) {
+        setCurrentSocietyId(local.societyId)
+        setUser((prev) => (prev ? { ...prev, flatNumber: local.flatNumber, role: 'resident', roles: ['resident'] } : prev))
+        seedDemoActivities(local.societyId, local.flatNumber)
+        return
+      }
+      if (!localStorage.getItem(DEMO_AUTH_KEY)) {
+        setCurrentSocietyId(null)
+      }
+    }
+  }
+
+  const refreshSocietyProfile = useCallback(async () => {
+    if (user?.id) await resolveSocietyId(user.id, user.email)
+  }, [user?.id])
+
+  function mapSocietyToSubscriptionTier(society?: Society | null) {
+    const slab = society?.pricing_slab_id?.toLowerCase() ?? ''
+    if (slab.includes('tier3') || slab.includes('enterprise')) return 'tier3'
+    if (slab.includes('tier2') || slab.includes('business') || slab.includes('growth')) return 'tier2'
+    return 'tier1'
+  }
+
+  async function resolveSocietySubscriptionTier(societyId: string) {
+    try {
+      const [society] = await restGet<Society[]>(`societies?id=eq.${societyId}`)
+      const tier = mapSocietyToSubscriptionTier(society)
+      setUser((prev) => (prev ? { ...prev, tier } : prev))
+    } catch {
+      setUser((prev) => (prev ? { ...prev, tier: 'tier1' } : prev))
+    }
+  }
+
+  function buildUser(
+    sessionUser: {
+      id: string
+      email?: string | null
+      role?: string
+      user_metadata?: { role?: string; tier?: string }
+      app_metadata?: { provider?: string }
+    },
+    roles: string[] = [],
+    tier: SubscriptionTier = 'tier1',
+    flatNumber?: string | null
+  ): User {
+    const metadataRole = sessionUser.user_metadata?.role ?? sessionUser.role ?? roles[0] ?? 'resident'
+    const metadataTier = sessionUser.user_metadata?.tier ?? tier
+
+    return {
+      id: sessionUser.id,
+      email: sessionUser.email ?? '',
+      roles,
+      tier,
+      role: metadataRole,
+      user_metadata: {
+        role: metadataRole,
+        tier: metadataTier
+      },
+      app_metadata: {
+        provider: sessionUser.app_metadata?.provider ?? 'local'
+      },
+      flatNumber
+    }
+  }
+
+  useEffect(() => {
+    restoreDemoSession()
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        localStorage.removeItem(DEMO_AUTH_KEY)
+        const roles = isSuperAdminEmail(session.user.email ?? '') ? DEV_SUPER_ADMIN.roles : []
+        const nextUser = buildUser(session.user, roles)
+        setUser(nextUser)
+        void resolveSocietyId(session.user.id, session.user.email ?? undefined)
+        return
+      }
+
+      if (!localStorage.getItem(DEMO_AUTH_KEY)) {
+        setUser(null)
+        setCurrentSocietyId(null)
+        setShowcaseData(null)
+      } else {
+        restoreDemoSession()
+      }
+    })
+
+    supabase.auth.getSession().then(({ data }) => {
+      const session = data.session
+      if (localStorage.getItem(DEMO_AUTH_KEY)) {
+        restoreDemoSession()
+        return
+      }
+      if (session?.user) {
+        const roles = isSuperAdminEmail(session.user.email ?? '') ? DEV_SUPER_ADMIN.roles : []
+        setUser(buildUser(session.user, roles))
+        void resolveSocietyId(session.user.id, session.user.email ?? undefined)
+      }
+    })
+
+    return () => {
+      listener?.subscription.unsubscribe()
+    }
+  }, [])
+
+  async function signUp(
+    email: string,
+    password: string,
+    options?: { fullName?: string; role?: string }
+  ) {
+    const accountRole = options?.role ?? 'resident'
+    const res = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: options?.fullName ?? '',
+          role: accountRole
+        }
+      }
+    })
+    if (res.error) throw res.error
+    if (res.data?.user) {
+      const roles = accountRole === 'rwa_owner' ? ['rwa_owner'] : ['resident']
+      setUser(buildUser(res.data.user, roles, 'tier1', null))
+    }
+    return res
+  }
+
+  async function signIn(email: string, password: string) {
+    const normalizedEmail = email.trim().toLowerCase()
+    const isSeedAdmin =
+      normalizedEmail === DEV_SUPER_ADMIN.email && password === DEV_SUPER_ADMIN.password
+
+    if (isSeedAdmin) {
+      await supabase.auth.signOut()
+      localStorage.removeItem(DEMO_AUTH_KEY)
+      const fallbackUser = buildUser({ id: DEV_SUPER_ADMIN.id, email: DEV_SUPER_ADMIN.email }, DEV_SUPER_ADMIN.roles, 'tier3')
+      setUser(fallbackUser)
+      setCurrentSocietyId(null)
+      setShowcaseData(null)
+      return { data: { user: fallbackUser }, user: fallbackUser, societyId: null }
+    }
+
+    const demoLogin = DEMO_LOGINS[normalizedEmail]
+    if (demoLogin && demoLogin.password === password) {
+      await supabase.auth.signOut()
+
+      const userId = `demo-${normalizedEmail}`
+      const nextUser = buildUser(
+        {
+          id: userId,
+          email: normalizedEmail,
+          role: demoLogin.role,
+          user_metadata: {
+            role: demoLogin.role,
+            tier: demoLogin.tier
+          },
+          app_metadata: {
+            provider: 'local'
+          }
+        },
+        demoLogin.roles,
+        demoLogin.tier,
+        demoLogin.flatNumber ?? null
+      )
+      const sessionPayload = {
+        session: {
+          user: {
+            id: userId,
+            email: normalizedEmail,
+            role: demoLogin.role,
+            user_metadata: {
+              role: demoLogin.role,
+              tier: demoLogin.tier
+            },
+            app_metadata: {
+              provider: 'local'
+            }
+          }
+        }
+      }
+      setUser(nextUser)
+      setCurrentSocietyId(DEMO_SOCIETY_ID)
+      setShowcaseData(demoShowcaseData)
+      seedDemoBillingStatus(DEMO_SOCIETY_ID, demoShowcaseData.society.name)
+      localStorage.setItem(
+        DEMO_AUTH_KEY,
+        JSON.stringify({
+          email: normalizedEmail,
+          roles: demoLogin.roles,
+          tier: demoLogin.tier,
+          currentSocietyId: DEMO_SOCIETY_ID,
+          flatNumber: demoLogin.flatNumber ?? null
+        })
+      )
+      return {
+        session: sessionPayload.session,
+        data: { user: nextUser },
+        user: nextUser,
+        societyId: DEMO_SOCIETY_ID
+      }
+    }
+
+    try {
+      const res = await supabase.auth.signInWithPassword({ email: normalizedEmail, password })
+      if (res.error) throw res.error
+      const metadataRole = res.data.user?.user_metadata?.role as string | undefined
+      const roles = metadataRole === 'rwa_owner' ? ['rwa_owner'] : metadataRole === 'rwa_accountant' ? ['rwa_accountant'] : []
+      const nextUser = buildUser(res.data.user!, roles, 'tier1', null)
+      setUser(nextUser)
+
+      let societyId: string | null = null
+      try {
+        const residentProfile = await resolveResidentProfile(res.data.user!.id, normalizedEmail)
+        if (residentProfile) {
+          societyId = residentProfile.societyId
+          setCurrentSocietyId(societyId)
+          setUser((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  flatNumber: residentProfile.flatNumber,
+                  role: 'resident',
+                  roles: ['resident'],
+                  user_metadata: { role: 'resident', tier: prev.user_metadata?.tier ?? 'tier1' }
+                }
+              : prev
+          )
+          seedDemoActivities(residentProfile.societyId, residentProfile.flatNumber)
+          if (societyId) await resolveSocietySubscriptionTier(societyId)
+        } else {
+          const rows = await restGet<UserAndFlat[]>(`user_and_flats?user_id=eq.${res.data.user!.id}&limit=1`)
+          const profile = rows?.[0]
+          societyId = profile?.society_id ?? null
+          setCurrentSocietyId(societyId)
+          if (profile) {
+            setUser((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    flatNumber: profile.flat_number,
+                    role: profile.role ?? metadataRole ?? prev.role,
+                    roles: profile.role === 'rwa_owner' ? ['rwa_owner'] : prev.roles,
+                    user_metadata: {
+                      role: profile.role ?? metadataRole ?? 'resident',
+                      tier: prev.user_metadata?.tier ?? 'tier1'
+                    }
+                  }
+                : prev
+            )
+            seedDemoActivities(profile.society_id, profile.flat_number)
+            if (societyId) await resolveSocietySubscriptionTier(societyId)
+          }
+        }
+      } catch {
+        const local = getLocalResidentProfile(res.data.user!.id)
+        if (local) {
+          societyId = local.societyId
+          setCurrentSocietyId(societyId)
+          setUser((prev) => (prev ? { ...prev, flatNumber: local.flatNumber, role: 'resident', roles: ['resident'] } : prev))
+        } else {
+          setCurrentSocietyId(null)
+        }
+      }
+
+      setShowcaseData(null)
+      localStorage.removeItem(DEMO_AUTH_KEY)
+      return { ...res, user: nextUser, societyId }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      throw new Error(`Authentication failed: ${message}`)
+    }
+  }
+
+  async function signOut() {
+    await supabase.auth.signOut()
+    setUser(null)
+    setCurrentSocietyId(null)
+    setShowcaseData(null)
+    localStorage.removeItem(DEMO_AUTH_KEY)
+  }
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        setUser,
+        currentSocietyId,
+        setCurrentSocietyId,
+        showcaseData,
+        setShowcaseData,
+        signUp,
+        signIn,
+        signOut,
+        refreshSocietyProfile
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext)
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
+  return ctx
+}

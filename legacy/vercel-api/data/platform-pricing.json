@@ -1,0 +1,8 @@
+{
+  "activationFeeInr": 2499,
+  "tiers": [
+    { "id": "tier1", "label": "Tier 1", "price": 149, "description": "Basic society operations for up to 50 flats." },
+    { "id": "tier2", "label": "Tier 2", "price": 99, "description": "Extended management for 51–150 flats." },
+    { "id": "tier3", "label": "Tier 3", "price": 75, "description": "Enterprise orchestration for large portfolios." }
+  ]
+}

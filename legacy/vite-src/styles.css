@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+@import "tailwindcss";
+@source "../index.html";
+@source "../src/**/*.{js,ts,jsx,tsx}";
+
+@theme {
+  --color-syncra-bg: #ffffff;
+  --color-syncra-surface: #f4f5f7;
+  --color-syncra-surface-alt: #fafbfc;
+  --color-syncra-primary: #1a365d;
+  --color-syncra-blue: #0052cc;
+  --color-syncra-accent: #00b4d8;
+  --color-syncra-action: #ff8c00;
+  --color-syncra-action-alt: #ff6b6b;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --shadow-accent-glow: 0 0 20px rgba(0, 180, 216, 0.12);
+}
+
+:root {
+  --syncra-bg: #ffffff;
+  --syncra-surface: #f4f5f7;
+  --syncra-surface-alt: #fafbfc;
+  --syncra-primary: #1a365d;
+  --syncra-blue: #0052cc;
+  --syncra-accent: #00b4d8;
+  --syncra-action: #ff8c00;
+  --syncra-action-alt: #ff6b6b;
+  --syncra-text: #0f172a;
+  --syncra-text-muted: #64748b;
+  --syncra-border: #e2e8f0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--syncra-bg);
+  color: var(--syncra-text);
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

@@ -1,0 +1,206 @@
+{
+  "name": "Syncra Society WhatsApp Bridge",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "syncra-society",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-syncra",
+      "name": "Syncra Event Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "syncra-society"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": { "caseSensitive": false },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.type }}",
+                    "rightValue": "notice.published",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "notice"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": false },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.type }}",
+                    "rightValue": "visitor.approved",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "visitor"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": false },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.type }}",
+                    "rightValue": "payment.reminder",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "payment"
+            }
+          ]
+        },
+        "options": { "fallbackOutput": "extra" }
+      },
+      "id": "switch-type",
+      "name": "Route by Event Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "msg",
+              "name": "whatsappMessage",
+              "value": "=📢 *{{ $json.body.societyName }}*\n\n{{ $json.body.summary }}\n\n_View in syncra-society portal_",
+              "type": "string"
+            },
+            {
+              "id": "recipients",
+              "name": "recipients",
+              "value": "={{ $json.body.recipients }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-message",
+      "name": "Format WhatsApp Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [720, 300]
+    },
+    {
+      "parameters": {
+        "content": "## Replace this node with your WhatsApp BSP\n\nOptions:\n- Twilio WhatsApp node\n- HTTP Request → Gupshup / Wati / Interakt\n- Meta WhatsApp Business Cloud\n\nFor local testing, this logs the message. Check n8n execution output.",
+        "height": 200,
+        "width": 340
+      },
+      "id": "note-bsp",
+      "name": "WhatsApp BSP Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [880, 120]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Mock WhatsApp send — replace with real BSP node in production\nconst item = $input.first().json;\nconsole.log('WhatsApp mock send:', item.whatsappMessage);\nconsole.log('Recipients:', item.recipients);\nreturn [{ json: { sent: true, mock: true, message: item.whatsappMessage, recipients: item.recipients } }];"
+      },
+      "id": "mock-whatsapp",
+      "name": "Mock WhatsApp Send",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [960, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: true, processed: $json } }}",
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Syncra",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1200, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-inbound",
+        "options": {}
+      },
+      "id": "inbound-webhook",
+      "name": "WhatsApp Inbound Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 560],
+      "webhookId": "whatsapp-inbound"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:5173/api/automation/inbound",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-syncra-automation-secret",
+              "value": "syncra-local-dev-secret"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { societyId: $json.body.societyId, flatNumber: $json.body.flatNumber, phone: $json.body.phone, messageType: $json.body.messageType || 'ticket', subject: $json.body.subject, description: $json.body.text || $json.body.description, amount: $json.body.amount } }}",
+        "options": {}
+      },
+      "id": "forward-inbound",
+      "name": "Forward to Syncra Portal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 560]
+    }
+  ],
+  "connections": {
+    "Syncra Event Webhook": {
+      "main": [[{ "node": "Route by Event Type", "type": "main", "index": 0 }]]
+    },
+    "Route by Event Type": {
+      "main": [
+        [{ "node": "Format WhatsApp Message", "type": "main", "index": 0 }],
+        [{ "node": "Format WhatsApp Message", "type": "main", "index": 0 }],
+        [{ "node": "Format WhatsApp Message", "type": "main", "index": 0 }],
+        [{ "node": "Format WhatsApp Message", "type": "main", "index": 0 }]
+      ]
+    },
+    "Format WhatsApp Message": {
+      "main": [[{ "node": "Mock WhatsApp Send", "type": "main", "index": 0 }]]
+    },
+    "Mock WhatsApp Send": {
+      "main": [[{ "node": "Respond to Syncra", "type": "main", "index": 0 }]]
+    },
+    "WhatsApp Inbound Webhook": {
+      "main": [[{ "node": "Forward to Syncra Portal", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 2,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
