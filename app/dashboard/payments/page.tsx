@@ -1,11 +1,20 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
+import { PageHeader } from '@/components/layout/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table'
 import { formatDate, formatInr } from '@/lib/utils'
 import type { Flat, PaymentWithFlat, Society } from '@/types/database'
 import { hasAddon, UnlockPremiumCard } from '@/components/premium/unlock-premium-card'
@@ -56,25 +65,20 @@ export default function PaymentsPage() {
     const res = await fetch('/api/payments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        flat_id: flatId,
-        amount: Number(amount),
-        status: statusValue,
-        due_date: dueDate
-      })
+      body: JSON.stringify({ flat_id: flatId, amount: Number(amount), status: statusValue, due_date: dueDate })
     })
     const data = await res.json()
     setLoading(false)
     if (!res.ok) {
-      setStatus(data.error ? JSON.stringify(data.error) : 'Failed to create payment')
+      setStatus(data.error ? JSON.stringify(data.error) : 'Unable to commit payment record.')
       return
     }
     setStatus(
       data.n8n?.skipped
-        ? 'Payment recorded. WhatsApp alert skipped — enable whatsapp_automation.'
+        ? 'Payment recorded. Settlement alert deferred — WhatsApp module inactive.'
         : data.n8n?.ok === false
-          ? `Payment saved. n8n: ${data.n8n.error}`
-          : 'Payment recorded + n8n alert sent'
+          ? `Payment recorded. Alert warning: ${data.n8n.error}`
+          : 'Payment recorded and owner settlement alert dispatched.'
     )
     void reload()
   }
@@ -86,28 +90,35 @@ export default function PaymentsPage() {
     const res = await fetch('/api/payments/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        flat_id: flatId,
-        amount: Number(amount),
-        due_date: dueDate
-      })
+      body: JSON.stringify({ flat_id: flatId, amount: Number(amount), due_date: dueDate })
     })
     const data = await res.json()
     setLoading(false)
     if (res.status === 403) {
-      setStatus(data.error ?? 'Payment gateway module locked')
+      setStatus(data.error ?? 'Global Payment Gateway module inactive for this society.')
       return
     }
     if (!res.ok) {
-      setStatus(data.error ?? 'Order failed')
+      setStatus(data.error ?? 'Gateway order initiation failed.')
       return
     }
-    setStatus(`Gateway order created via ${data.order?.provider}: ${data.order?.orderId}`)
+    setStatus(`Gateway order provisioned via ${data.order?.provider}: ${data.order?.orderId}`)
     void reload()
   }
 
   return (
-    <div className="space-y-6">
+    <div>
+      <PageHeader
+        eyebrow="Global Payment Configuration"
+        title="Multi-regional collections"
+        description="Orchestrate maintenance collections through Razorpay, Stripe, or regional providers — with automated owner confirmation via the n8n communications bridge."
+        action={
+          <Button asChild variant="outline" size="sm" className="border-neutral-200">
+            <Link href="/admin/config">Runtime gateway settings</Link>
+          </Button>
+        }
+      />
+
       {!paymentGatewayEnabled && selectedSociety && (
         <UnlockPremiumCard addon="payment_gateway" societyName={selectedSociety.name} />
       )}
@@ -116,98 +127,93 @@ export default function PaymentsPage() {
       )}
 
       {gateway && (
-        <p className="text-sm text-muted-foreground">
-          Active gateway: <strong>{gateway.provider}</strong> (public key loaded from system_configs)
-        </p>
+        <section className="syncra-panel mt-2 flex flex-wrap items-center justify-between gap-4 px-6 py-4">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-400">Active processor</p>
+            <p className="mt-1 text-base font-semibold text-neutral-900">{gateway.provider}</p>
+          </div>
+          <p className="font-mono text-xs text-neutral-500">Public key · {gateway.publicKey.slice(0, 16)}…</p>
+        </section>
       )}
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr]">
-        <Card>
-          <CardHeader>
-            <CardTitle>Record Payment</CardTitle>
-            <CardDescription>Manual entry or create a gateway order via PaymentFactory.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="flat">Flat</Label>
-                <select
-                  id="flat"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                  value={flatId}
-                  onChange={(e) => setFlatId(e.target.value)}
-                  required
-                >
-                  {flats.map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.flat_number} — {f.owner_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="amount">Amount (INR)</Label>
-                <Input id="amount" type="number" min="1" value={amount} onChange={(e) => setAmount(e.target.value)} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <select
-                  id="status"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                  value={statusValue}
-                  onChange={(e) => setStatusValue(e.target.value as 'paid' | 'pending')}
-                >
-                  <option value="pending">Pending</option>
-                  <option value="paid">Paid</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="due">Due Date</Label>
-                <Input id="due" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} required />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Button type="submit" disabled={loading}>
-                  {loading ? 'Saving…' : 'Record Payment'}
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  disabled={loading || !paymentGatewayEnabled}
-                  onClick={() => void createGatewayOrder()}
-                >
-                  Create Gateway Order
-                </Button>
-              </div>
-              {status && <p className="text-sm text-muted-foreground">{status}</p>}
-            </form>
-          </CardContent>
-        </Card>
+      <div className="mt-8 grid gap-8 xl:grid-cols-[340px_1fr]">
+        <section className="syncra-panel p-6">
+          <h2 className="text-sm font-semibold text-neutral-900">Issue collection</h2>
+          <p className="mt-1 text-sm text-neutral-500">Manual ledger entry or initiate a PaymentFactory gateway order.</p>
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="flat">Assessed unit</Label>
+              <select id="flat" className="syncra-input h-10" value={flatId} onChange={(e) => setFlatId(e.target.value)} required>
+                {flats.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    Unit {f.flat_number} · {f.owner_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="amount">Amount (INR)</Label>
+              <Input id="amount" type="number" min="1" value={amount} onChange={(e) => setAmount(e.target.value)} required className="border-neutral-200" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="status">Settlement status</Label>
+              <select id="status" className="syncra-input h-10" value={statusValue} onChange={(e) => setStatusValue(e.target.value as 'paid' | 'pending')}>
+                <option value="pending">Pending settlement</option>
+                <option value="paid">Settled</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="due">Due date</Label>
+              <Input id="due" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} required className="border-neutral-200" />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button type="submit" disabled={loading}>
+                {loading ? 'Committing…' : 'Record collection'}
+              </Button>
+              <Button type="button" variant="outline" className="border-neutral-200" disabled={loading || !paymentGatewayEnabled} onClick={() => void createGatewayOrder()}>
+                Initiate gateway order
+              </Button>
+            </div>
+            {status && <p className="text-sm text-neutral-500">{status}</p>}
+          </form>
+        </section>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Payments</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {payments.length === 0 && <p className="text-sm text-muted-foreground">No payments yet.</p>}
-            {payments.map((payment) => (
-              <div key={payment.id} className="flex items-start justify-between rounded-lg border p-4">
-                <div>
-                  <p className="font-semibold">{formatInr(Number(payment.amount))}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Flat {payment.flats?.flat_number ?? '—'} · Due {payment.due_date}
-                  </p>
-                  {payment.gateway_order_id && (
-                    <p className="text-xs text-muted-foreground">Order: {payment.gateway_order_id}</p>
-                  )}
-                  {payment.created_at && (
-                    <p className="mt-2 text-xs text-muted-foreground">{formatDate(payment.created_at)}</p>
-                  )}
-                </div>
-                <Badge variant={payment.status === 'paid' ? 'success' : 'warning'}>{payment.status}</Badge>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+        <section className="syncra-panel overflow-hidden">
+          <div className="border-b border-neutral-200 px-6 py-4">
+            <h2 className="text-sm font-semibold text-neutral-900">Settlement ledger</h2>
+            <p className="text-sm text-neutral-500">{payments.length} collection records</p>
+          </div>
+          {payments.length === 0 ? (
+            <p className="px-6 py-12 text-sm text-neutral-500">No collections recorded.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow className="border-neutral-200 hover:bg-transparent">
+                  <TableHead className="text-neutral-500">Amount</TableHead>
+                  <TableHead className="text-neutral-500">Unit</TableHead>
+                  <TableHead className="text-neutral-500">Due date</TableHead>
+                  <TableHead className="text-neutral-500">Reference</TableHead>
+                  <TableHead className="text-neutral-500">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {payments.map((payment) => (
+                  <TableRow key={payment.id} className="border-neutral-100">
+                    <TableCell className="font-medium text-neutral-900">{formatInr(Number(payment.amount))}</TableCell>
+                    <TableCell className="text-neutral-600">{payment.flats?.flat_number ?? '—'}</TableCell>
+                    <TableCell className="text-neutral-600">{payment.due_date}</TableCell>
+                    <TableCell className="font-mono text-xs text-neutral-500">{payment.gateway_order_id ?? '—'}</TableCell>
+                    <TableCell>
+                      <Badge variant={payment.status === 'paid' ? 'success' : 'warning'} className="font-normal">
+                        {payment.status === 'paid' ? 'Settled' : 'Outstanding'}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </section>
       </div>
     </div>
   )

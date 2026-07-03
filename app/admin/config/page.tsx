@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import type { Society, SystemConfig } from '@/types/database'
+import { PageHeader } from '@/components/layout/page-header'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -105,82 +105,84 @@ export default function AdminConfigPage() {
 
   if (!authenticated) {
     return (
-      <Card className="mx-auto max-w-md">
-        <CardHeader>
-          <div className="flex items-center gap-2 text-primary">
-            <Shield className="h-5 w-5" />
-            <CardTitle>Super Admin Access</CardTitle>
+      <div className="mx-auto flex min-h-[60vh] max-w-md items-center">
+        <section className="syncra-panel w-full p-8">
+          <div className="flex h-10 w-10 items-center justify-center rounded-md border border-neutral-200 bg-neutral-50">
+            <Shield className="h-4 w-4 text-neutral-600" strokeWidth={1.5} />
           </div>
-          <CardDescription>Enter your SUPER_ADMIN_SECRET to manage zero-code platform configuration.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="key">Admin Key</Label>
-            <Input
-              id="key"
-              type="password"
-              value={adminKey}
-              onChange={(e) => setAdminKey(e.target.value)}
-              placeholder="SUPER_ADMIN_SECRET"
-            />
+          <h1 className="mt-5 text-lg font-semibold tracking-tight text-neutral-900">Platform Configuration</h1>
+          <p className="mt-2 text-sm leading-relaxed text-neutral-500">
+            Super Admin authentication required to modify runtime gateway routing, n8n webhooks, and society
+            premium entitlements.
+          </p>
+          <div className="mt-6 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="key">Administrator access key</Label>
+              <Input
+                id="key"
+                type="password"
+                value={adminKey}
+                onChange={(e) => setAdminKey(e.target.value)}
+                placeholder="SUPER_ADMIN_SECRET"
+                className="border-neutral-200"
+              />
+            </div>
+            <Button disabled={!adminKey || loading} onClick={() => void loadConfigs(adminKey)} className="w-full">
+              {loading ? 'Verifying credentials…' : 'Unlock configuration console'}
+            </Button>
+            {status && <p className="text-sm text-destructive">{status}</p>}
           </div>
-          <Button disabled={!adminKey || loading} onClick={() => void loadConfigs(adminKey)}>
-            {loading ? 'Verifying…' : 'Unlock Dashboard'}
-          </Button>
-          {status && <p className="text-sm text-destructive">{status}</p>}
-        </CardContent>
-      </Card>
+        </section>
+      </div>
     )
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold">Super Admin Configuration</h1>
-        <p className="mt-2 text-muted-foreground">
-          Edit runtime values in <code className="text-xs">system_configs</code> — gateways, n8n webhooks, and
-          Twilio routing update instantly without Vercel redeploy.
-        </p>
-      </div>
+    <div>
+      <PageHeader
+        eyebrow="Platform Configuration"
+        title="Runtime control plane"
+        description="Modify Razorpay, Stripe, n8n, and Twilio routing in production — changes propagate instantly without redeploying to Vercel."
+      />
 
-      {status && (
-        <div className="rounded-lg border bg-muted/50 px-4 py-3 text-sm">{status}</div>
-      )}
+      {status && <div className="syncra-panel mb-8 px-4 py-3 text-sm text-neutral-600">{status}</div>}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>System Configuration</CardTitle>
-          <CardDescription>All platform secrets and routing targets</CardDescription>
-        </CardHeader>
-        <CardContent>
+      <section className="syncra-panel overflow-hidden">
+        <div className="border-b border-neutral-200 px-6 py-4">
+          <h2 className="text-sm font-semibold text-neutral-900">System configuration registry</h2>
+          <p className="text-sm text-neutral-500">Authoritative runtime parameters stored in system_configs</p>
+        </div>
+        <div className="overflow-x-auto p-4">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Key</TableHead>
-                <TableHead>Value</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead className="w-[100px]" />
+              <TableRow className="border-neutral-200 hover:bg-transparent">
+                <TableHead className="text-neutral-500">Key</TableHead>
+                <TableHead className="text-neutral-500">Value</TableHead>
+                <TableHead className="text-neutral-500">Description</TableHead>
+                <TableHead className="w-[80px]" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {configs.map((config) => (
-                <TableRow key={config.key}>
-                  <TableCell className="font-mono text-xs">{config.key}</TableCell>
+                <TableRow key={config.key} className="border-neutral-100">
+                  <TableCell className="font-mono text-xs text-neutral-700">{config.key}</TableCell>
                   <TableCell>
                     {config.key.includes('SECRET') ? (
                       <Input
                         type="password"
                         value={drafts[config.key] ?? ''}
                         onChange={(e) => setDrafts((d) => ({ ...d, [config.key]: e.target.value }))}
+                        className="border-neutral-200"
                       />
                     ) : config.key === 'N8N_WEBHOOK_URL' ? (
                       <Input
                         value={drafts[config.key] ?? ''}
                         onChange={(e) => setDrafts((d) => ({ ...d, [config.key]: e.target.value }))}
+                        className="border-neutral-200"
                       />
                     ) : config.key === 'ACTIVE_PAYMENT_GATEWAY' ? (
                       <select
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                        className="syncra-input h-10"
                         value={drafts[config.key] ?? 'RAZORPAY'}
                         onChange={(e) => setDrafts((d) => ({ ...d, [config.key]: e.target.value }))}
                       >
@@ -193,12 +195,13 @@ export default function AdminConfigPage() {
                         rows={2}
                         value={drafts[config.key] ?? ''}
                         onChange={(e) => setDrafts((d) => ({ ...d, [config.key]: e.target.value }))}
+                        className="border-neutral-200"
                       />
                     )}
                   </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{config.description}</TableCell>
+                  <TableCell className="text-xs text-neutral-500">{config.description}</TableCell>
                   <TableCell>
-                    <Button size="sm" variant="outline" onClick={() => void saveConfig(config.key)}>
+                    <Button size="sm" variant="outline" className="border-neutral-200" onClick={() => void saveConfig(config.key)}>
                       <Save className="h-3 w-3" />
                     </Button>
                   </TableCell>
@@ -206,32 +209,32 @@ export default function AdminConfigPage() {
               ))}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Society Premium Modules</CardTitle>
-          <CardDescription>Toggle feature addons per society — controls 403 gating on API routes</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <section className="syncra-panel mt-8 overflow-hidden">
+        <div className="border-b border-neutral-200 px-6 py-4">
+          <h2 className="text-sm font-semibold text-neutral-900">Society premium entitlements</h2>
+          <p className="text-sm text-neutral-500">Toggle feature modules per society — controls 403 gating on API routes</p>
+        </div>
+        <div className="space-y-4 p-4">
           {societies.map((society) => (
-            <div key={society.id} className="rounded-lg border p-4">
+            <div key={society.id} className="rounded-lg border border-neutral-200 bg-neutral-50/50 p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <p className="font-semibold">{society.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Tier: {society.subscription_tier}
-                  </p>
+                  <p className="font-medium text-neutral-900">{society.name}</p>
+                  <p className="text-xs text-neutral-500">Tier: {society.subscription_tier}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {(society.active_addons ?? []).map((addon) => (
-                    <Badge key={addon} variant="success">
+                    <Badge key={addon} variant="success" className="font-normal">
                       {addon}
                     </Badge>
                   ))}
                   {(society.active_addons ?? []).length === 0 && (
-                    <Badge variant="secondary">basic only</Badge>
+                    <Badge variant="secondary" className="font-normal">
+                      basic only
+                    </Badge>
                   )}
                 </div>
               </div>
@@ -242,7 +245,8 @@ export default function AdminConfigPage() {
                     <Button
                       key={addon}
                       size="sm"
-                      variant={enabled ? 'destructive' : 'default'}
+                      variant={enabled ? 'destructive' : 'outline'}
+                      className={enabled ? undefined : 'border-neutral-200'}
                       onClick={() => void toggleAddon(society.id, addon, !enabled)}
                     >
                       {enabled ? 'Disable' : 'Enable'} {addon}
@@ -252,8 +256,8 @@ export default function AdminConfigPage() {
               </div>
             </div>
           ))}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     </div>
   )
 }
