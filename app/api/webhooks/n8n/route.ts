@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getN8nWebhookUrl } from '@/lib/config/system-config'
 import { NextResponse } from 'next/server'
 
