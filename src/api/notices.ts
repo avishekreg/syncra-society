@@ -4,8 +4,27 @@ import { isRemoteSocietyId } from './societies'
 import { uploadDocument } from '../utils/upload'
 import { logActivity } from '../lib/activityLog'
 
+export type NoticeViewReceipt = {
+  noticeId: string
+  userId?: string | null
+  flatNumber?: string | null
+  viewedAt: string
+}
+
+export function formatNoticeTimestamp(iso?: string | null) {
+  if (!iso) return 'Date unavailable'
+  return new Date(iso).toLocaleString('en-IN', {
+    dateStyle: 'medium',
+    timeStyle: 'short'
+  })
+}
+
 function noticesKey(societyId: string) {
   return `syncra-notices-${societyId}`
+}
+
+function noticeViewsKey(societyId: string) {
+  return `syncra-notice-views-${societyId}`
 }
 
 function loadLocalNotices(societyId: string): Notice[] {
@@ -21,10 +40,69 @@ function saveLocalNotices(societyId: string, notices: Notice[]) {
   localStorage.setItem(noticesKey(societyId), JSON.stringify(notices))
 }
 
+function loadViewReceipts(societyId: string): NoticeViewReceipt[] {
+  try {
+    const raw = localStorage.getItem(noticeViewsKey(societyId))
+    return raw ? (JSON.parse(raw) as NoticeViewReceipt[]) : []
+  } catch {
+    return []
+  }
+}
+
+function saveViewReceipts(societyId: string, receipts: NoticeViewReceipt[]) {
+  localStorage.setItem(noticeViewsKey(societyId), JSON.stringify(receipts.slice(0, 2000)))
+}
+
 function sortNotices(notices: Notice[]) {
   return [...notices].sort(
     (a, b) => new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime()
   )
+}
+
+export function getNoticeViewStats(societyId: string, noticeId: string) {
+  const receipts = loadViewReceipts(societyId).filter((receipt) => receipt.noticeId === noticeId)
+  const uniqueFlats = new Set(receipts.map((receipt) => receipt.flatNumber).filter(Boolean))
+  return {
+    totalViews: receipts.length,
+    uniqueResidents: uniqueFlats.size,
+    receipts
+  }
+}
+
+export function recordNoticeView(input: {
+  societyId: string
+  noticeId: string
+  userId?: string | null
+  flatNumber?: string | null
+}) {
+  const receipts = loadViewReceipts(input.societyId)
+  const alreadySeen = receipts.some(
+    (receipt) =>
+      receipt.noticeId === input.noticeId &&
+      ((input.userId && receipt.userId === input.userId) ||
+        (input.flatNumber && receipt.flatNumber === input.flatNumber))
+  )
+  if (alreadySeen) return getNoticeViewStats(input.societyId, input.noticeId)
+
+  receipts.unshift({
+    noticeId: input.noticeId,
+    userId: input.userId ?? null,
+    flatNumber: input.flatNumber ?? null,
+    viewedAt: new Date().toISOString()
+  })
+  saveViewReceipts(input.societyId, receipts)
+
+  logActivity({
+    societyId: input.societyId,
+    userId: input.userId ?? null,
+    flatNumber: input.flatNumber ?? null,
+    category: 'notice',
+    action: 'notice_viewed',
+    summary: `Notice viewed${input.flatNumber ? ` by Flat ${input.flatNumber}` : ''}`,
+    metadata: { noticeId: input.noticeId }
+  })
+
+  return getNoticeViewStats(input.societyId, input.noticeId)
 }
 
 export async function listNotices(societyId: string): Promise<Notice[]> {
@@ -67,7 +145,7 @@ export async function createNotice(payload: Partial<Notice>, file?: File) {
       category: 'notice',
       action: 'notice_published',
       summary: `Notice published: ${body.title}`,
-      metadata: { noticeId: body.id }
+      metadata: { noticeId: body.id, publishedAt: body.created_at }
     })
     return body
   }
@@ -83,7 +161,7 @@ export async function createNotice(payload: Partial<Notice>, file?: File) {
       category: 'notice',
       action: 'notice_published',
       summary: `Notice published: ${body.title}`,
-      metadata: { noticeId: created?.id ?? body.id }
+      metadata: { noticeId: created?.id ?? body.id, publishedAt: body.created_at }
     })
     return created ?? body
   } catch {

@@ -274,18 +274,26 @@ export default function ResidentHelpdesk() {
       </section>
 
       <section className={ui.card}>
-        <h2 className={`mb-4 ${ui.heading}`}>My ticket history</h2>
+        <h2 className={`mb-6 ${ui.heading}`}>My ticket history</h2>
         {loading && <p className={ui.body}>Loading tickets…</p>}
         {!loading && complaints.length === 0 && <p className={ui.body}>No tickets raised yet.</p>}
-        <ul className="space-y-2">
+        <ul className="grid gap-4">
           {complaints.map((ticket) => (
-            <li key={ticket.id} className={ui.innerItem}>
-              <div className="flex items-start justify-between gap-3">
-                <div>
+            <li key={ticket.id} className={`${ui.innerItem} p-5`}>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0 flex-1">
                   <p className="font-medium text-syncra-primary">{ticket.subject}</p>
-                  {ticket.description && <p className={`mt-1 ${ui.body}`}>{ticket.description}</p>}
+                  {ticket.description && <p className={`mt-2 ${ui.body}`}>{ticket.description}</p>}
+                  {ticket.created_at && (
+                    <time className="mt-3 block text-xs text-slate-500">
+                      {new Date(ticket.created_at).toLocaleString('en-IN', {
+                        dateStyle: 'medium',
+                        timeStyle: 'short'
+                      })}
+                    </time>
+                  )}
                 </div>
-                <span className="shrink-0 rounded-full border border-syncra-accent/30 bg-syncra-accent/10 px-2.5 py-0.5 text-xs font-semibold text-syncra-blue">
+                <span className="shrink-0 self-start rounded-full border border-syncra-accent/30 bg-syncra-accent/10 px-2.5 py-0.5 text-xs font-semibold text-syncra-blue">
                   {formatComplaintStatus(ticket.status)}
                 </span>
               </div>

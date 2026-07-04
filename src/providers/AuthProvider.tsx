@@ -5,6 +5,12 @@ import type { Society, UserAndFlat } from '../types/db'
 import { resolveResidentProfile, getLocalResidentProfile } from '../api/residentMapping'
 import { seedDemoActivities } from '../lib/activityLog'
 import { DEV_SUPER_ADMIN, DEMO_AUTH_KEY, DEMO_LOGINS, DEMO_SOCIETY_ID, isSuperAdminEmail, seedDemoBillingStatus } from '../config/devSeed'
+import {
+  canAccessPortal,
+  isEmailVerificationRequired,
+  isEmailVerified,
+  verificationRedirectUrl
+} from '../lib/emailVerification'
 
 type SubscriptionTier = 'tier1' | 'tier2' | 'tier3'
 
@@ -79,6 +85,8 @@ const AuthContext = createContext<
       signIn: (email: string, password: string) => Promise<any>
       signOut: () => Promise<void>
       refreshSocietyProfile: () => Promise<void>
+      resendVerificationEmail: (email: string) => Promise<void>
+      verifyEmailOtp: (email: string, token: string) => Promise<{ user: { id: string; email?: string | null; email_confirmed_at?: string | null } | null }>
     }
   | undefined
 >(undefined)
@@ -372,6 +380,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
+        if (!canAccessPortal(session.user)) {
+          void supabase.auth.signOut()
+          setUser(null)
+          setCurrentSocietyId(null)
+          setShowcaseData(null)
+          return
+        }
+
         localStorage.removeItem(DEMO_AUTH_KEY)
         const roles = isSuperAdminEmail(session.user.email ?? '') ? DEV_SUPER_ADMIN.roles : []
         const nextUser = buildUser(session.user, roles)
@@ -396,6 +412,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return
       }
       if (session?.user) {
+        if (!canAccessPortal(session.user)) {
+          setUser(null)
+          setCurrentSocietyId(null)
+          setShowcaseData(null)
+          return
+        }
         const roles = isSuperAdminEmail(session.user.email ?? '') ? DEV_SUPER_ADMIN.roles : []
         setUser(buildUser(session.user, roles))
         void resolveSocietyId(session.user.id, session.user.email ?? undefined)
@@ -412,11 +434,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string,
     options?: { fullName?: string; role?: string }
   ) {
+    const normalizedEmail = email.trim().toLowerCase()
     const accountRole = options?.role ?? 'resident'
     const res = await supabase.auth.signUp({
-      email,
+      email: normalizedEmail,
       password,
       options: {
+        emailRedirectTo: verificationRedirectUrl(),
         data: {
           full_name: options?.fullName ?? '',
           role: accountRole
@@ -424,11 +448,65 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     })
     if (res.error) throw res.error
+
+    if (isEmailVerificationRequired(normalizedEmail)) {
+      await supabase.auth.signOut()
+      setUser(null)
+      setCurrentSocietyId(null)
+      setShowcaseData(null)
+      return res
+    }
+
     if (res.data?.user) {
       const roles = accountRole === 'rwa_owner' ? ['rwa_owner'] : ['resident']
       setUser(buildUser(res.data.user, roles, 'tier1', null))
     }
     return res
+  }
+
+  async function resendVerificationEmail(email: string) {
+    const normalizedEmail = email.trim().toLowerCase()
+    if (!isEmailVerificationRequired(normalizedEmail)) {
+      throw new Error('Email verification is not required for this account.')
+    }
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: normalizedEmail,
+      options: {
+        emailRedirectTo: verificationRedirectUrl()
+      }
+    })
+    if (error) throw error
+  }
+
+  async function verifyEmailOtp(email: string, token: string) {
+    const normalizedEmail = email.trim().toLowerCase()
+    const attempts = [
+      () => supabase.auth.verifyOtp({ email: normalizedEmail, token, type: 'signup' }),
+      () => supabase.auth.verifyOtp({ email: normalizedEmail, token, type: 'email' })
+    ]
+
+    let lastError: Error | null = null
+    for (const attempt of attempts) {
+      const { data, error } = await attempt()
+      if (!error && data.user) {
+        if (!isEmailVerified(data.user)) {
+          throw new Error('Verification did not complete. Request a new code and try again.')
+        }
+        const roles =
+          data.user.user_metadata?.role === 'rwa_owner'
+            ? ['rwa_owner']
+            : data.user.user_metadata?.role === 'rwa_accountant'
+              ? ['rwa_accountant']
+              : ['resident']
+        setUser(buildUser(data.user, roles, 'tier1', null))
+        await resolveSocietyId(data.user.id, data.user.email ?? normalizedEmail)
+        return { user: data.user }
+      }
+      lastError = error ?? lastError
+    }
+
+    throw new Error(lastError?.message ?? 'Invalid or expired verification code.')
   }
 
   async function signIn(email: string, password: string) {
@@ -508,7 +586,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       const res = await supabase.auth.signInWithPassword({ email: normalizedEmail, password })
-      if (res.error) throw res.error
+      if (res.error) {
+        if (res.error.message.toLowerCase().includes('email not confirmed')) {
+          throw new Error('Please verify your email before signing in. Check your inbox or enter your verification code.')
+        }
+        throw res.error
+      }
+
+      if (isEmailVerificationRequired(normalizedEmail) && !isEmailVerified(res.data.user)) {
+        await supabase.auth.signOut()
+        throw new Error('Please verify your email before signing in. Check your inbox or enter your verification code.')
+      }
+
       const metadataRole = res.data.user?.user_metadata?.role as string | undefined
       const roles = metadataRole === 'rwa_owner' ? ['rwa_owner'] : metadataRole === 'rwa_accountant' ? ['rwa_accountant'] : []
       const nextUser = buildUser(res.data.user!, roles, 'tier1', null)
@@ -597,7 +686,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signUp,
         signIn,
         signOut,
-        refreshSocietyProfile
+        refreshSocietyProfile,
+        resendVerificationEmail,
+        verifyEmailOtp
       }}
     >
       {children}

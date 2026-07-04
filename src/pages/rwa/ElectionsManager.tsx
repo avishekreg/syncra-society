@@ -3,15 +3,38 @@ import { useAuth } from '../../providers/AuthProvider'
 import { createElection, listElections, closeElection, tallyElection } from '../../api/elections'
 import { ui } from '../../lib/ui'
 
+type PositionDraft = {
+  title: string
+  candidates: string
+}
+
+const DEFAULT_POSITIONS: PositionDraft[] = [
+  { title: 'President', candidates: 'Candidate A\nCandidate B' },
+  { title: 'Secretary', candidates: 'Candidate C\nCandidate D' },
+  { title: 'Cashier', candidates: 'Candidate E\nCandidate F' }
+]
+
 export default function ElectionsManager() {
   const { currentSocietyId } = useAuth()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [candidates, setCandidates] = useState('Candidate A\nCandidate B')
+  const [positions, setPositions] = useState<PositionDraft[]>(DEFAULT_POSITIONS)
   const [refresh, setRefresh] = useState(0)
   const [tally, setTally] = useState<Record<string, Awaited<ReturnType<typeof tallyElection>>>>({})
 
   const elections = currentSocietyId ? listElections(currentSocietyId) : []
+
+  function updatePosition(index: number, patch: Partial<PositionDraft>) {
+    setPositions((current) => current.map((item, i) => (i === index ? { ...item, ...patch } : item)))
+  }
+
+  function addPosition() {
+    setPositions((current) => [...current, { title: '', candidates: '' }])
+  }
+
+  function removePosition(index: number) {
+    setPositions((current) => current.filter((_, i) => i !== index))
+  }
 
   async function handleCreate(event: React.FormEvent) {
     event.preventDefault()
@@ -20,11 +43,14 @@ export default function ElectionsManager() {
       societyId: currentSocietyId,
       title,
       description,
-      candidates: candidates.split('\n').map((c) => c.trim()).filter(Boolean)
+      positions: positions.map((position) => ({
+        title: position.title,
+        candidates: position.candidates.split('\n').map((name) => name.trim()).filter(Boolean)
+      }))
     })
     setTitle('')
     setDescription('')
-    setCandidates('Candidate A\nCandidate B')
+    setPositions(DEFAULT_POSITIONS)
     setRefresh((n) => n + 1)
   }
 
@@ -35,34 +61,82 @@ export default function ElectionsManager() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={ui.sectionGap}>
       <section className={ui.card}>
         <p className={ui.eyebrow}>Society elections</p>
-        <h2 className={`mt-2 ${ui.headingLg}`}>Run encrypted elections</h2>
+        <h2 className={`mt-2 ${ui.headingLg}`}>Run encrypted multi-position elections</h2>
         <p className={`mt-2 ${ui.body}`}>
-          Votes are RSA-encrypted at cast time. One vote per flat via irreversible HMAC seal. Tally only after closing.
+          Define contested management roles separately. Votes are RSA-encrypted with one irreversible ballot per flat
+          per position.
         </p>
-        <form onSubmit={(e) => void handleCreate(e)} className="mt-6 space-y-4">
+        <form onSubmit={(e) => void handleCreate(e)} className="mt-6 space-y-6">
           <input value={title} onChange={(e) => setTitle(e.target.value)} className={ui.input} placeholder="Election title" required />
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} className={ui.input} rows={2} placeholder="Description" required />
-          <textarea value={candidates} onChange={(e) => setCandidates(e.target.value)} className={ui.input} rows={4} placeholder="One candidate per line" required />
-          <button type="submit" className={ui.btnPrimary}>Open Election</button>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className={ui.label}>Contested positions</p>
+              <button type="button" onClick={addPosition} className={ui.btnGhost}>
+                Add position
+              </button>
+            </div>
+            {positions.map((position, index) => (
+              <div key={`position-${index}`} className={`${ui.innerItem} space-y-3`}>
+                <div className="flex items-start justify-between gap-3">
+                  <input
+                    value={position.title}
+                    onChange={(e) => updatePosition(index, { title: e.target.value })}
+                    className={ui.input}
+                    placeholder="Position title (e.g. President)"
+                    required
+                  />
+                  {positions.length > 1 && (
+                    <button type="button" onClick={() => removePosition(index)} className={ui.btnGhost}>
+                      Remove
+                    </button>
+                  )}
+                </div>
+                <textarea
+                  value={position.candidates}
+                  onChange={(e) => updatePosition(index, { candidates: e.target.value })}
+                  className={ui.input}
+                  rows={3}
+                  placeholder="One candidate per line"
+                  required
+                />
+              </div>
+            ))}
+          </div>
+
+          <button type="submit" className={ui.btnPrimary}>
+            Open Election
+          </button>
         </form>
       </section>
 
       <section className={ui.card}>
         <h3 className={ui.heading}>Elections</h3>
-        <ul className="mt-4 space-y-4">
+        <ul className="mt-6 space-y-4">
           {elections.map((election) => {
             const results = tally[election.id]
             return (
               <li key={`${election.id}-${refresh}`} className={ui.innerItem}>
                 <p className="font-semibold text-syncra-primary">{election.title}</p>
                 <p className={`mt-1 text-sm ${ui.body}`}>{election.description}</p>
-                <p className="mt-2 text-xs text-slate-500">Status: {election.status}</p>
-                <div className="mt-3 flex flex-wrap gap-2">
+                <p className="mt-2 text-xs text-slate-500">
+                  Status: {election.status} · {election.positions.length} positions ·{' '}
+                  {new Date(election.createdAt).toLocaleString('en-IN')}
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
                   {election.status === 'open' && currentSocietyId && (
-                    <button type="button" onClick={() => { closeElection(currentSocietyId, election.id); setRefresh((n) => n + 1) }} className={ui.btnSecondary}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        closeElection(currentSocietyId, election.id)
+                        setRefresh((n) => n + 1)
+                      }}
+                      className={ui.btnSecondary}
+                    >
                       Close Voting
                     </button>
                   )}
@@ -70,13 +144,37 @@ export default function ElectionsManager() {
                     Tally Results
                   </button>
                 </div>
+
+                <div className="mt-4 grid gap-4 md:grid-cols-2">
+                  {election.positions.map((position) => (
+                    <div key={position.id} className="rounded-xl border border-slate-200 bg-white p-4">
+                      <p className="text-sm font-semibold text-syncra-primary">{position.title}</p>
+                      <ul className="mt-2 space-y-1 text-sm text-slate-600">
+                        {position.candidates.map((candidate) => (
+                          <li key={candidate.id}>{candidate.name}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+
                 {results && (
-                  <ul className="mt-3 space-y-1 text-sm text-slate-600">
-                    <li>Total encrypted votes: {results.totalVotes}</li>
-                    {results.election.candidates.map((c) => (
-                      <li key={c.id}>{c.name}: {results.counts[c.id] ?? 0}</li>
+                  <div className="mt-4 space-y-4">
+                    {results.positionResults.map(({ position, totalVotes, counts }) => (
+                      <div key={position.id} className="rounded-xl border border-syncra-accent/20 bg-syncra-surface-alt p-4">
+                        <p className="text-sm font-semibold text-syncra-blue">
+                          {position.title} · {totalVotes} encrypted votes
+                        </p>
+                        <ul className="mt-2 space-y-1 text-sm text-slate-600">
+                          {position.candidates.map((candidate) => (
+                            <li key={candidate.id}>
+                              {candidate.name}: {counts[candidate.id] ?? 0}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 )}
               </li>
             )

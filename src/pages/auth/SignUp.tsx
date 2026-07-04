@@ -5,9 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { useAuth } from '../../providers/AuthProvider'
 import { useNavigate, Link } from 'react-router-dom'
-import { resolvePostLoginPath } from '../../config/devSeed'
-import { linkResidentAccount } from '../../api/residentMapping'
 import { listRegisteredSocieties } from '../../lib/societyRegistry'
+import { savePendingSignup } from '../../lib/emailVerification'
 import { ui } from '../../lib/ui'
 
 const schema = z
@@ -32,9 +31,10 @@ const schema = z
 type Form = z.infer<typeof schema>
 
 export default function SignUp() {
-  const { signUp, signIn, refreshSocietyProfile } = useAuth()
+  const { signUp } = useAuth()
   const navigate = useNavigate()
   const societies = listRegisteredSocieties()
+  const [status, setStatus] = useState<string | null>(null)
   const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<Form>({
     resolver: zodResolver(schema),
     defaultValues: { accountType: 'society_admin' }
@@ -45,37 +45,23 @@ export default function SignUp() {
   async function onSubmit(values: Form) {
     try {
       const role = values.accountType === 'society_admin' ? 'rwa_owner' : 'resident'
-      const signUpRes = await signUp(values.email, values.password, { fullName: values.fullName, role })
-      const userId = signUpRes.data?.user?.id
+      const normalizedEmail = values.email.trim().toLowerCase()
 
-      try {
-        const res: any = await signIn(values.email, values.password)
+      savePendingSignup({
+        email: normalizedEmail,
+        fullName: values.fullName,
+        accountType: values.accountType,
+        societyJoinCode: values.societyJoinCode,
+        flatNumber: values.flatNumber,
+        building: values.building
+      })
 
-        if (values.accountType === 'resident' && userId && values.societyJoinCode && values.flatNumber) {
-          await linkResidentAccount({
-            userId,
-            email: values.email,
-            fullName: values.fullName,
-            societyJoinCode: values.societyJoinCode,
-            flatNumber: values.flatNumber,
-            building: values.building
-          })
-          await refreshSocietyProfile()
-        }
+      await signUp(normalizedEmail, values.password, { fullName: values.fullName, role })
 
-        const nextPath = resolvePostLoginPath(
-          values.email,
-          res?.user?.roles ?? (role === 'rwa_owner' ? ['rwa_owner'] : ['resident']),
-          res?.societyId ?? null,
-          role
-        )
-        navigate(nextPath)
-      } catch {
-        alert('Account created. Please sign in to continue.')
-        navigate('/auth/signin')
-      }
-    } catch (err: any) {
-      alert(err.message || 'Sign up failed')
+      setStatus('Account created. Verify your email to complete signup.')
+      navigate(`/auth/verify-email?email=${encodeURIComponent(normalizedEmail)}`)
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Sign up failed')
     }
   }
 
@@ -86,8 +72,8 @@ export default function SignUp() {
           <p className={ui.eyebrow}>Premium onboarding</p>
           <h2 className={ui.heading}>Register as a Society Admin or Resident.</h2>
           <p className={`leading-7 ${ui.body}`}>
-            Society Admins complete one-time setup after signup. Residents link to their society using the join code
-            from their RWA admin plus flat details.
+            Every new account must verify email ownership before accessing the portal. You will receive a clickable
+            link and a one-time code. Super Admin accounts are the only exception.
           </p>
           {accountType === 'resident' && (
             <div className={`${ui.innerItem} text-sm`}>
@@ -161,6 +147,8 @@ export default function SignUp() {
               Create Account
             </button>
           </form>
+
+          {status && <p className="mt-4 text-sm text-emerald-600">{status}</p>}
 
           <div className="mt-6 border-t border-slate-200 pt-6 text-center text-sm text-slate-600">
             Already registered?{' '}

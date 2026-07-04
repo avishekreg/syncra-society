@@ -28,8 +28,13 @@ export default function SignIn() {
       const role = res?.user?.role ?? res?.user?.user_metadata?.role
       const nextPath = resolvePostLoginPath(normalizedEmail, roles, res?.societyId ?? null, role)
       navigate(nextPath)
-    } catch (err: any) {
-      alert(err.message || 'Sign in failed')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Sign in failed'
+      if (message.toLowerCase().includes('verify your email')) {
+        navigate(`/auth/verify-email?email=${encodeURIComponent(values.email.trim().toLowerCase())}`)
+        return
+      }
+      alert(message)
     }
   }
 
@@ -86,6 +91,13 @@ export default function SignIn() {
             Don’t have an account?{' '}
             <Link to="/auth/signup" className="font-semibold text-syncra-blue hover:text-syncra-accent">
               Create one
+            </Link>
+          </div>
+
+          <div className="mt-4 text-center text-sm text-slate-600">
+            Need to verify your email?{' '}
+            <Link to="/auth/verify-email" className="font-semibold text-syncra-blue hover:text-syncra-accent">
+              Enter verification code
             </Link>
           </div>
 

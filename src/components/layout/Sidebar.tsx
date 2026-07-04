@@ -1,5 +1,5 @@
-import React from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../providers/AuthProvider'
 import { canAccessResidentPortal, isGlobalSuperAdmin, isRwaStaff } from '../../lib/roles'
 import { ui } from '../../lib/ui'
@@ -29,6 +29,57 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
       : 'border border-transparent text-slate-600 hover:border-slate-200 hover:bg-white hover:text-syncra-primary'
   ].join(' ')
 
+const subNavLinkClass = ({ isActive }: { isActive: boolean }) =>
+  [
+    'flex items-center gap-2 rounded-lg py-2 pl-9 pr-3.5 text-sm font-medium transition-all duration-200',
+    isActive
+      ? 'bg-syncra-accent/10 text-syncra-blue'
+      : 'text-slate-600 hover:bg-syncra-surface-alt hover:text-syncra-primary'
+  ].join(' ')
+
+type NavGroupProps = {
+  label: string
+  paths: string[]
+  defaultOpen?: boolean
+  children: React.ReactNode
+}
+
+function NavGroup({ label, paths, defaultOpen = false, children }: NavGroupProps) {
+  const location = useLocation()
+  const childActive = paths.some((path) => location.pathname.startsWith(path))
+  const [open, setOpen] = useState(defaultOpen || childActive)
+
+  useEffect(() => {
+    if (childActive) setOpen(true)
+  }, [childActive])
+
+  return (
+    <div className="space-y-0.5">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-syncra-surface-alt hover:text-syncra-primary"
+      >
+        <span>{label}</span>
+        <svg
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          aria-hidden="true"
+        >
+          <path
+            fillRule="evenodd"
+            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </button>
+      {open && <div className="space-y-0.5 pb-1">{children}</div>}
+    </div>
+  )
+}
+
 export default function Sidebar({ children }: { children?: React.ReactNode }) {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
@@ -49,6 +100,15 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
     await signOut()
     navigate('/')
   }
+
+  const residentCommunityPaths = [
+    '/resident/surveys',
+    '/resident/gallery',
+    '/resident/elections',
+    '/resident/rewards'
+  ]
+
+  const rwaControlPaths = ['/rwa/surveys', '/rwa/gallery', '/rwa/elections', '/rwa/rewards']
 
   return (
     <div className="flex min-h-screen bg-syncra-surface">
@@ -84,18 +144,20 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
               <NavLink to="/resident/visitor-logs" className={navLinkClass}>
                 Visitor Logs
               </NavLink>
-              <NavLink to="/resident/surveys" className={navLinkClass}>
-                Surveys
-              </NavLink>
-              <NavLink to="/resident/gallery" className={navLinkClass}>
-                Photo Gallery
-              </NavLink>
-              <NavLink to="/resident/elections" className={navLinkClass}>
-                Elections
-              </NavLink>
-              <NavLink to="/resident/rewards" className={navLinkClass}>
-                Rewards & Recognition
-              </NavLink>
+              <NavGroup label="Community & Governance" paths={residentCommunityPaths}>
+                <NavLink to="/resident/surveys" className={subNavLinkClass}>
+                  Surveys
+                </NavLink>
+                <NavLink to="/resident/gallery" className={subNavLinkClass}>
+                  Photo Gallery
+                </NavLink>
+                <NavLink to="/resident/elections" className={subNavLinkClass}>
+                  Elections
+                </NavLink>
+                <NavLink to="/resident/rewards" className={subNavLinkClass}>
+                  Rewards & Recognition
+                </NavLink>
+              </NavGroup>
             </>
           )}
 
@@ -109,18 +171,20 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
                   <NavLink to="/rwa" end className={navLinkClass}>
                     RWA Dashboard
                   </NavLink>
-                  <NavLink to="/rwa/surveys" className={navLinkClass}>
-                    Surveys
-                  </NavLink>
-                  <NavLink to="/rwa/gallery" className={navLinkClass}>
-                    Gallery Management
-                  </NavLink>
-                  <NavLink to="/rwa/elections" className={navLinkClass}>
-                    Elections
-                  </NavLink>
-                  <NavLink to="/rwa/rewards" className={navLinkClass}>
-                    Rewards & Governance
-                  </NavLink>
+                  <NavGroup label="RWA Controls" paths={rwaControlPaths}>
+                    <NavLink to="/rwa/surveys" className={subNavLinkClass}>
+                      Surveys
+                    </NavLink>
+                    <NavLink to="/rwa/gallery" className={subNavLinkClass}>
+                      Gallery Management
+                    </NavLink>
+                    <NavLink to="/rwa/elections" className={subNavLinkClass}>
+                      Elections
+                    </NavLink>
+                    <NavLink to="/rwa/rewards" className={subNavLinkClass}>
+                      Rewards & Governance
+                    </NavLink>
+                  </NavGroup>
                   <NavLink to="/rwa/gatekeeper" className={navLinkClass}>
                     Guard Console
                   </NavLink>

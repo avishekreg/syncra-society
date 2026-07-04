@@ -53,7 +53,13 @@ export async function decryptVote(privateKeyJwk: JsonWebKey, encryptedBallot: st
 }
 
 /** One-way voter seal — prevents double voting without storing identity on ballot. */
-export async function createVoterSeal(electionId: string, societyId: string, flatNumber: string, pepper: string) {
+export async function createVoterSeal(
+  electionId: string,
+  societyId: string,
+  flatNumber: string,
+  pepper: string,
+  positionId?: string
+) {
   const key = await crypto.subtle.importKey(
     'raw',
     new TextEncoder().encode(pepper),
@@ -61,7 +67,10 @@ export async function createVoterSeal(electionId: string, societyId: string, fla
     false,
     ['sign']
   )
-  const payload = `${electionId}|${societyId}|${flatNumber.trim().toUpperCase()}`
+  const flat = flatNumber.trim().toUpperCase()
+  const payload = positionId
+    ? `${electionId}|${positionId}|${societyId}|${flat}`
+    : `${electionId}|${societyId}|${flat}`
   const signature = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(payload))
   return toBase64(signature)
 }
