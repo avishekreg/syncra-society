@@ -3,7 +3,7 @@ import { restGet, restPost, restDelete } from './supabaseClient'
 import { isRemoteSocietyId } from './societies'
 import { uploadDocument } from '../utils/upload'
 import { logActivity } from '../lib/activityLog'
-import { dispatchNoticePublished } from '../lib/n8nClient'
+import { N8N_PRODUCTION_WEBHOOK_URL } from '../lib/n8nConfig'
 import { listRegisteredSocieties } from '../lib/societyRegistry'
 import {
   resolveNoticeReceiverPhones,
@@ -137,29 +137,60 @@ function buildNoticeMessageBody(notice: Notice, societyName: string) {
   return `📢 ${societyName}\n\n${notice.title}\n\n${notice.body}\n\nPublished: ${timestamp}`
 }
 
-async function relayNoticeToN8n(notice: Notice) {
+/** Sole notice webhook dispatcher — always POSTs to production n8n after publish. */
+async function postNoticePublishedToN8n(notice: Notice) {
   const societyName = societyNameForId(notice.society_id)
-  const senderWhatsapp = await resolveSocietySenderWhatsapp(notice.society_id)
-  const receiverPhones = await resolveNoticeReceiverPhones(notice.society_id)
-  if (receiverPhones.length === 0) return
-
   const messageBody = buildNoticeMessageBody(notice, societyName)
   const publishedAt = notice.created_at ?? new Date().toISOString()
+  const senderWhatsapp = await resolveSocietySenderWhatsapp(notice.society_id)
+  const receiverPhones = await resolveNoticeReceiverPhones(notice.society_id)
+  const targets = receiverPhones.length > 0 ? receiverPhones : ['']
 
   await Promise.all(
-    receiverPhones.map((receiverWhatsapp) =>
-      dispatchNoticePublished({
+    targets.map(async (receiverWhatsapp) => {
+      const payload = {
+        eventId: receiverWhatsapp
+          ? `notice-${notice.id}-${receiverWhatsapp.replace(/\D/g, '')}`
+          : `notice-${notice.id}`,
+        type: 'notice.published' as const,
         societyId: notice.society_id,
         societyName,
+        flatNumber: null,
+        summary: `New notice: ${notice.title}`,
+        occurredAt: publishedAt,
         title: notice.title,
+        message: messageBody,
+        message_body: messageBody,
         body: notice.body,
-        noticeId: notice.id,
-        publishedAt,
         sender_whatsapp: senderWhatsapp,
         receiver_whatsapp: receiverWhatsapp,
-        message_body: messageBody
+        metadata: {
+          noticeId: notice.id,
+          title: notice.title,
+          body: notice.body,
+          message: messageBody,
+          message_body: messageBody,
+          publishedAt,
+          sender_whatsapp: senderWhatsapp,
+          receiver_whatsapp: receiverWhatsapp
+        }
+      }
+
+      const res = await fetch(N8N_PRODUCTION_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       })
-    )
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => '')
+        console.warn(
+          `[notices] n8n webhook failed (${res.status})`,
+          text || res.statusText,
+          N8N_PRODUCTION_WEBHOOK_URL
+        )
+      }
+    })
   )
 }
 
@@ -177,7 +208,7 @@ export async function createNotice(payload: Partial<Notice>, file?: File) {
     body.attachment_url = await uploadDocument(file)
   }
 
-  const saveLocal = () => {
+  const saveLocal = async () => {
     const local = loadLocalNotices(body.society_id)
     local.unshift(body)
     saveLocalNotices(body.society_id, local)
@@ -188,7 +219,7 @@ export async function createNotice(payload: Partial<Notice>, file?: File) {
       summary: `Notice published: ${body.title}`,
       metadata: { noticeId: body.id, publishedAt: body.created_at }
     })
-    void relayNoticeToN8n(body)
+    await postNoticePublishedToN8n(body)
     return body
   }
 
@@ -198,15 +229,16 @@ export async function createNotice(payload: Partial<Notice>, file?: File) {
 
   try {
     const created = await restPost<Notice>('notices', body)
+    const notice = created ?? body
     logActivity({
       societyId: body.society_id,
       category: 'notice',
       action: 'notice_published',
       summary: `Notice published: ${body.title}`,
-      metadata: { noticeId: created?.id ?? body.id, publishedAt: body.created_at }
+      metadata: { noticeId: notice.id, publishedAt: notice.created_at ?? body.created_at }
     })
-    void relayNoticeToN8n(created ?? body)
-    return created ?? body
+    await postNoticePublishedToN8n(notice)
+    return notice
   } catch {
     return saveLocal()
   }
