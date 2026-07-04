@@ -3,11 +3,14 @@ function supabaseBaseUrl(): string {
   return raw.replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '')
 }
 
+const PRODUCTION_N8N_WEBHOOK_URL =
+  'https://avishekreg-syncra-society.hf.space/webhook/syncra-society'
+
 function n8nWebhookUrl(): string {
   return (
     process.env.N8N_WEBHOOK_URL ??
     process.env.VITE_N8N_WEBHOOK_URL ??
-    ''
+    PRODUCTION_N8N_WEBHOOK_URL
   )
 }
 

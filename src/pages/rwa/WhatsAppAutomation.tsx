@@ -174,7 +174,10 @@ export default function WhatsAppAutomation() {
         <ol className="mt-2 list-decimal space-y-1 pl-5">
           <li>Run <code className="text-xs">docker compose up n8n</code> in the project root</li>
           <li>Import workflow from <code className="text-xs">n8n/workflows/syncra-society-whatsapp.json</code></li>
-          <li>Production n8n: set <code className="text-xs">N8N_WEBHOOK_URL</code> to your Render webhook URL in Vercel env</li>
+          <li>
+            Production n8n: set <code className="text-xs">N8N_WEBHOOK_URL</code> to{' '}
+            <code className="text-xs">https://avishekreg-syncra-society.hf.space/webhook/syncra-society</code> in Vercel env
+          </li>
           <li>Connect your WhatsApp BSP credentials inside n8n</li>
         </ol>
       </section>

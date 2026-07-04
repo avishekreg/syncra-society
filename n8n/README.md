@@ -81,10 +81,10 @@ Use approved templates for outbound messages outside the 24-hour window.
 ## Cloud deployment
 
 When moving to production:
-1. Host n8n on Railway, Render, or self-hosted VPS
-2. Set `N8N_WEBHOOK_URL=https://n8n-latest-syncra-society.onrender.com/webhook/syncra-society` in Vercel env
+1. Production n8n is hosted at Hugging Face Spaces (`avishekreg-syncra-society.hf.space`)
+2. Set `N8N_WEBHOOK_URL=https://avishekreg-syncra-society.hf.space/webhook/syncra-society` in Vercel env
 3. Use HTTPS and rotate `SYNCRA_AUTOMATION_SECRET`
-4. Point inbound n8n HTTP nodes at `https://your-vercel-domain/api/automation/inbound`
+4. Point inbound n8n HTTP nodes at `https://syncra-society.vercel.app/api/automation/inbound`
 
 ## Event types
 
