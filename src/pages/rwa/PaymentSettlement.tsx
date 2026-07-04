@@ -10,7 +10,7 @@ const initialDirectSettlement = {
   qrCodeUrl: ''
 }
 
-const saveBtn = 'rounded-xl bg-syncra-blue px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0047b3]'
+const saveBtn = 'inline-flex min-h-11 items-center justify-center rounded-xl bg-syncra-blue px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0047b3]'
 
 export default function PaymentSettlement() {
   const { currentSocietyId } = useAuth()
@@ -73,7 +73,7 @@ export default function PaymentSettlement() {
           <p className="text-lg font-semibold text-syncra-primary">Route 1: Direct Member Settlement</p>
           <p className={`mt-2 ${ui.body}`}>Self-managed bank/UPI details for society-level settlements.</p>
 
-          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
             {[
               { label: 'Society Bank Name', key: 'bankName' as const, placeholder: 'Example Bank' },
               { label: 'Account Number', key: 'accountNumber' as const, placeholder: '000012345678' },
@@ -92,7 +92,7 @@ export default function PaymentSettlement() {
             ))}
           </div>
 
-          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
             <label className="space-y-2">
               <span className={ui.label}>Society QR Code</span>
               <input type="file" accept="image/*" onChange={handleQrUpload} className={ui.input} />
@@ -108,7 +108,7 @@ export default function PaymentSettlement() {
         </div>
 
         <div className={ui.innerItem}>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-lg font-semibold text-syncra-primary">Route 2: Syncra Managed Processing</p>
               <p className={`mt-2 ${ui.body}`}>
@@ -130,7 +130,7 @@ export default function PaymentSettlement() {
           </p>
         </div>
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <button type="submit" className={saveBtn}>
             Save Settlement Settings
           </button>

@@ -16,6 +16,7 @@ import {
   TableRow
 } from '@/components/ui/table'
 import { formatDate, formatInr } from '@/lib/utils'
+import { MESSAGE_GATEWAY_UNAVAILABLE } from '@/lib/clientCopy'
 import type { Flat, PaymentWithFlat, Society } from '@/types/database'
 import { hasAddon, UnlockPremiumCard } from '@/components/premium/unlock-premium-card'
 
@@ -77,7 +78,7 @@ export default function PaymentsPage() {
       data.n8n?.skipped
         ? 'Payment recorded. Settlement alert deferred — WhatsApp module inactive.'
         : data.n8n?.ok === false
-          ? `Payment recorded. Alert warning: ${data.n8n.error}`
+          ? MESSAGE_GATEWAY_UNAVAILABLE
           : 'Payment recorded and owner settlement alert dispatched.'
     )
     void reload()
@@ -111,7 +112,7 @@ export default function PaymentsPage() {
       <PageHeader
         eyebrow="Global Payment Configuration"
         title="Multi-regional collections"
-        description="Orchestrate maintenance collections through Razorpay, Stripe, or regional providers — with automated owner confirmation via the n8n communications bridge."
+        description="Orchestrate maintenance collections through Razorpay, Stripe, or regional providers — with automated owner confirmation via the Syncra communications gateway."
         action={
           <Button asChild variant="outline" size="sm" className="border-neutral-200">
             <Link href="/admin/config">Runtime gateway settings</Link>
@@ -179,12 +180,12 @@ export default function PaymentsPage() {
         </section>
 
         <section className="syncra-panel overflow-hidden">
-          <div className="border-b border-neutral-200 px-6 py-4">
+          <div className="border-b border-neutral-200 px-4 py-4 sm:px-6">
             <h2 className="text-sm font-semibold text-neutral-900">Settlement ledger</h2>
             <p className="text-sm text-neutral-500">{payments.length} collection records</p>
           </div>
           {payments.length === 0 ? (
-            <p className="px-6 py-12 text-sm text-neutral-500">No collections recorded.</p>
+            <p className="px-4 py-10 sm:px-6 sm:py-12 text-sm text-neutral-500">No collections recorded.</p>
           ) : (
             <Table>
               <TableHeader>

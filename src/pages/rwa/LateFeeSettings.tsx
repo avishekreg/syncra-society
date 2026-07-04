@@ -26,7 +26,7 @@ function getStorageKey(societyId: string) {
   return `syncra-late-fee-config-${societyId}`
 }
 
-const saveBtn = 'rounded-xl bg-syncra-blue py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0047b3]'
+const saveBtn = 'inline-flex min-h-11 items-center justify-center rounded-xl bg-syncra-blue py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0047b3]'
 
 export default function LateFeeSettings() {
   const { currentSocietyId } = useAuth()
@@ -102,7 +102,7 @@ export default function LateFeeSettings() {
           </label>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <label className="space-y-2">
             <span className={ui.label}>Fixed Penalty Amount</span>
             <div className={`flex items-center gap-2 ${ui.input}`}>
@@ -137,7 +137,7 @@ export default function LateFeeSettings() {
           </label>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <label className="space-y-2">
             <span className={ui.label}>Interest calculation mode</span>
             <select

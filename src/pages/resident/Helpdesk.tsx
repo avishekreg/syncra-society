@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react'
 import { AiServiceError, HELPDESK_CATEGORIES, HELPDESK_SEVERITIES, processVoiceTicket } from '../../api/ai'
+import { SMART_AI_UNAVAILABLE_MESSAGE } from '../../lib/clientCopy'
 import VoiceSoundwave from '../../components/helpdesk/VoiceSoundwave'
 import { useAuth } from '../../providers/AuthProvider'
 import { useComplaints, formatComplaintStatus } from '../../hooks/useComplaints'
@@ -60,10 +61,10 @@ export default function ResidentHelpdesk() {
     } catch (err) {
       const text =
         err instanceof AiServiceError
-          ? err.message
+          ? SMART_AI_UNAVAILABLE_MESSAGE
           : err instanceof Error
             ? err.message
-            : 'Voice processing failed. You can keep typing manually.'
+            : SMART_AI_UNAVAILABLE_MESSAGE
       setMessage(text)
     } finally {
       setVoiceState('idle')
@@ -188,7 +189,7 @@ export default function ResidentHelpdesk() {
           <div className="space-y-3">
             <span className={ui.label}>Description</span>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row">
               <textarea
                 value={details}
                 onChange={(e) => setDetails(e.target.value)}
@@ -238,7 +239,9 @@ export default function ResidentHelpdesk() {
 
             {voiceEnabled && voiceBusy && (
               <p className="text-sm text-syncra-blue">
-                {voiceState === 'transcribing' ? 'Transcribing with Whisper…' : 'Auto-categorizing with Llama-3…'}
+                {voiceState === 'transcribing'
+                  ? 'Processing high-fidelity audio transcription…'
+                  : 'Running automated AI severity triage…'}
               </p>
             )}
 

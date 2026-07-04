@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { SocietyLedgerEntry } from '../types/db'
-import { supabaseRestUrl, getSupabaseRestHeaders } from '../api/supabaseClient'
+import { restGet } from '../api/supabaseClient'
+import { fetchApiJson } from '../api/safeFetch'
+import { shouldUseLocalFallback } from '../api/apiErrors'
 
 const DEFAULT_LEDGER_ENTRIES: SocietyLedgerEntry[] = [
   {
@@ -43,22 +45,31 @@ export function useLedger(societyId: string | null) {
       return
     }
 
-    fetch(supabaseRestUrl(`society_ledger?society_id=eq.${societyId}&order=date.desc`), {
-      headers: getSupabaseRestHeaders()
-    })
-      .then(async (res) => {
+    void (async () => {
+      const fromApi = await fetchApiJson<SocietyLedgerEntry[]>(
+        `/api/ledger?society_id=${encodeURIComponent(societyId)}`
+      )
+      if (!mounted) return
+      if (fromApi) {
+        setEntries(fromApi.length ? fromApi : DEFAULT_LEDGER_ENTRIES)
+        return
+      }
+
+      try {
+        const data = await restGet<SocietyLedgerEntry[]>(
+          `society_ledger?society_id=eq.${societyId}&order=created_at.desc`
+        )
         if (!mounted) return
-        if (!res.ok) {
-          throw new Error(`Ledger fetch failed with status ${res.status}`)
+        setEntries(Array.isArray(data) && data.length ? data : DEFAULT_LEDGER_ENTRIES)
+      } catch (err) {
+        if (!mounted) return
+        if (shouldUseLocalFallback(err)) {
+          setEntries(DEFAULT_LEDGER_ENTRIES)
+          return
         }
-        const data = await res.json()
-        if (!mounted) return
-        setEntries(Array.isArray(data) ? data : DEFAULT_LEDGER_ENTRIES)
-      })
-      .catch(() => {
-        if (!mounted) return
         setEntries(DEFAULT_LEDGER_ENTRIES)
-      })
+      }
+    })()
 
     return () => {
       mounted = false

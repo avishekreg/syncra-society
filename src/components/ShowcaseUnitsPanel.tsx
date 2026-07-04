@@ -11,7 +11,7 @@ const statusStyles: Record<DemoUnit['balance_status'], string> = {
 export default function ShowcaseUnitsPanel({ units }: { units: DemoUnit[] }) {
   return (
     <section className={ui.card}>
-      <header className={`${ui.cardHeader} flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between`}>
+      <header className={`${ui.cardHeader} flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between`}>
         <div>
           <p className={ui.eyebrow}>Flat owner showcase</p>
           <h2 className={`mt-2 ${ui.headingLg}`}>Syncra Windsor Castle Flats Overview</h2>
@@ -22,7 +22,7 @@ export default function ShowcaseUnitsPanel({ units }: { units: DemoUnit[] }) {
         <span className={ui.badge}>Demo occupancy data</span>
       </header>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {units.map((unit) => (
           <div key={unit.flat_number} className={ui.innerItem}>
             <div className="flex items-start justify-between gap-4">
@@ -37,7 +37,7 @@ export default function ShowcaseUnitsPanel({ units }: { units: DemoUnit[] }) {
               </span>
             </div>
 
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="rounded-xl border border-slate-200 bg-syncra-surface-alt p-4">
                 <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Outstanding</p>
                 <p className="mt-2 text-xl font-semibold text-syncra-primary">

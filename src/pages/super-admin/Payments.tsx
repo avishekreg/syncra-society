@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { ui } from '../../lib/ui'
 
-const saveBtn = 'rounded-xl bg-syncra-blue px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0047b3]'
+const saveBtn = 'inline-flex min-h-11 items-center justify-center rounded-xl bg-syncra-blue px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0047b3]'
 
 export default function SuperAdminPayments() {
   const [keyId, setKeyId] = useState('')

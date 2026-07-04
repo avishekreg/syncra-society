@@ -14,13 +14,35 @@ import {
   DEFAULT_PAYMENTS_WEBHOOK_RECEPTION_URL,
   N8N_PRODUCTION_WEBHOOK_URL
 } from '../types/platformConfig'
-import { restGet, restPatch, restPost } from '../api/supabaseClient'
-import { migrateLegacyRazorpayKeys } from './systemConfigSync'
+import { fetchApiJson } from '../api/safeFetch'
+import {
+  migrateLegacyRazorpayKeys,
+  hydratePlatformConfigFromMirror,
+  mergePlatformConfigPreferLocalSecrets,
+  writeSystemConfigMirror
+} from './systemConfigSync'
 
 export const PLATFORM_CONFIG_STORAGE_KEY = 'syncra-platform-config'
 export const PLATFORM_CONFIG_CHANGED_EVENT = 'syncra-platform-config-changed'
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || import.meta.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const ADMIN_KEY_STORAGE = 'syncra-super-admin-key'
+
+function getSuperAdminKey() {
+  try {
+    return (
+      localStorage.getItem(ADMIN_KEY_STORAGE)?.trim() ||
+      import.meta.env.VITE_SUPER_ADMIN_SECRET?.trim() ||
+      import.meta.env.NEXT_PUBLIC_SUPER_ADMIN_SECRET?.trim() ||
+      ''
+    )
+  } catch {
+    return (
+      import.meta.env.VITE_SUPER_ADMIN_SECRET?.trim() ||
+      import.meta.env.NEXT_PUBLIC_SUPER_ADMIN_SECRET?.trim() ||
+      ''
+    )
+  }
+}
 
 export const DEFAULT_SOCIETY_ADDONS: Record<SocietyAddonKey, boolean> = {
   whatsappAlerts: true,
@@ -140,19 +162,25 @@ export function readPlatformConfigFromStorage(): PlatformConfig {
   try {
     const raw = localStorage.getItem(PLATFORM_CONFIG_STORAGE_KEY)
     if (!raw) {
-      return migrateLegacyRazorpayKeys({
+      return hydratePlatformConfigFromMirror(
+        migrateLegacyRazorpayKeys({
+          ...DEFAULT_PLATFORM_CONFIG,
+          updatedAt: new Date().toISOString()
+        })
+      )
+    }
+    return hydratePlatformConfigFromMirror(
+      migrateLegacyRazorpayKeys(
+        normalizePlatformConfig(JSON.parse(raw) as Partial<PlatformConfig>)
+      )
+    )
+  } catch {
+    return hydratePlatformConfigFromMirror(
+      migrateLegacyRazorpayKeys({
         ...DEFAULT_PLATFORM_CONFIG,
         updatedAt: new Date().toISOString()
       })
-    }
-    return migrateLegacyRazorpayKeys(
-      normalizePlatformConfig(JSON.parse(raw) as Partial<PlatformConfig>)
     )
-  } catch {
-    return migrateLegacyRazorpayKeys({
-      ...DEFAULT_PLATFORM_CONFIG,
-      updatedAt: new Date().toISOString()
-    })
   }
 }
 
@@ -204,8 +232,10 @@ export function isVoiceTicketingEnabled(societyId?: string | null, config = getP
 }
 
 export function writePlatformConfigToStorage(config: PlatformConfig) {
-  localStorage.setItem(PLATFORM_CONFIG_STORAGE_KEY, JSON.stringify(config))
-  window.dispatchEvent(new CustomEvent(PLATFORM_CONFIG_CHANGED_EVENT, { detail: config }))
+  const hydrated = hydratePlatformConfigFromMirror(config)
+  localStorage.setItem(PLATFORM_CONFIG_STORAGE_KEY, JSON.stringify(hydrated))
+  writeSystemConfigMirror(hydrated)
+  window.dispatchEvent(new CustomEvent(PLATFORM_CONFIG_CHANGED_EVENT, { detail: hydrated }))
 }
 
 export function patchPlatformConfig(patch: Partial<PlatformConfig>): PlatformConfig {
@@ -274,37 +304,40 @@ export function patchSocietyGateway(
 }
 
 export async function syncPlatformConfigToSupabase(config: PlatformConfig): Promise<boolean> {
-  if (!SUPABASE_URL) return false
+  const adminKey = getSuperAdminKey()
+  if (!adminKey) return false
 
-  const row = {
-    id: 'global',
-    payload: config,
-    updated_at: config.updatedAt
-  }
+  const result = await fetchApiJson<{ payload?: unknown }>('/api/platform/config', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-super-admin-key': adminKey
+    },
+    body: JSON.stringify({
+      payload: config,
+      updated_at: config.updatedAt
+    })
+  })
 
-  try {
-    await restPatch(`platform_settings?id=eq.global`, row)
-    return true
-  } catch {
-    try {
-      await restPost('platform_settings', row)
-      return true
-    } catch {
-      return false
-    }
-  }
+  return Boolean(result)
 }
 
 export async function loadPlatformConfigFromSupabase(): Promise<PlatformConfig | null> {
-  if (!SUPABASE_URL) return null
+  const adminKey = getSuperAdminKey()
+  if (!adminKey) return null
+
+  const remote = await fetchApiJson<{ payload?: Partial<PlatformConfig> }>('/api/platform/config', {
+    headers: { 'x-super-admin-key': adminKey }
+  })
+
+  const payload = remote?.payload
+  if (!payload) return null
 
   try {
-    const rows = await restGet<Array<{ payload?: Partial<PlatformConfig> }>>(
-      'platform_settings?id=eq.global&select=payload'
+    const local = readPlatformConfigFromStorage()
+    const normalized = hydratePlatformConfigFromMirror(
+      mergePlatformConfigPreferLocalSecrets(local, normalizePlatformConfig(payload))
     )
-    const payload = rows?.[0]?.payload
-    if (!payload) return null
-    const normalized = normalizePlatformConfig(payload)
     writePlatformConfigToStorage(normalized)
     return normalized
   } catch {

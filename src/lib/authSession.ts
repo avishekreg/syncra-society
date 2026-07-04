@@ -14,6 +14,18 @@ export type AuthSnapshot = {
   kind: 'demo' | 'super_admin' | 'supabase'
 }
 
+type SupabaseStoredSession = {
+  access_token?: string
+  refresh_token?: string
+  expires_at?: number
+  user?: {
+    id: string
+    email?: string | null
+    user_metadata?: { role?: string; tier?: string }
+    app_metadata?: { provider?: string }
+  }
+}
+
 export function saveAuthSnapshot(snapshot: AuthSnapshot, societyId?: string | null) {
   localStorage.setItem(AUTH_SNAPSHOT_KEY, JSON.stringify(snapshot))
   if (societyId !== undefined) {
@@ -48,4 +60,32 @@ export function markSuperAdminSession(active: boolean) {
 
 export function hasSuperAdminSession() {
   return localStorage.getItem(SUPER_ADMIN_SESSION_KEY) === '1'
+}
+
+/** Synchronously read Supabase auth payload from `sb-*-auth-token` localStorage keys. */
+export function readSupabaseSessionFromStorage(): SupabaseStoredSession | null {
+  if (typeof window === 'undefined') return null
+
+  try {
+    for (let index = 0; index < localStorage.length; index += 1) {
+      const key = localStorage.key(index)
+      if (!key?.startsWith('sb-') || !key.endsWith('-auth-token')) continue
+
+      const raw = localStorage.getItem(key)
+      if (!raw) continue
+
+      const parsed = JSON.parse(raw) as SupabaseStoredSession
+      if (parsed?.access_token && parsed?.user?.id) return parsed
+    }
+  } catch {
+    return null
+  }
+
+  return null
+}
+
+export function isSupabaseSessionFresh(session: SupabaseStoredSession | null) {
+  if (!session?.access_token) return false
+  if (!session.expires_at) return true
+  return session.expires_at * 1000 > Date.now() + 30_000
 }

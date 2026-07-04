@@ -5,6 +5,7 @@ import PaymentSettlement from './PaymentSettlement'
 import DefaulterBoard from './DefaulterBoard'
 import BankStatementReconciliation from '../../components/BankStatementReconciliation'
 import RwaBillingEngine from './RwaBillingEngine'
+import SocietyIntegrationCredentials from '../../components/society/SocietyIntegrationCredentials'
 import { useAuth } from '../../providers/AuthProvider'
 import { ui } from '../../lib/ui'
 
@@ -135,7 +136,7 @@ export default function RwaSettings() {
   return (
     <>
       <div className={`mb-8 ${ui.card}`}>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className={ui.eyebrow}>Society settings</p>
             <h2 className="mt-1 text-lg font-semibold text-syncra-primary">{roleStatus.label}</h2>
@@ -147,6 +148,8 @@ export default function RwaSettings() {
         </div>
       </div>
 
+      <SocietyIntegrationCredentials className="mb-8" />
+
       <section className={ui.card}>
         <div className="mb-5">
           <p className={ui.eyebrow}>Local Emergency & Utility Directory</p>
@@ -154,7 +157,7 @@ export default function RwaSettings() {
           <p className={`mt-2 ${ui.body}`}>Configure the resident speed dial directory for hospitals, police, vendors, and maintenance agencies.</p>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {[
             { label: 'Nearest Hospital', value: hospital, setter: setHospital, placeholder: 'Hospital phone number' },
             { label: 'Ambulance Rail', value: ambulance, setter: setAmbulance, placeholder: 'Ambulance contact' },
@@ -175,7 +178,7 @@ export default function RwaSettings() {
           ))}
         </div>
 
-        <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <button type="button" onClick={handleDirectorySave} className={ui.btnPrimary}>
             Save directory
           </button>
@@ -190,7 +193,7 @@ export default function RwaSettings() {
             <h2 className={`mt-2 ${ui.heading}`}>Resident and Gatekeeper Credentials</h2>
             <p className={`mt-2 ${ui.body}`}>Review flat assignments and trigger mock password overrides without exposing raw credentials.</p>
           </div>
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-syncra-surface-alt">
+          <div className="w-full overflow-x-auto overscroll-x-contain rounded-2xl border border-slate-200 bg-syncra-surface-alt [-webkit-overflow-scrolling:touch]">
             <div className="grid grid-cols-1 gap-0 text-xs uppercase tracking-[0.35em] bg-syncra-surface px-6 py-4 text-slate-500 md:grid-cols-[1fr_2fr_1fr_150px]">
               <span>Flat / Role</span>
               <span>Name</span>
@@ -259,7 +262,7 @@ export default function RwaSettings() {
         <PaymentSettlement />
         <BankStatementReconciliation />
         <RwaBillingEngine />
-        <div className="grid gap-6 xl:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
           <LateFeeSettings />
           <GatekeeperProvisioning />
         </div>

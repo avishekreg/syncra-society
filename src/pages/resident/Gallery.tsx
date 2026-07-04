@@ -21,7 +21,7 @@ export default function ResidentGalleryPage() {
           <p className={ui.body}>No photos uploaded yet.</p>
         </section>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {photos.map((photo) => (
             <article key={photo.id} className={ui.card}>
               <img src={photo.imageDataUrl} alt={photo.title} className="h-48 w-full rounded-xl object-cover" />

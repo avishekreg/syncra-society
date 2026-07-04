@@ -6,7 +6,7 @@ export default function AuthLayout({ children, title }: { children: React.ReactN
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(0,180,216,0.08),_transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(0,82,204,0.06),_transparent_24%)]" />
       <div className="relative mx-auto flex min-h-screen items-center justify-center px-4 py-12">
         <div className="w-full max-w-4xl space-y-8">
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-card md:p-10">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-card sm:p-6 md:p-10">
             <div className="mb-8 flex flex-col gap-4 rounded-xl border border-slate-200 bg-syncra-surface p-6 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-syncra-accent">Syncra Society</p>

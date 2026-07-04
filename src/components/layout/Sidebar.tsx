@@ -1,38 +1,18 @@
 import React, { useEffect, useState } from 'react'
+import { Menu, X } from 'lucide-react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
+import SyncraBrandLogo from '../brand/SyncraBrandLogo'
 import { useAuth } from '../../providers/AuthProvider'
 import { usePlatformConfig } from '../../providers/PlatformConfigProvider'
 import { canAccessResidentPortal, isGlobalSuperAdmin, isRwaStaff } from '../../lib/roles'
 import { ui } from '../../lib/ui'
 
-function SyncraLogo() {
-  return (
-    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-9 w-9 shrink-0" aria-hidden="true">
-      <rect width="40" height="40" rx="10" fill="#F4F5F7" />
-      <path d="M8 28 L20 8 L32 28" stroke="url(#syncra-gradient)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M12 22 H28" stroke="#00B4D8" strokeWidth="2" strokeLinecap="round" />
-      <path d="M14 32 H26" stroke="#0052CC" strokeWidth="1.5" strokeLinecap="round" opacity="0.8" />
-      <defs>
-        <linearGradient id="syncra-gradient" x1="8" y1="28" x2="32" y2="8" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#00B4D8" />
-          <stop offset="1" stopColor="#0052CC" />
-        </linearGradient>
-      </defs>
-    </svg>
-  )
-}
-
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-  [
-    'group flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all duration-200',
-    isActive
-      ? 'border border-syncra-accent/30 bg-syncra-accent/10 text-syncra-blue shadow-sm'
-      : 'border border-transparent text-slate-600 hover:border-slate-200 hover:bg-white hover:text-syncra-primary'
-  ].join(' ')
+  [ui.navLink, isActive ? ui.navLinkActive : ui.navLinkIdle].join(' ')
 
 const subNavLinkClass = ({ isActive }: { isActive: boolean }) =>
   [
-    'flex items-center gap-2 rounded-lg py-2 pl-9 pr-3.5 text-sm font-medium transition-all duration-200',
+    ui.subNavLink,
     isActive
       ? 'bg-syncra-accent/10 text-syncra-blue'
       : 'text-slate-600 hover:bg-syncra-surface-alt hover:text-syncra-primary'
@@ -60,7 +40,7 @@ function NavGroup({ label, paths, defaultOpen = false, children }: NavGroupProps
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
-        className="flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-syncra-surface-alt hover:text-syncra-primary"
+        className={`${ui.navLink} w-full justify-between text-slate-600 hover:bg-syncra-surface-alt hover:text-syncra-primary`}
       >
         <span>{label}</span>
         <svg
@@ -81,18 +61,38 @@ function NavGroup({ label, paths, defaultOpen = false, children }: NavGroupProps
   )
 }
 
-export default function Sidebar({ children }: { children?: React.ReactNode }) {
+type SidebarProps = {
+  children?: React.ReactNode
+  title?: string
+}
+
+export default function Sidebar({ children, title }: SidebarProps) {
   const { user, signOut, currentSocietyId } = useAuth()
   const { isModuleEnabled } = usePlatformConfig()
   const navigate = useNavigate()
+  const location = useLocation()
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   const societyScope = currentSocietyId
   const moduleEnabled = (key: Parameters<typeof isModuleEnabled>[0]) =>
     isModuleEnabled(key, societyScope)
 
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [location.pathname])
+
+  useEffect(() => {
+    if (!mobileOpen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [mobileOpen])
+
   if (!user) {
     return (
-      <div className={`${ui.page} flex items-center justify-center p-8 text-slate-500`}>
+      <div className={`${ui.page} flex items-center justify-center p-6 text-slate-500 sm:p-8`}>
         Loading Syncra Workspace Safely...
       </div>
     )
@@ -103,6 +103,7 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
   const showRwaNav = isRwaStaff(user)
 
   async function handleSignOut() {
+    setMobileOpen(false)
     await signOut()
     navigate('/')
   }
@@ -133,156 +134,202 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
     '/super-admin/master-config'
   ]
 
-  const presidentConsolePaths = ['/admin/dashboard', '/admin/notices', '/rwa/workspace']
+  const presidentConsolePaths = ['/admin/dashboard', '/admin/notices', '/admin/configuration', '/rwa/workspace']
 
   const showRwaControls = rwaControlPaths.length > 0
 
-  return (
-    <div className="flex min-h-screen bg-syncra-surface">
-      <aside className="sticky top-0 flex h-screen w-[17.5rem] shrink-0 flex-col border-r border-slate-200 bg-white">
-        <div className="border-b border-slate-200 px-5 py-6">
-          <div className="flex items-center gap-3">
-            <SyncraLogo />
-            <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-syncra-accent">Syncra Systems</p>
-              <h2 className="truncate text-base font-semibold tracking-tight text-syncra-primary">syncra-society</h2>
-            </div>
-          </div>
-          {user && <p className="mt-3 truncate text-xs text-slate-500">{user.email}</p>}
-          {isSuperAdmin && (
-            <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-syncra-action">
-              Global Platform Admin
-            </p>
-          )}
-        </div>
-
-        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-5">
-          {showResidentNav && (
-            <>
-              <p className="mb-2 px-3.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-                Workspace
-              </p>
-              <NavLink to="/resident" end className={navLinkClass}>
-                Resident Dashboard
-              </NavLink>
-              {moduleEnabled('helpdesk') && (
-                <NavLink to="/resident/helpdesk" className={navLinkClass}>
-                  Smart Helpdesk
-                </NavLink>
-              )}
-              {moduleEnabled('visitorLogs') && (
-                <NavLink to="/resident/visitor-logs" className={navLinkClass}>
-                  Visitor Logs
-                </NavLink>
-              )}
-              {showResidentCommunity && (
-                <NavGroup label="Community & Governance" paths={residentCommunityPaths}>
-                  {moduleEnabled('surveys') && (
-                    <NavLink to="/resident/surveys" className={subNavLinkClass}>
-                      Surveys
-                    </NavLink>
-                  )}
-                  {moduleEnabled('gallery') && (
-                    <NavLink to="/resident/gallery" className={subNavLinkClass}>
-                      Photo Gallery
-                    </NavLink>
-                  )}
-                  {moduleEnabled('elections') && (
-                    <NavLink to="/resident/elections" className={subNavLinkClass}>
-                      Elections
-                    </NavLink>
-                  )}
-                  {moduleEnabled('rewards') && (
-                    <NavLink to="/resident/rewards" className={subNavLinkClass}>
-                      Rewards & Recognition
-                    </NavLink>
-                  )}
-                </NavGroup>
-              )}
-            </>
-          )}
-
-          {(showRwaNav || isSuperAdmin) && (
-            <>
-              <p className="mb-2 mt-6 px-3.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-                Administration
-              </p>
-              {showRwaNav && (
-                <>
-                  <NavGroup label="President Console" paths={presidentConsolePaths} defaultOpen>
-                    <NavLink to="/admin/dashboard" className={subNavLinkClass}>
-                      Analytics Overview
-                    </NavLink>
-                    {moduleEnabled('notices') && (
-                      <NavLink to="/admin/notices" className={subNavLinkClass}>
-                        Notices
-                      </NavLink>
-                    )}
-                    <NavLink to="/rwa/workspace" className={subNavLinkClass}>
-                      Society Operations
-                    </NavLink>
-                  </NavGroup>
-                  {showRwaControls && (
-                    <NavGroup label="RWA Controls" paths={rwaControlPaths}>
-                      {moduleEnabled('surveys') && (
-                        <NavLink to="/rwa/surveys" className={subNavLinkClass}>
-                          Surveys
-                        </NavLink>
-                      )}
-                      {moduleEnabled('gallery') && (
-                        <NavLink to="/rwa/gallery" className={subNavLinkClass}>
-                          Gallery Management
-                        </NavLink>
-                      )}
-                      {moduleEnabled('elections') && (
-                        <NavLink to="/rwa/elections" className={subNavLinkClass}>
-                          Elections
-                        </NavLink>
-                      )}
-                      {moduleEnabled('rewards') && (
-                        <NavLink to="/rwa/rewards" className={subNavLinkClass}>
-                          Rewards & Governance
-                        </NavLink>
-                      )}
-                    </NavGroup>
-                  )}
-                  {moduleEnabled('gatekeeper') && (
-                    <NavLink to="/rwa/gatekeeper" className={navLinkClass}>
-                      Guard Console
-                    </NavLink>
-                  )}
-                  {moduleEnabled('whatsappAutomation') && (
-                    <NavLink to="/rwa/whatsapp" className={navLinkClass}>
-                      WhatsApp Automation
-                    </NavLink>
-                  )}
-                  <NavLink to="/rwa/settings" className={navLinkClass}>
-                    RWA Settings
-                  </NavLink>
-                </>
-              )}
-              {isSuperAdmin && (
-                <NavGroup label="Super Admin" paths={superAdminPaths} defaultOpen>
-                  <NavLink to="/super-admin/societies" className={subNavLinkClass}>
-                    Societies Manager
-                  </NavLink>
-                  <NavLink to="/super-admin/pricing" className={subNavLinkClass}>
-                    Pricing & Subscriptions
-                  </NavLink>
-                  <NavLink to="/super-admin/master-config" className={subNavLinkClass}>
-                    Global Platform Settings
-                  </NavLink>
-                </NavGroup>
-              )}
-            </>
-          )}
-        </nav>
-
-        <div className="border-t border-slate-200 p-4">
-          <button type="button" onClick={handleSignOut} className={`w-full text-left ${ui.btnGhost}`}>
-            Sign Out
+  const navContent = (
+    <>
+      <div className="border-b border-slate-200 px-4 py-4 sm:px-5 sm:py-5">
+        <div className="flex items-start justify-between gap-3">
+          <SyncraBrandLogo to="/" />
+          <button
+            type="button"
+            className={`${ui.btnIcon} lg:hidden`}
+            aria-label="Close navigation menu"
+            onClick={() => setMobileOpen(false)}
+          >
+            <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
+        {user && <p className="mt-3 truncate text-xs text-slate-500">{user.email}</p>}
+        {isSuperAdmin && (
+          <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-syncra-action">
+            Global Platform Admin
+          </p>
+        )}
+      </div>
+
+      <nav className="flex-1 space-y-1 overflow-y-auto overscroll-contain px-3 py-4 sm:py-5">
+        {showResidentNav && (
+          <>
+            <p className="mb-2 px-3.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+              Workspace
+            </p>
+            <NavLink to="/resident" end className={navLinkClass}>
+              Resident Dashboard
+            </NavLink>
+            {moduleEnabled('helpdesk') && (
+              <NavLink to="/resident/helpdesk" className={navLinkClass}>
+                Smart Helpdesk
+              </NavLink>
+            )}
+            {moduleEnabled('visitorLogs') && (
+              <NavLink to="/resident/visitor-logs" className={navLinkClass}>
+                Visitor Logs
+              </NavLink>
+            )}
+            {showResidentCommunity && (
+              <NavGroup label="Community & Governance" paths={residentCommunityPaths}>
+                {moduleEnabled('surveys') && (
+                  <NavLink to="/resident/surveys" className={subNavLinkClass}>
+                    Surveys
+                  </NavLink>
+                )}
+                {moduleEnabled('gallery') && (
+                  <NavLink to="/resident/gallery" className={subNavLinkClass}>
+                    Photo Gallery
+                  </NavLink>
+                )}
+                {moduleEnabled('elections') && (
+                  <NavLink to="/resident/elections" className={subNavLinkClass}>
+                    Elections
+                  </NavLink>
+                )}
+                {moduleEnabled('rewards') && (
+                  <NavLink to="/resident/rewards" className={subNavLinkClass}>
+                    Rewards & Recognition
+                  </NavLink>
+                )}
+              </NavGroup>
+            )}
+          </>
+        )}
+
+        {(showRwaNav || isSuperAdmin) && (
+          <>
+            <p className="mb-2 mt-4 px-3.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 sm:mt-6">
+              Administration
+            </p>
+            {showRwaNav && (
+              <>
+                <NavGroup label="President Console" paths={presidentConsolePaths} defaultOpen>
+                  <NavLink to="/admin/dashboard" className={subNavLinkClass}>
+                    Analytics Overview
+                  </NavLink>
+                  {moduleEnabled('notices') && (
+                    <NavLink to="/admin/notices" className={subNavLinkClass}>
+                      Notices
+                    </NavLink>
+                  )}
+                  <NavLink to="/admin/configuration" className={subNavLinkClass}>
+                    Society Configuration
+                  </NavLink>
+                  <NavLink to="/rwa/workspace" className={subNavLinkClass}>
+                    Society Operations
+                  </NavLink>
+                </NavGroup>
+                {showRwaControls && (
+                  <NavGroup label="RWA Controls" paths={rwaControlPaths}>
+                    {moduleEnabled('surveys') && (
+                      <NavLink to="/rwa/surveys" className={subNavLinkClass}>
+                        Surveys
+                      </NavLink>
+                    )}
+                    {moduleEnabled('gallery') && (
+                      <NavLink to="/rwa/gallery" className={subNavLinkClass}>
+                        Gallery Management
+                      </NavLink>
+                    )}
+                    {moduleEnabled('elections') && (
+                      <NavLink to="/rwa/elections" className={subNavLinkClass}>
+                        Elections
+                      </NavLink>
+                    )}
+                    {moduleEnabled('rewards') && (
+                      <NavLink to="/rwa/rewards" className={subNavLinkClass}>
+                        Rewards & Governance
+                      </NavLink>
+                    )}
+                  </NavGroup>
+                )}
+                {moduleEnabled('gatekeeper') && (
+                  <NavLink to="/rwa/gatekeeper" className={navLinkClass}>
+                    Guard Console
+                  </NavLink>
+                )}
+                {moduleEnabled('whatsappAutomation') && (
+                  <NavLink to="/rwa/whatsapp" className={navLinkClass}>
+                    WhatsApp Automation
+                  </NavLink>
+                )}
+                <NavLink to="/rwa/settings" className={navLinkClass}>
+                  RWA Settings
+                </NavLink>
+              </>
+            )}
+            {isSuperAdmin && (
+              <NavGroup label="Super Admin" paths={superAdminPaths} defaultOpen>
+                <NavLink to="/super-admin/societies" className={subNavLinkClass}>
+                  Societies Manager
+                </NavLink>
+                <NavLink to="/super-admin/pricing" className={subNavLinkClass}>
+                  Pricing & Subscriptions
+                </NavLink>
+                <NavLink to="/super-admin/master-config" className={subNavLinkClass}>
+                  Global Platform Settings
+                </NavLink>
+              </NavGroup>
+            )}
+          </>
+        )}
+      </nav>
+
+      <div className="border-t border-slate-200 p-3 sm:p-4">
+        <button type="button" onClick={() => void handleSignOut()} className={`w-full ${ui.btnGhost}`}>
+          Sign Out
+        </button>
+      </div>
+    </>
+  )
+
+  return (
+    <div className="flex min-h-screen flex-col bg-syncra-surface lg:flex-row">
+      {/* Mobile top bar */}
+      <header className="sticky top-0 z-40 flex min-h-14 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 lg:hidden">
+        <button
+          type="button"
+          className={ui.btnIcon}
+          aria-label="Open navigation menu"
+          aria-expanded={mobileOpen}
+          onClick={() => setMobileOpen(true)}
+        >
+          <Menu className="h-5 w-5" aria-hidden="true" />
+        </button>
+        <div className="min-w-0 flex-1 text-center">
+          <p className="truncate text-sm font-semibold text-syncra-primary">{title ?? 'Syncra Society'}</p>
+        </div>
+        <div className="w-11" aria-hidden="true" />
+      </header>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <button
+          type="button"
+          aria-label="Close navigation menu"
+          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-[1px] lg:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar drawer / desktop rail */}
+      <aside
+        className={[
+          'fixed inset-y-0 left-0 z-50 flex w-[min(100vw-3rem,17.5rem)] flex-col border-r border-slate-200 bg-white shadow-xl transition-transform duration-200 ease-out lg:static lg:z-auto lg:h-screen lg:w-[17.5rem] lg:shrink-0 lg:translate-x-0 lg:shadow-none',
+          mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        ].join(' ')}
+      >
+        {navContent}
       </aside>
 
       <main className="min-w-0 flex-1 bg-syncra-surface text-slate-900">{children}</main>

@@ -3,6 +3,7 @@ import {
   resolveNoticeEnhancerModel,
   resolveVoiceModel
 } from '../lib/n8nConfig'
+import { SMART_AI_UNAVAILABLE_MESSAGE } from '../lib/clientCopy'
 
 const HF_INFERENCE_BASE = 'https://api-inference.huggingface.co/models'
 
@@ -31,10 +32,7 @@ type HfJsonResponse = Record<string, unknown> | Array<Record<string, unknown>>
 async function hfFetch(modelId: string, init: RequestInit, retries = 2): Promise<Response> {
   const token = resolveHuggingFaceToken()
   if (!token) {
-    throw new AiServiceError(
-      'Hugging Face API token is not configured. Add it in Global Platform Settings.',
-      'missing_token'
-    )
+    throw new AiServiceError(SMART_AI_UNAVAILABLE_MESSAGE, 'missing_token')
   }
 
   const headers = new Headers(init.headers)
@@ -107,17 +105,14 @@ export async function transcribeAudioBlob(audio: Blob): Promise<string> {
   const res = await hfFetch(model, { method: 'POST', body: audio })
 
   if (!res.ok) {
-    const detail = await res.text().catch(() => res.statusText)
-    throw new AiServiceError(
-      detail || `Transcription failed (${res.status})`,
-      'transcription_failed'
-    )
+    await res.text().catch(() => res.statusText)
+    throw new AiServiceError(SMART_AI_UNAVAILABLE_MESSAGE, 'transcription_failed')
   }
 
   const payload = (await res.json()) as HfJsonResponse
   const text = extractGeneratedText(payload).trim()
   if (!text) {
-    throw new AiServiceError('Whisper returned an empty transcript.', 'transcription_failed')
+    throw new AiServiceError(SMART_AI_UNAVAILABLE_MESSAGE, 'transcription_failed')
   }
   return text
 }
@@ -147,11 +142,8 @@ export async function classifyHelpdeskTicket(description: string): Promise<Helpd
   })
 
   if (!res.ok) {
-    const detail = await res.text().catch(() => res.statusText)
-    throw new AiServiceError(
-      detail || `Classification failed (${res.status})`,
-      'classification_failed'
-    )
+    await res.text().catch(() => res.statusText)
+    throw new AiServiceError(SMART_AI_UNAVAILABLE_MESSAGE, 'classification_failed')
   }
 
   const payload = (await res.json()) as HfJsonResponse

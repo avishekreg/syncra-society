@@ -6,6 +6,14 @@ export const DEV_SUPER_ADMIN = {
 }
 
 export const DEMO_SOCIETY_ID = 'syncra-windsor-castle'
+/** Primary key in `public.societies` for the Windsor Castle demo seed (schema.sql). */
+export const DEMO_SOCIETY_UUID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+
+/** Maps legacy slug/local ids to PostgreSQL UUIDs from `public.societies`. */
+export const LEGACY_SOCIETY_ID_ALIASES: Record<string, string> = {
+  [DEMO_SOCIETY_ID]: DEMO_SOCIETY_UUID,
+  'syncra-windsor-castle': DEMO_SOCIETY_UUID
+}
 export const DEMO_AUTH_KEY = 'syncra-demo-auth'
 
 export type DemoLoginConfig = {

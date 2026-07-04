@@ -16,6 +16,7 @@
   --syncra-text: #0f172a;
   --syncra-text-muted: #64748b;
   --syncra-border: #e2e8f0;
+  --syncra-touch-min: 44px;
 }
 
 html,
@@ -32,14 +33,56 @@ body {
   letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
-@layer utilities {
+@layer base {
+  a,
+  button,
+  [role='button'],
+  input[type='checkbox'],
+  input[type='radio'],
+  select {
+    touch-action: manipulation;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  @media (min-width: 640px) {
+    input,
+    select,
+    textarea {
+      font-size: inherit;
+    }
+  }
+}
+
+@layer components {
   .syncra-panel {
     @apply rounded-2xl border border-slate-200 bg-white shadow-card;
   }
 
   .syncra-panel-active {
     @apply border border-syncra-accent/30 bg-syncra-accent/10 text-syncra-blue shadow-sm;
+  }
+
+  .syncra-touch-target {
+    @apply inline-flex min-h-11 min-w-11 items-center justify-center;
+  }
+}
+
+@layer utilities {
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
   }
 }

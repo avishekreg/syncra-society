@@ -87,7 +87,7 @@ export default function RewardsGovernance() {
 
       <section className={ui.card}>
         <h3 className={ui.heading}>Published scoring weights (v{weights.version})</h3>
-        <div className="mt-4 grid gap-6 md:grid-cols-2">
+        <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
             <p className="text-sm font-semibold text-syncra-primary">Resident actions</p>
             <ul className="mt-2 space-y-1 text-sm text-slate-600">

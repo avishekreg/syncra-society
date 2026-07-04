@@ -118,7 +118,7 @@ export default function GatekeeperGuard() {
           <p className={ui.eyebrow}>Guard Interface</p>
           <h2 className={`mt-2 ${ui.heading}`}>Log Visitor Entry</h2>
           <p className={`mt-1 ${ui.body}`}>New requests default to Pending Approval until the resident acts.</p>
-          <form onSubmit={handleSubmit} className="mt-6 grid gap-4 sm:grid-cols-2">
+          <form onSubmit={handleSubmit} className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <input className={inputClass} placeholder="Visitor Name" value={visitorName} onChange={(e) => setVisitorName(e.target.value)} />
             <input className={inputClass} placeholder="Purpose of Visit" value={purpose} onChange={(e) => setPurpose(e.target.value)} />
             <input className={inputClass} placeholder="Vehicle Number (optional)" value={vehicleNumber} onChange={(e) => setVehicleNumber(e.target.value)} />
@@ -131,7 +131,7 @@ export default function GatekeeperGuard() {
         </div>
 
         <div className={ui.card}>
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
             <h3 className={ui.heading}>Live Visitor Logs</h3>
             {loading && <span className={ui.body}>Syncing…</span>}
           </div>

@@ -19,7 +19,11 @@ export function useVoiceRecorder(options: UseVoiceRecorderOptions = {}) {
   const { onAudioLevel } = options
   const [isRecording, setIsRecording] = useState(false)
   const [isSupported] = useState(
-    () => typeof window !== 'undefined' && Boolean(navigator.mediaDevices?.getUserMedia && window.MediaRecorder)
+    () =>
+      typeof window !== 'undefined' &&
+      typeof navigator !== 'undefined' &&
+      typeof navigator.mediaDevices?.getUserMedia === 'function' &&
+      typeof window.MediaRecorder !== 'undefined'
   )
   const [error, setError] = useState<VoiceRecorderError>(null)
   const [permissionDenied, setPermissionDenied] = useState(false)

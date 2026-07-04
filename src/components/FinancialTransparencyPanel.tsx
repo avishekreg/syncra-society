@@ -69,7 +69,7 @@ export default function FinancialTransparencyPanel({ embedded = false, data }: P
           {recentExpenses.map((entry) => (
             <div
               key={entry.id}
-              className="flex items-center justify-between gap-4 rounded-lg border border-slate-200 bg-white px-3 py-2.5"
+              className="flex items-center justify-between gap-4 rounded-lg border border-slate-200 bg-white min-h-11 px-3 py-3"
             >
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium text-syncra-primary">{entry.description}</p>

@@ -28,7 +28,13 @@ export type BillingStatus = {
   paymentsConfigured: boolean
 }
 
-import { getTierRate } from './platformPricing'
+import {
+  calculateWhatsAppOverageCost,
+  getPlatformPricing,
+  getTierRate,
+  resolvePremiumAddonMonthlyFee,
+  type PremiumAddonsPricingConfig
+} from './platformPricing'
 
 export function resolveMonthlyRatePerFlat(pricingSlabId?: string | null): number {
   return getTierRate(pricingSlabId)
@@ -50,4 +56,55 @@ export function onboardingPathForStatus(status: ActivationStatus): string {
   if (status === 'pending') return '/onboarding/activation'
   if (status === 'activation_paid') return '/onboarding/flats'
   return '/admin/dashboard'
+}
+
+export type SocietyAddonBillLine = {
+  addon: keyof PremiumAddonsPricingConfig
+  label: string
+  amountInr: number
+  billingNote?: string
+}
+
+export function calculateSocietyAddonMonthlyDues(
+  activeAddons: Array<keyof PremiumAddonsPricingConfig>,
+  config: PremiumAddonsPricingConfig = getPlatformPricing().premiumAddons
+): { lines: SocietyAddonBillLine[]; monthlyAddonTotalInr: number } {
+  const lines: SocietyAddonBillLine[] = activeAddons.flatMap((addon) => {
+    const amountInr = resolvePremiumAddonMonthlyFee(addon, config)
+    if (amountInr <= 0) return []
+
+    const labels: Record<keyof PremiumAddonsPricingConfig, string> = {
+      whatsapp: 'WhatsApp Automation',
+      voiceHelpdesk: 'AI Voice Ticketing & Smart Helpdesk',
+      elections: 'Encrypted Election Module'
+    }
+
+    return [
+      {
+        addon,
+        label: labels[addon],
+        amountInr,
+        billingNote:
+          addon === 'elections' && config.elections.billingMode === 'per_event'
+            ? 'Billed per election event'
+            : undefined
+      }
+    ]
+  })
+
+  return {
+    lines,
+    monthlyAddonTotalInr: lines.reduce((sum, line) => sum + line.amountInr, 0)
+  }
+}
+
+export function calculateWhatsAppMonthlyBill(messageCount: number) {
+  const config = getPlatformPricing().premiumAddons.whatsapp
+  const base = config.baseMonthlyPriceInr
+  const overage = calculateWhatsAppOverageCost(messageCount, config)
+  return {
+    baseMonthlyPriceInr: base,
+    ...overage,
+    totalInr: base + overage.overageCostInr
+  }
 }

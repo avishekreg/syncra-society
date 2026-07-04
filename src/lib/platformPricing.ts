@@ -1,56 +1,71 @@
-export type PricingTierId = 'tier1' | 'tier2' | 'tier3'
+import {
+  DEFAULT_PLATFORM_PRICING,
+  DEFAULT_PREMIUM_ADDONS,
+  PLATFORM_PRICING_SYSTEM_CONFIG_KEY,
+  type ElectionAddonPricing,
+  type ElectionBillingMode,
+  type PlatformPricingConfig,
+  type PlatformTierConfig,
+  type PremiumAddonsPricingConfig,
+  type PricingTierId,
+  type VoiceHelpdeskAddonPricing,
+  type WhatsAppAddonPricing
+} from '../../types/platform-pricing'
 
-export type PlatformTierConfig = {
-  id: PricingTierId
-  label: string
-  price: number
-  description: string
-  headline: string
-  features: string[]
+export type {
+  ElectionAddonPricing,
+  ElectionBillingMode,
+  PlatformPricingConfig,
+  PlatformTierConfig,
+  PremiumAddonsPricingConfig,
+  PricingTierId,
+  VoiceHelpdeskAddonPricing,
+  WhatsAppAddonPricing
 }
 
-export type PlatformPricingConfig = {
-  activationFeeInr: number
-  tiers: PlatformTierConfig[]
-  updatedAt?: string
-}
+export { DEFAULT_PLATFORM_PRICING, DEFAULT_PREMIUM_ADDONS, PLATFORM_PRICING_SYSTEM_CONFIG_KEY }
 
 export const PRICING_STORAGE_KEY = 'syncra-pricing-config'
 export const PRICING_UPDATED_EVENT = 'syncra-pricing-updated'
 
-export const DEFAULT_PLATFORM_PRICING: PlatformPricingConfig = {
-  activationFeeInr: 2499,
-  tiers: [
-    {
-      id: 'tier1',
-      label: 'Tier 1',
-      price: 149,
-      headline: 'Small Societies',
-      description: 'Basic society operations for up to 50 flats.',
-      features: ['Resident dashboard', 'Notice Board', 'Syncra Gate Visitor Log', 'Basic ledger view']
+function normalizePremiumAddons(raw: Partial<PremiumAddonsPricingConfig> | null | undefined): PremiumAddonsPricingConfig {
+  const base = DEFAULT_PREMIUM_ADDONS
+  const whatsapp = raw?.whatsapp
+  const voiceHelpdesk = raw?.voiceHelpdesk
+  const elections = raw?.elections
+
+  const billingMode: ElectionBillingMode =
+    elections?.billingMode === 'per_event' ? 'per_event' : 'monthly'
+
+  return {
+    whatsapp: {
+      baseMonthlyPriceInr: Number(whatsapp?.baseMonthlyPriceInr ?? base.whatsapp.baseMonthlyPriceInr),
+      includedMessagesPerMonth: Number(
+        whatsapp?.includedMessagesPerMonth ?? base.whatsapp.includedMessagesPerMonth
+      ),
+      overageBlockSize: Number(whatsapp?.overageBlockSize ?? base.whatsapp.overageBlockSize),
+      overageBlockPriceInr: Number(whatsapp?.overageBlockPriceInr ?? base.whatsapp.overageBlockPriceInr)
     },
-    {
-      id: 'tier2',
-      label: 'Tier 2',
-      price: 99,
-      headline: 'Medium Portfolio',
-      description: 'Extended management for 51–150 flats.',
-      features: ['Multi-block RWA', 'Contract tracking', 'Role management', 'Priority support']
+    voiceHelpdesk: {
+      monthlyFlatFeeInr: Number(voiceHelpdesk?.monthlyFlatFeeInr ?? base.voiceHelpdesk.monthlyFlatFeeInr)
     },
-    {
-      id: 'tier3',
-      label: 'Tier 3',
-      price: 75,
-      headline: 'Enterprise Townships',
-      description: 'Enterprise orchestration for large portfolios.',
-      features: ['Enterprise orchestration', 'Advanced analytics', 'Dedicated onboarding', 'SLA support']
+    elections: {
+      billingMode,
+      monthlyFeeInr: Number(elections?.monthlyFeeInr ?? base.elections.monthlyFeeInr),
+      perEventFeeInr: Number(elections?.perEventFeeInr ?? base.elections.perEventFeeInr)
     }
-  ]
+  }
 }
 
-function normalizePricing(raw: Partial<PlatformPricingConfig> | null | undefined): PlatformPricingConfig {
+export function normalizePricing(raw: Partial<PlatformPricingConfig> | null | undefined): PlatformPricingConfig {
   const base = DEFAULT_PLATFORM_PRICING
-  if (!raw) return { ...base, tiers: base.tiers.map((tier) => ({ ...tier })) }
+  if (!raw) {
+    return {
+      ...base,
+      tiers: base.tiers.map((tier) => ({ ...tier })),
+      premiumAddons: normalizePremiumAddons(null)
+    }
+  }
 
   const tierMap = new Map((raw.tiers ?? []).map((tier) => [tier.id, tier]))
   const tiers = base.tiers.map((defaults) => {
@@ -68,14 +83,17 @@ function normalizePricing(raw: Partial<PlatformPricingConfig> | null | undefined
   })
 
   return {
-    activationFeeInr: Number(raw.activationFeeInr ?? (raw as { activationFee?: number }).activationFee ?? base.activationFeeInr),
+    activationFeeInr: Number(
+      raw.activationFeeInr ?? (raw as { activationFee?: number }).activationFee ?? base.activationFeeInr
+    ),
     tiers,
+    premiumAddons: normalizePremiumAddons(raw.premiumAddons),
     updatedAt: raw.updatedAt
   }
 }
 
 export function getPlatformPricing(): PlatformPricingConfig {
-  if (typeof window === 'undefined') return DEFAULT_PLATFORM_PRICING
+  if (typeof window === 'undefined') return normalizePricing(null)
   const saved = localStorage.getItem(PRICING_STORAGE_KEY)
   if (!saved) return normalizePricing(null)
   try {
@@ -104,25 +122,133 @@ export function formatInr(amount: number) {
   return `₹${amount.toLocaleString('en-IN')}`
 }
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ''
+export function formatWhatsAppAddonPrice(config: WhatsAppAddonPricing) {
+  return `${formatInr(config.baseMonthlyPriceInr)}/month · ${config.includedMessagesPerMonth.toLocaleString('en-IN')} alerts included`
+}
 
-/** Load pricing from /api/platform/pricing, falling back to browser storage. */
-export async function fetchPlatformPricing(): Promise<PlatformPricingConfig> {
-  try {
-    const res = await fetch(`${API_BASE}/api/platform/pricing`)
-    if (!res.ok) throw new Error('Pricing API unavailable')
-    const data = (await res.json()) as PlatformPricingConfig
-    const normalized = normalizePricing(data)
-    localStorage.setItem(PRICING_STORAGE_KEY, JSON.stringify(normalized))
-    return normalized
-  } catch {
-    return getPlatformPricing()
+export function formatVoiceHelpdeskAddonPrice(config: VoiceHelpdeskAddonPricing) {
+  return `${formatInr(config.monthlyFlatFeeInr)}/month per society`
+}
+
+export function formatElectionAddonPrice(config: ElectionAddonPricing) {
+  if (config.billingMode === 'per_event') {
+    return `${formatInr(config.perEventFeeInr)}/election event`
+  }
+  return `${formatInr(config.monthlyFeeInr)}/month per society`
+}
+
+export function calculateWhatsAppOverageCost(messageCount: number, config: WhatsAppAddonPricing) {
+  const included = Math.max(0, config.includedMessagesPerMonth)
+  const blockSize = Math.max(1, config.overageBlockSize)
+  const extra = Math.max(0, messageCount - included)
+  const blocks = Math.ceil(extra / blockSize)
+  return {
+    messageCount,
+    includedMessages: included,
+    overageMessages: extra,
+    overageBlocks: blocks,
+    overageCostInr: blocks * Math.max(0, config.overageBlockPriceInr)
   }
 }
 
-/** Persist pricing to browser + API so checkout uses the same values. */
-export async function savePlatformPricing(config: PlatformPricingConfig): Promise<PlatformPricingConfig> {
+export function resolvePremiumAddonMonthlyFee(
+  addon: keyof PremiumAddonsPricingConfig,
+  config: PremiumAddonsPricingConfig = getPlatformPricing().premiumAddons
+): number {
+  if (addon === 'whatsapp') return config.whatsapp.baseMonthlyPriceInr
+  if (addon === 'voiceHelpdesk') return config.voiceHelpdesk.monthlyFlatFeeInr
+  return config.elections.billingMode === 'monthly' ? config.elections.monthlyFeeInr : 0
+}
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ''
+
+function getSuperAdminKey() {
+  return (
+    import.meta.env.VITE_SUPER_ADMIN_SECRET?.trim() ||
+    import.meta.env.NEXT_PUBLIC_SUPER_ADMIN_SECRET?.trim() ||
+    ''
+  )
+}
+
+/** Mirror pricing JSON to Supabase system_configs when admin API is reachable. */
+export async function syncPlatformPricingToSystemConfigs(
+  config: PlatformPricingConfig
+): Promise<boolean> {
+  const adminKey = getSuperAdminKey()
+  if (!adminKey) return false
+
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/config`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-super-admin-key': adminKey
+      },
+      body: JSON.stringify({
+        key: PLATFORM_PRICING_SYSTEM_CONFIG_KEY,
+        value: JSON.stringify(normalizePricing(config)),
+        description: 'SaaS tier and premium add-on pricing engine'
+      })
+    })
+    return res.ok
+  } catch {
+    return false
+  }
+}
+
+/** Load pricing from system_configs via admin API (fallback when local cache is empty). */
+export async function fetchPlatformPricingFromSystemConfigs(): Promise<PlatformPricingConfig | null> {
+  const adminKey = getSuperAdminKey()
+  if (!adminKey) return null
+
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/config`, {
+      headers: { 'x-super-admin-key': adminKey }
+    })
+    if (!res.ok) return null
+    const rows = (await res.json()) as Array<{ key: string; value: string }>
+    const row = rows.find((item) => item.key === PLATFORM_PRICING_SYSTEM_CONFIG_KEY)
+    if (!row?.value) return null
+    return normalizePricing(JSON.parse(row.value) as PlatformPricingConfig)
+  } catch {
+    return null
+  }
+}
+
+/** Load pricing from /api/platform/pricing, system_configs, then browser storage. */
+export async function fetchPlatformPricing(): Promise<PlatformPricingConfig> {
+  try {
+    const res = await fetch(`${API_BASE}/api/platform/pricing`)
+    if (res.ok) {
+      const data = normalizePricing((await res.json()) as PlatformPricingConfig)
+      localStorage.setItem(PRICING_STORAGE_KEY, JSON.stringify(data))
+      return data
+    }
+  } catch {
+    // fall through
+  }
+
+  const local = getPlatformPricing()
+  const hasLocalOverride = Boolean(localStorage.getItem(PRICING_STORAGE_KEY))
+  if (hasLocalOverride) return local
+
+  const remote = await fetchPlatformPricingFromSystemConfigs()
+  if (remote) {
+    localStorage.setItem(PRICING_STORAGE_KEY, JSON.stringify(remote))
+    return remote
+  }
+
+  return local
+}
+
+/** Persist pricing to browser, platform API, and system_configs. */
+export async function savePlatformPricing(
+  config: PlatformPricingConfig
+): Promise<{ saved: PlatformPricingConfig; remoteSynced: boolean }> {
   const local = savePlatformPricingLocal(config)
+  let saved = local
+  let remoteSynced = false
+
   try {
     const res = await fetch(`${API_BASE}/api/platform/pricing`, {
       method: 'PUT',
@@ -130,13 +256,17 @@ export async function savePlatformPricing(config: PlatformPricingConfig): Promis
       body: JSON.stringify(local)
     })
     if (res.ok) {
-      const data = normalizePricing((await res.json()) as PlatformPricingConfig)
-      localStorage.setItem(PRICING_STORAGE_KEY, JSON.stringify(data))
-      window.dispatchEvent(new CustomEvent(PRICING_UPDATED_EVENT, { detail: data }))
-      return data
+      saved = normalizePricing((await res.json()) as PlatformPricingConfig)
+      localStorage.setItem(PRICING_STORAGE_KEY, JSON.stringify(saved))
+      window.dispatchEvent(new CustomEvent(PRICING_UPDATED_EVENT, { detail: saved }))
     }
   } catch {
-    // API offline — local save still applies to marketing pages.
+    // API offline — local save still applies.
   }
-  return local
+
+  if (await syncPlatformPricingToSystemConfigs(saved)) {
+    remoteSynced = true
+  }
+
+  return { saved, remoteSynced }
 }

@@ -148,7 +148,7 @@ export default function AdminConfigPage() {
       {status && <div className="syncra-panel mb-8 px-4 py-3 text-sm text-neutral-600">{status}</div>}
 
       <section className="syncra-panel overflow-hidden">
-        <div className="border-b border-neutral-200 px-6 py-4">
+        <div className="border-b border-neutral-200 px-4 py-4 sm:px-6">
           <h2 className="text-sm font-semibold text-neutral-900">System configuration registry</h2>
           <p className="text-sm text-neutral-500">Authoritative runtime parameters stored in system_configs</p>
         </div>
@@ -213,7 +213,7 @@ export default function AdminConfigPage() {
       </section>
 
       <section className="syncra-panel mt-8 overflow-hidden">
-        <div className="border-b border-neutral-200 px-6 py-4">
+        <div className="border-b border-neutral-200 px-4 py-4 sm:px-6">
           <h2 className="text-sm font-semibold text-neutral-900">Society premium entitlements</h2>
           <p className="text-sm text-neutral-500">Toggle feature modules per society — controls 403 gating on API routes</p>
         </div>

@@ -11,7 +11,7 @@ import {
 } from '../../types/platformConfig'
 
 const saveBtn =
-  'rounded-xl bg-syncra-blue px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0047b3]'
+  'inline-flex min-h-11 items-center justify-center rounded-xl bg-syncra-blue px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0047b3]'
 
 function CollapsibleSection({
   title,
@@ -199,7 +199,7 @@ export default function MasterSystemConfig() {
             placeholder="hf_..."
             type="password"
           />
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <SelectField
               label="Voice / Complaints model"
               value={config.aiUtilities.voiceModel}
@@ -247,7 +247,7 @@ export default function MasterSystemConfig() {
           subtitle="Razorpay settlement keys and verified webhook signing secrets"
           defaultOpen
         >
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <TextField
               label="Razorpay Key ID"
               value={gateways.razorpayKeyId}
@@ -266,7 +266,7 @@ export default function MasterSystemConfig() {
               type="password"
             />
           </div>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <TextField
               label="RAZORPAY_WEBHOOK_SECRET"
               value={gateways.razorpayWebhookSecret}
@@ -310,7 +310,7 @@ export default function MasterSystemConfig() {
           title="Global Sidebar Modules"
           subtitle="Platform-wide navigation toggles combined with per-society gating in Societies Manager"
         >
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {sidebarKeys.map((key) => {
               const meta = SIDEBAR_MODULE_LABELS[key]
               return (
@@ -335,7 +335,7 @@ export default function MasterSystemConfig() {
               updateConfig({ surveyEngine: { ...config.surveyEngine, enabled } })
             }
           />
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <TextField
               label="Max questions"
               value={String(config.surveyEngine.maxQuestionsPerSurvey)}
@@ -384,7 +384,7 @@ export default function MasterSystemConfig() {
               updateConfig({ electionModule: { ...config.electionModule, enabled } })
             }
           />
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <TextField
               label="Max positions per election"
               value={String(config.electionModule.maxPositionsPerElection)}

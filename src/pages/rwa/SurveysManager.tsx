@@ -84,7 +84,7 @@ export default function SurveysManager() {
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} className={ui.input} rows={2} placeholder="Description" required />
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
               <p className={ui.label}>
                 Questions ({questions.length}/{surveyConfig.maxQuestionsPerSurvey} max ·{' '}
                 {surveyConfig.maxOptionsPerQuestion} options each)

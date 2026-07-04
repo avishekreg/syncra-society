@@ -22,7 +22,7 @@ export default function OutstandingRevenueMatrix({ baseOutstanding, lateFee, acc
         <h2 className={`mt-1 ${ui.heading}`}>Forensic dues breakdown</h2>
       </header>
 
-      <div className="grid flex-1 grid-cols-2 gap-3">
+      <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2">
         {[
           ['Base Principal', baseOutstanding],
           ['Late Fee', lateFee],

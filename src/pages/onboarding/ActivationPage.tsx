@@ -139,7 +139,7 @@ export default function ActivationPage() {
 
           <div className="rounded-2xl border border-syncra-accent/30 bg-cyan-50 px-5 py-4">
             <p className="text-sm font-semibold text-syncra-blue">Activation fee (one-time)</p>
-            <p className="mt-2 text-3xl font-semibold text-syncra-primary">
+            <p className="mt-2 text-2xl font-semibold text-syncra-primary sm:text-3xl">
               ₹{activationFeeInr.toLocaleString('en-IN')}
             </p>
             <p className={`mt-2 text-sm ${ui.body}`}>

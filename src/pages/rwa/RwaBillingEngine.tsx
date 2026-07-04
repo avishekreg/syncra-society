@@ -47,7 +47,7 @@ function getStorageKey(societyId: string) {
   return `syncra-billing-engine-${societyId}`
 }
 
-const saveBtn = 'rounded-xl bg-syncra-blue px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0047b3]'
+const saveBtn = 'inline-flex min-h-11 items-center justify-center rounded-xl bg-syncra-blue px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0047b3]'
 
 export default function RwaBillingEngine() {
   const { currentSocietyId } = useAuth()
@@ -155,7 +155,7 @@ export default function RwaBillingEngine() {
       </div>
 
       <form onSubmit={handleSave} className="mt-8 space-y-8">
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className={ui.innerItem}>
             <p className="text-lg font-semibold text-syncra-primary">Billing model</p>
             <div className="mt-5 space-y-4">
@@ -261,7 +261,7 @@ export default function RwaBillingEngine() {
                       Active
                     </label>
                   </div>
-                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <label className="space-y-2">
                       <span className="text-xs uppercase tracking-[0.25em] text-slate-500">Due window</span>
                       <input
@@ -295,7 +295,7 @@ export default function RwaBillingEngine() {
         </div>
 
         <div className={ui.innerItem}>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-lg font-semibold text-syncra-primary">Create split cost request</p>
               <p className={`mt-2 ${ui.body}`}>Raise one-off or ad-hoc maintenance cost requests for shared approval.</p>
@@ -305,7 +305,7 @@ export default function RwaBillingEngine() {
             </button>
           </div>
 
-          <div className="mt-6 grid gap-4 lg:grid-cols-3">
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <label className="space-y-2">
               <span className={ui.label}>Request title</span>
               <input value={requestTitle} onChange={(event) => setRequestTitle(event.target.value)} className={ui.input} placeholder="Title for split cost" />
@@ -325,7 +325,7 @@ export default function RwaBillingEngine() {
             </label>
           </div>
 
-          <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
             <label className="space-y-2">
               <span className={ui.label}>Due date</span>
               <input type="date" value={requestDueDate} onChange={(event) => setRequestDueDate(event.target.value)} className={ui.input} />
@@ -365,7 +365,7 @@ export default function RwaBillingEngine() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <button type="submit" className={saveBtn}>
             Save Billing Configuration
           </button>

@@ -70,7 +70,7 @@ export default function ResidentElectionsPage() {
         <section key={election.id} className={ui.card}>
           <h3 className="text-lg font-semibold text-syncra-primary">{election.title}</h3>
           <p className={`mt-2 ${ui.body}`}>{election.description}</p>
-          <div className="mt-6 grid gap-6 lg:grid-cols-2">
+          <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
             {election.positions.map((position) => {
               const voted = votedMap[election.id]?.[position.id]
               return (

@@ -13,14 +13,72 @@ export type PlatformTierConfig = {
 export type PlatformPricingConfig = {
   activationFeeInr: number
   tiers: PlatformTierConfig[]
+  premiumAddons?: PremiumAddonsPricingConfig
   updatedAt?: string
+}
+
+export type PremiumAddonsPricingConfig = {
+  whatsapp: {
+    baseMonthlyPriceInr: number
+    includedMessagesPerMonth: number
+    overageBlockSize: number
+    overageBlockPriceInr: number
+  }
+  voiceHelpdesk: {
+    monthlyFlatFeeInr: number
+  }
+  elections: {
+    billingMode: 'monthly' | 'per_event'
+    monthlyFeeInr: number
+    perEventFeeInr: number
+  }
+}
+
+const DEFAULT_PREMIUM_ADDONS: PremiumAddonsPricingConfig = {
+  whatsapp: {
+    baseMonthlyPriceInr: 499,
+    includedMessagesPerMonth: 3000,
+    overageBlockSize: 1000,
+    overageBlockPriceInr: 199
+  },
+  voiceHelpdesk: { monthlyFlatFeeInr: 799 },
+  elections: { billingMode: 'monthly', monthlyFeeInr: 599, perEventFeeInr: 2499 }
 }
 
 const STORE_KEY = 'platform:pricing'
 
+function normalizePremiumAddons(raw: PremiumAddonsPricingConfig | undefined): PremiumAddonsPricingConfig {
+  const base = DEFAULT_PREMIUM_ADDONS
+  if (!raw) return { ...base, whatsapp: { ...base.whatsapp }, elections: { ...base.elections } }
+  return {
+    whatsapp: {
+      baseMonthlyPriceInr: Number(raw.whatsapp?.baseMonthlyPriceInr ?? base.whatsapp.baseMonthlyPriceInr),
+      includedMessagesPerMonth: Number(
+        raw.whatsapp?.includedMessagesPerMonth ?? base.whatsapp.includedMessagesPerMonth
+      ),
+      overageBlockSize: Number(raw.whatsapp?.overageBlockSize ?? base.whatsapp.overageBlockSize),
+      overageBlockPriceInr: Number(raw.whatsapp?.overageBlockPriceInr ?? base.whatsapp.overageBlockPriceInr)
+    },
+    voiceHelpdesk: {
+      monthlyFlatFeeInr: Number(raw.voiceHelpdesk?.monthlyFlatFeeInr ?? base.voiceHelpdesk.monthlyFlatFeeInr)
+    },
+    elections: {
+      billingMode: raw.elections?.billingMode === 'per_event' ? 'per_event' : 'monthly',
+      monthlyFeeInr: Number(raw.elections?.monthlyFeeInr ?? base.elections.monthlyFeeInr),
+      perEventFeeInr: Number(raw.elections?.perEventFeeInr ?? base.elections.perEventFeeInr)
+    }
+  }
+}
+
 function normalize(input: Partial<PlatformPricingConfig> | null | undefined): PlatformPricingConfig {
   const base = defaultPricing as PlatformPricingConfig
-  if (!input) return { ...base, tiers: base.tiers.map((t) => ({ ...t })) }
+  if (!input) {
+    return {
+      ...base,
+      tiers: base.tiers.map((t) => ({ ...t })),
+      premiumAddons: normalizePremiumAddons(undefined)
+    }
+  }
 
   const tierMap = new Map((input.tiers ?? []).map((tier) => [tier.id, tier]))
   return {
@@ -34,6 +92,7 @@ function normalize(input: Partial<PlatformPricingConfig> | null | undefined): Pl
         price: Number(saved?.price ?? defaults.price)
       }
     }),
+    premiumAddons: normalizePremiumAddons(input.premiumAddons),
     updatedAt: input.updatedAt
   }
 }

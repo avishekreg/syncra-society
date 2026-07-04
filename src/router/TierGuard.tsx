@@ -34,10 +34,10 @@ export default function TierGuard({
   if (currentRank < requiredRank) {
     return (
       <div className={ui.page}>
-        <div className="mx-auto max-w-3xl px-6 py-24">
+        <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-24">
           <div className={ui.card}>
             <p className={ui.eyebrow}>Access restricted</p>
-            <h1 className="mt-4 text-4xl font-semibold text-syncra-primary">Upgrade your society plan</h1>
+            <h1 className="mt-4 text-2xl font-semibold text-syncra-primary sm:text-3xl md:text-4xl">Upgrade your society plan</h1>
             <p className={`mt-4 text-lg leading-relaxed ${ui.body}`}>
               This feature requires {requiredTier === 'tier2' ? 'Tier 2' : 'Tier 3'} access. Contact your society administrator or review pricing to upgrade your subscription.
             </p>

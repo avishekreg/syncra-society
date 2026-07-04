@@ -114,12 +114,12 @@ export default function NoticesPage() {
         </section>
 
         <section className="syncra-panel overflow-hidden">
-          <div className="border-b border-neutral-200 px-6 py-4">
+          <div className="border-b border-neutral-200 px-4 py-4 sm:px-6">
             <h2 className="text-sm font-semibold text-neutral-900">Active announcements</h2>
             <p className="text-sm text-neutral-500">{notices.length} notices on record</p>
           </div>
           {notices.length === 0 ? (
-            <p className="px-6 py-12 text-sm text-neutral-500">No announcements published yet.</p>
+            <p className="px-4 py-10 sm:px-6 sm:py-12 text-sm text-neutral-500">No announcements published yet.</p>
           ) : (
             <Table>
               <TableHeader>

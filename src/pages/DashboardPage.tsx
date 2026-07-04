@@ -55,7 +55,7 @@ export default function DashboardPage() {
         description="Portfolio metrics across society records, resident communications, gatekeeper activity, and payment operations."
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => {
           const Icon = stat.icon
           return (
@@ -64,7 +64,7 @@ export default function DashboardPage() {
               to={stat.href}
               className="syncra-panel group p-6 transition-colors hover:border-neutral-300"
             >
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <Icon className="h-4 w-4 text-neutral-400" strokeWidth={1.5} />
                 <ArrowUpRight className="h-4 w-4 text-neutral-300 opacity-0 transition group-hover:opacity-100" />
               </div>

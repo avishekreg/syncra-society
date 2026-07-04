@@ -14,7 +14,8 @@ import {
 import {
   migrateLegacyRazorpayKeys,
   syncInfrastructureFromPlatformConfig,
-  writeSystemConfigMirror
+  writeSystemConfigMirror,
+  SYSTEM_CONFIG_MIRROR_EVENT
 } from '../lib/systemConfigSync'
 import type { PlatformConfig, SidebarModuleKey, SocietyAddonKey, SocietyGatewayConfig } from '../types/platformConfig'
 
@@ -75,13 +76,19 @@ export function PlatformConfigProvider({ children }: { children: React.ReactNode
       else refresh()
     }
 
+    const onMirror = () => {
+      refresh()
+    }
+
     window.addEventListener('storage', onStorage)
     window.addEventListener(PLATFORM_CONFIG_CHANGED_EVENT, onCustom)
+    window.addEventListener(SYSTEM_CONFIG_MIRROR_EVENT, onMirror)
 
     return () => {
       active = false
       window.removeEventListener('storage', onStorage)
       window.removeEventListener(PLATFORM_CONFIG_CHANGED_EVENT, onCustom)
+      window.removeEventListener(SYSTEM_CONFIG_MIRROR_EVENT, onMirror)
     }
   }, [refresh])
 

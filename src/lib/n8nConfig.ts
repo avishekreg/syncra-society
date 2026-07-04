@@ -1,3 +1,4 @@
+import { getMirroredSystemConfig } from './systemConfigSync'
 import { getPlatformConfig, getSocietyGatewayConfig } from './platformConfig'
 import { N8N_PRODUCTION_WEBHOOK_URL } from '../../lib/n8n-config'
 
@@ -32,7 +33,11 @@ export function resolveTwilioSenderPhone(societyId?: string | null) {
 }
 
 export function resolveHuggingFaceToken() {
-  return getPlatformConfig().aiUtilities.huggingFaceToken?.trim() || ''
+  return (
+    getPlatformConfig().aiUtilities.huggingFaceToken?.trim() ||
+    getMirroredSystemConfig('HUGGING_FACE_API_TOKEN')?.trim() ||
+    ''
+  )
 }
 
 export function resolveVoiceModel() {

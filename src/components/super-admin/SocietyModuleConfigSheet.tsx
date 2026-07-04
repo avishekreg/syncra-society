@@ -20,7 +20,7 @@ type Props = {
 }
 
 const saveBtn =
-  'rounded-xl bg-syncra-blue px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0047b3]'
+  'inline-flex min-h-11 items-center justify-center rounded-xl bg-syncra-blue px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0047b3]'
 
 function ToggleRow({
   label,
@@ -109,7 +109,7 @@ export default function SocietyModuleConfigSheet({ society, open, onClose }: Pro
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="ml-auto flex h-full w-full max-w-lg flex-col border-l border-slate-200 bg-white shadow-card-hover"
+        className="ml-auto flex h-full w-full max-w-full flex-col sm:max-w-lg border-l border-slate-200 bg-white shadow-card-hover"
         onClick={(event) => event.stopPropagation()}
       >
         <header className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5">
@@ -128,7 +128,7 @@ export default function SocietyModuleConfigSheet({ society, open, onClose }: Pro
           </button>
         </header>
 
-        <form onSubmit={handleSave} className="flex flex-1 flex-col overflow-y-auto px-6 py-5">
+        <form onSubmit={handleSave} className="flex flex-1 flex-col overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
           <div className="space-y-6">
             <section>
               <h3 className="text-sm font-semibold text-syncra-primary">Feature gating</h3>

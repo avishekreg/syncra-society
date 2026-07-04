@@ -103,7 +103,7 @@ export default function ElectionsManager() {
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} className={ui.input} rows={2} placeholder="Description" required />
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
               <p className={ui.label}>
                 Contested positions ({positions.length}/{electionConfig.maxPositionsPerElection} max ·{' '}
                 {electionConfig.maxCandidatesPerPosition} candidates each)
@@ -182,7 +182,7 @@ export default function ElectionsManager() {
                   </button>
                 </div>
 
-                <div className="mt-4 grid gap-4 md:grid-cols-2">
+                <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                   {election.positions.map((position) => (
                     <div key={position.id} className="rounded-xl border border-slate-200 bg-white p-4">
                       <p className="text-sm font-semibold text-syncra-primary">{position.title}</p>

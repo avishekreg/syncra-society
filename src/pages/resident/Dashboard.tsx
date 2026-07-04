@@ -156,7 +156,7 @@ export default function ResidentDashboard() {
       {speedDialOpen && (
         <div className={ui.overlay}>
           <div className={ui.modal}>
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-syncra-action-alt">
                   Emergency Speed Dial
@@ -167,7 +167,7 @@ export default function ResidentDashboard() {
                 Close
               </button>
             </div>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {emergencyContacts.map((contact) => (
                 <div key={contact.label} className={ui.innerItem}>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
@@ -201,7 +201,7 @@ export default function ResidentDashboard() {
             <ul className="space-y-3">
               {myLedgerEntries.map((e) => (
                 <li key={e.id} className={ui.innerItem}>
-                  <div className="flex items-center justify-between gap-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                     <div>
                       <div className="font-medium text-slate-800">{e.description}</div>
                       <div className="mt-0.5 text-sm text-slate-500">{e.date}</div>

@@ -83,7 +83,7 @@ export default function ContractsList({ embedded = false }: Props) {
         />
         {errors.vendor_name && <p className="text-xs text-syncra-action-alt">{errors.vendor_name.message}</p>}
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <input type="date" {...register('start_date')} className={ui.input} />
             {errors.start_date && <p className="mt-1 text-xs text-syncra-action-alt">{errors.start_date.message}</p>}

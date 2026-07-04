@@ -83,16 +83,16 @@ export default function SocietyRecordsPage() {
         </section>
 
         <section className="syncra-panel overflow-hidden">
-          <div className="border-b border-neutral-200 px-6 py-4">
+          <div className="border-b border-neutral-200 px-4 py-4 sm:px-6">
             <h2 className="text-sm font-semibold text-neutral-900">Society records</h2>
             <p className="text-sm text-neutral-500">{societies.length} societies under management</p>
           </div>
           <div className="divide-y divide-neutral-100">
             {societies.length === 0 ? (
-              <p className="px-6 py-10 text-sm text-neutral-500">No societies registered.</p>
+              <p className="px-4 py-8 sm:px-6 sm:py-10 text-sm text-neutral-500">No societies registered.</p>
             ) : (
               societies.map((society) => (
-                <div key={society.id} className="flex flex-wrap items-start justify-between gap-4 px-6 py-5">
+                <div key={society.id} className="flex flex-wrap items-start justify-between gap-4 px-4 py-4 sm:px-6 sm:py-5">
                   <div>
                     <p className="font-medium text-neutral-900">{society.name}</p>
                     <p className="mt-1 text-sm text-neutral-500">{society.address ?? 'Address pending'}</p>
@@ -121,7 +121,7 @@ export default function SocietyRecordsPage() {
       </div>
 
       <section className="syncra-panel mt-8 overflow-hidden">
-        <div className="border-b border-neutral-200 px-6 py-4">
+        <div className="border-b border-neutral-200 px-4 py-4 sm:px-6">
           <h2 className="text-sm font-semibold text-neutral-900">Flat master directory</h2>
           <p className="text-sm text-neutral-500">
             {flats.length} units indexed across {societies.length} societies

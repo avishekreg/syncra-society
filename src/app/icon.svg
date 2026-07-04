@@ -1,0 +1,19 @@
+<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="syncra-stroke" x1="6" y1="26" x2="26" y2="6" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00B4D8" />
+      <stop offset="0.55" stop-color="#0052CC" />
+      <stop offset="1" stop-color="#4338CA" />
+    </linearGradient>
+    <linearGradient id="syncra-fill" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FAFC" />
+      <stop offset="1" stop-color="#EEF2FF" />
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="8" fill="url(#syncra-fill)" />
+  <rect x="0.75" y="0.75" width="30.5" height="30.5" rx="7.25" stroke="url(#syncra-stroke)" stroke-opacity="0.18" stroke-width="1.5" />
+  <path d="M10 22.5V12.5L16 9.5L22 12.5V22.5" stroke="url(#syncra-stroke)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M13.5 22.5V15.2L16 13.9L18.5 15.2V22.5" stroke="url(#syncra-stroke)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M10 12.5L16 15.8L22 12.5" stroke="#0052CC" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.55" />
+  <circle cx="16" cy="18.8" r="1.35" fill="#0052CC" opacity="0.85" />
+</svg>

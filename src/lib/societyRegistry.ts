@@ -1,5 +1,7 @@
 /** Society join codes for resident self-registration. */
 
+import { DEMO_SOCIETY_ID, DEMO_SOCIETY_UUID } from '../config/devSeed'
+
 export type RegisteredSociety = {
   id: string
   name: string
@@ -31,8 +33,14 @@ export function generateJoinCode(name: string) {
 
 export function ensureSocietyJoinCode(societyId: string, societyName: string) {
   const map = loadJoinCodeMap()
+  const isDemo =
+    societyId === DEMO_SOCIETY_ID || societyId === DEMO_SOCIETY_UUID
   if (!map[societyId]) {
-    map[societyId] = societyId === 'syncra-windsor-castle' ? DEMO_JOIN_CODE : generateJoinCode(societyName)
+    map[societyId] = isDemo ? DEMO_JOIN_CODE : generateJoinCode(societyName)
+    saveJoinCodeMap(map)
+  }
+  if (isDemo && !map[DEMO_SOCIETY_UUID]) {
+    map[DEMO_SOCIETY_UUID] = map[societyId] ?? DEMO_JOIN_CODE
     saveJoinCodeMap(map)
   }
   return map[societyId]
@@ -42,10 +50,10 @@ export function listRegisteredSocieties(): RegisteredSociety[] {
   const map = loadJoinCodeMap()
   const societies: RegisteredSociety[] = [
     {
-      id: 'syncra-windsor-castle',
+      id: DEMO_SOCIETY_UUID,
       name: 'Syncra Windsor Castle',
       city: 'Bengaluru',
-      joinCode: map['syncra-windsor-castle'] ?? DEMO_JOIN_CODE
+      joinCode: map[DEMO_SOCIETY_UUID] ?? map[DEMO_SOCIETY_ID] ?? DEMO_JOIN_CODE
     }
   ]
 
@@ -64,8 +72,8 @@ export function listRegisteredSocieties(): RegisteredSociety[] {
     // ignore
   }
 
-  if (!map['syncra-windsor-castle']) {
-    map['syncra-windsor-castle'] = DEMO_JOIN_CODE
+  if (!map[DEMO_SOCIETY_UUID] && !map[DEMO_SOCIETY_ID]) {
+    map[DEMO_SOCIETY_UUID] = DEMO_JOIN_CODE
     saveJoinCodeMap(map)
   }
 

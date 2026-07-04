@@ -1,0 +1,23 @@
+{
+  "name": "Syncra Society",
+  "short_name": "Syncra",
+  "description": "Institutional housing society management platform",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#0052CC",
+  "background_color": "#F8FAFC",
+  "display": "standalone",
+  "start_url": "/"
+}

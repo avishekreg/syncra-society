@@ -9,7 +9,7 @@ type GatekeeperCredential = {
   issuedAt: string
 }
 
-const saveBtn = 'rounded-xl bg-syncra-blue py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0047b3]'
+const saveBtn = 'inline-flex min-h-11 items-center justify-center rounded-xl bg-syncra-blue py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0047b3]'
 
 export default function GatekeeperProvisioning() {
   const { currentSocietyId } = useAuth()
@@ -52,7 +52,7 @@ export default function GatekeeperProvisioning() {
       </div>
 
       <form onSubmit={handleProvision} className="mt-8 space-y-6">
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <label className="space-y-2">
             <span className={ui.label}>Gatekeeper name / shift</span>
             <input
@@ -90,7 +90,7 @@ export default function GatekeeperProvisioning() {
       {credential && (
         <div className={`mt-8 ${ui.innerItem}`}>
           <p className={ui.eyebrow}>Generated credentials</p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {[
               { label: 'Guard / Shift', value: credential.guard },
               { label: 'Location', value: credential.location },

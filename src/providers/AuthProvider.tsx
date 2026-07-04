@@ -19,9 +19,11 @@ import {
 import {
   clearAuthPersistence,
   hasSuperAdminSession,
+  isSupabaseSessionFresh,
   markSuperAdminSession,
   readAuthSnapshot,
   readPersistedSocietyId,
+  readSupabaseSessionFromStorage,
   saveAuthSnapshot,
   type AuthSnapshot
 } from '../lib/authSession'
@@ -248,6 +250,82 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     ]
   }
 
+  function buildUserFromSnapshot(snapshot: AuthSnapshot): User {
+    return {
+      id: snapshot.id,
+      email: snapshot.email,
+      roles: snapshot.roles,
+      tier: snapshot.tier,
+      role: snapshot.role,
+      flatNumber: snapshot.flatNumber ?? null,
+      user_metadata: { role: snapshot.role, tier: snapshot.tier },
+      app_metadata: {
+        provider: snapshot.kind === 'supabase' ? 'email' : snapshot.kind === 'demo' ? 'local' : 'local'
+      }
+    }
+  }
+
+  function restoreAuthSnapshotSession() {
+    const snapshot = readAuthSnapshot()
+    if (!snapshot) return false
+
+    const nextUser = buildUserFromSnapshot(snapshot)
+    setUser(nextUser)
+
+    if (snapshot.kind === 'super_admin') {
+      markSuperAdminSession(true)
+      setCurrentSocietyId(null)
+      setShowcaseData(null)
+      return true
+    }
+
+    if (snapshot.kind === 'demo') {
+      setCurrentSocietyId(readPersistedSocietyId())
+      setShowcaseData(demoShowcaseData)
+      return true
+    }
+
+    setCurrentSocietyId(readPersistedSocietyId())
+    return true
+  }
+
+  function restoreSupabaseSessionFromStorage() {
+    const stored = readSupabaseSessionFromStorage()
+    if (!isSupabaseSessionFresh(stored) || !stored?.user) return false
+
+    const sessionUser = stored.user
+    const isSuperAdmin = isSuperAdminEmail(sessionUser.email ?? '')
+    const roles = isSuperAdmin ? DEV_SUPER_ADMIN.roles : []
+    const metadataRole = sessionUser.user_metadata?.role
+    const resolvedRoles =
+      roles.length > 0
+        ? roles
+        : metadataRole === 'rwa_owner'
+          ? ['rwa_owner']
+          : metadataRole === 'rwa_accountant'
+            ? ['rwa_accountant']
+            : metadataRole === 'resident'
+              ? ['resident']
+              : readAuthSnapshot()?.roles ?? []
+
+    const nextUser = buildUser(
+      {
+        id: sessionUser.id,
+        email: sessionUser.email,
+        role: metadataRole,
+        user_metadata: sessionUser.user_metadata,
+        app_metadata: sessionUser.app_metadata
+      },
+      resolvedRoles
+    )
+
+    setUser(nextUser)
+    markSuperAdminSession(isSuperAdmin)
+    setCurrentSocietyId(readPersistedSocietyId())
+    persistAuthSession(nextUser, readPersistedSocietyId(), isSuperAdmin ? 'super_admin' : 'supabase')
+    return true
+  }
+
   function persistAuthSession(nextUser: User | null, societyId?: string | null, kind?: AuthSnapshot['kind']) {
     if (!nextUser) {
       clearAuthPersistence()
@@ -451,6 +529,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (active) setInitializing(false)
         return
       }
+      if (restoreAuthSnapshotSession()) {
+        // Keep initializing until Supabase confirms/refreshes the session in background.
+      } else if (restoreSupabaseSessionFromStorage()) {
+        // Instant hydration from sb-*-auth-token before async getSession().
+      }
 
       const { data } = await supabase.auth.getSession()
       if (!active) return
@@ -476,11 +559,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await resolveSocietyId(session.user.id, session.user.email ?? undefined)
         }
       } else if (!hasSuperAdminSession() && !localStorage.getItem(DEMO_AUTH_KEY)) {
-        const snapshot = readAuthSnapshot()
-        if (!snapshot) {
+        if (!readAuthSnapshot() && !readSupabaseSessionFromStorage()) {
           setUser(null)
           setCurrentSocietyId(null)
           setShowcaseData(null)
+        } else {
+          restoreAuthSnapshotSession() || restoreSupabaseSessionFromStorage()
         }
       }
 
@@ -520,6 +604,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       if (hasSuperAdminSession()) {
         restoreSuperAdminSession()
+        return
+      }
+
+      if (restoreAuthSnapshotSession() || restoreSupabaseSessionFromStorage()) {
         return
       }
 

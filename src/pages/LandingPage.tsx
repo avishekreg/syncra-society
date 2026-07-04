@@ -1,7 +1,16 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import SyncraBrandLogo from '../components/brand/SyncraBrandLogo'
+import HeroDashboardMockup from '../components/landing/HeroDashboardMockup'
+import SyncraPromiseSection from '../components/landing/SyncraPromiseSection'
 import { usePlatformPricing } from '../hooks/usePlatformPricing'
-import { formatInr } from '../lib/platformPricing'
+import {
+  formatElectionAddonPrice,
+  formatInr,
+  formatVoiceHelpdeskAddonPrice,
+  formatWhatsAppAddonPrice,
+  type PlatformPricingConfig
+} from '../lib/platformPricing'
 import { ui } from '../lib/ui'
 
 const landingFeatures = [
@@ -23,35 +32,41 @@ const landingFeatures = [
 ]
 
 type PremiumAddon = {
-  id: string
+  id: 'whatsapp' | 'voice-helpdesk' | 'elections'
   name: string
   description: string
   highlights: string[]
 }
 
-const premiumAddons: PremiumAddon[] = [
+const premiumAddonMeta: PremiumAddon[] = [
   {
     id: 'whatsapp',
     name: 'WhatsApp Automation',
     description:
       'Stack automated notice broadcasts and resident alerts on any base plan — fixed monthly add-on or bundled volume packs.',
-    highlights: ['n8n-powered notice relays', 'Opt-in resident contact routing', '3,000+ alerts / month tiers']
+    highlights: ['Syncra notice relays', 'Opt-in resident contact routing', 'Volume-tier alert packs']
   },
   {
     id: 'voice-helpdesk',
     name: 'AI Voice Ticketing & Smart Helpdesk',
     description:
-      'Speech-to-text complaint capture with Whisper, Llama auto-categorization, and a full resident ticket portal.',
-    highlights: ['MediaRecorder voice input', 'HF Whisper transcription', 'Smart severity triage']
+      'High-fidelity audio transcription with automated AI severity triage and a full resident ticket portal.',
+    highlights: ['Voice complaint capture', 'High-fidelity audio transcription', 'Automated AI severity triage']
   },
   {
     id: 'elections',
     name: 'Encrypted Election Module',
     description:
-      'Dynamic multi-position voting, encrypted ballots, and RWA election orchestration — activate per society via webhook.',
+      'Dynamic multi-position voting, encrypted ballots, and RWA election orchestration — activate per society on demand.',
     highlights: ['Multi-position ballots', 'Resident & RWA election views', 'Governance-grade audit trail']
   }
 ]
+
+function formatAddonPriceLabel(addonId: PremiumAddon['id'], pricing: PlatformPricingConfig) {
+  if (addonId === 'whatsapp') return formatWhatsAppAddonPrice(pricing.premiumAddons.whatsapp)
+  if (addonId === 'voice-helpdesk') return formatVoiceHelpdeskAddonPrice(pricing.premiumAddons.voiceHelpdesk)
+  return formatElectionAddonPrice(pricing.premiumAddons.elections)
+}
 
 function PricingFeature({ children }: { children: React.ReactNode }) {
   return (
@@ -75,52 +90,69 @@ export default function LandingPage() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(0,180,216,0.08),_transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(0,82,204,0.06),_transparent_24%)]" />
 
       <header className="relative z-20 border-b border-slate-200 bg-white/95 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-5">
-          <div>
-            <p className={ui.eyebrow}>Syncra Systems</p>
-            <h1 className="text-xl font-semibold tracking-[0.2em] text-syncra-primary">syncra-society</h1>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <Link to="/auth" className={ui.btnGhost}>
+        <div className="mx-auto flex min-h-14 max-w-7xl flex-col items-stretch justify-between gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-4 sm:px-6 sm:py-0">
+          <SyncraBrandLogo to="/" />
+          <div className="flex w-full flex-wrap items-stretch gap-3 sm:w-auto sm:items-center">
+            <Link to="/auth" className={`w-full sm:w-auto ${ui.btnGhost}`}>
               Login Now
             </Link>
-            <Link to="/auth/signup" className={ui.btnSecondary}>
+            <Link to="/auth/signup" className={`w-full sm:w-auto ${ui.btnSecondary}`}>
               Create Account
             </Link>
           </div>
         </div>
       </header>
 
-      <main className="relative z-10 mx-auto max-w-7xl space-y-24 px-6 py-24">
-        <section className="space-y-10 text-center">
-          <div className="mx-auto max-w-3xl space-y-6">
-            <p className={ui.eyebrow}>World-class society management</p>
-            <h2 className="text-5xl font-semibold leading-tight tracking-tight text-syncra-primary sm:text-6xl">
-              Ultra-premium governance for modern communities.
-            </h2>
-            <p className={`text-lg leading-relaxed ${ui.body}`}>
-              syncra-society from Syncra Systems unifies Multi-Tenant RWA, Ledgers, Notice Board, Contract
-              Tracking, and Syncra Gatekeeper into one elegant platform.
-            </p>
+      <main className="relative z-10 mx-auto max-w-7xl space-y-16 px-4 py-12 sm:space-y-24 sm:px-6 sm:py-16 md:py-24">
+        <section className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-14">
+          <div className="space-y-8 text-center lg:text-left">
+            <div className="mx-auto max-w-2xl space-y-6 lg:mx-0">
+              <p className={ui.eyebrow}>World-class society management</p>
+              <h2 className={`${ui.display} leading-[1.08]`}>
+                Ultra-premium governance for modern communities.
+              </h2>
+              <p className={`text-lg leading-relaxed ${ui.body}`}>
+                syncra-society from Syncra Systems unifies Multi-Tenant RWA, Ledgers, Notice Board, Contract
+                Tracking, and Syncra Gatekeeper into one elegant, privacy-first platform.
+              </p>
+            </div>
+
+            <div className="flex w-full flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center lg:justify-start">
+              <Link
+                to="/register"
+                className={`inline-flex w-full items-center justify-center sm:w-auto ${ui.btnPrimary} px-8 py-4 transition hover:-translate-y-0.5`}
+              >
+                Start Your Journey
+              </Link>
+              <a
+                href="#pricing"
+                className={`inline-flex w-full items-center justify-center sm:w-auto ${ui.btnSecondary} px-8 py-4`}
+              >
+                View Pricing
+              </a>
+            </div>
+
+            <div className="mx-auto flex max-w-md flex-wrap items-center justify-center gap-3 lg:mx-0 lg:justify-start">
+              {['No data selling', 'Zero ads', 'Encrypted by design'].map((badge) => (
+                <span
+                  key={badge}
+                  className="rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-600 shadow-sm"
+                >
+                  {badge}
+                </span>
+              ))}
+            </div>
           </div>
 
-          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row sm:justify-center">
-            <Link
-              to="/register"
-              className={`inline-flex items-center justify-center ${ui.btnPrimary} px-8 py-4 transition hover:-translate-y-0.5`}
-            >
-              Start Your Journey
-            </Link>
-            <a href="#pricing" className={`inline-flex items-center justify-center ${ui.btnSecondary} px-8 py-4`}>
-              View Pricing
-            </a>
-          </div>
+          <HeroDashboardMockup />
         </section>
+
+        <SyncraPromiseSection />
 
         <section className="space-y-12" id="features">
           <div className="mx-auto max-w-3xl space-y-6 text-center">
             <p className={ui.eyebrow}>Core Capabilities</p>
-            <h3 className="text-4xl font-semibold leading-tight text-syncra-primary">
+            <h3 className="text-2xl font-semibold leading-tight text-syncra-primary sm:text-3xl md:text-4xl">
               Everything your society needs, beautifully organized.
             </h3>
             <p className={`text-base leading-relaxed ${ui.body}`}>
@@ -150,7 +182,7 @@ export default function LandingPage() {
           <div className="space-y-10">
             <div className="mx-auto max-w-3xl space-y-4 text-center">
               <p className={ui.eyebrow}>Pricing tiers</p>
-              <h3 className="text-4xl font-semibold leading-tight text-syncra-primary">
+              <h3 className="text-2xl font-semibold leading-tight text-syncra-primary sm:text-3xl md:text-4xl">
                 Simple, premium, and transparent pricing.
               </h3>
               <p className="text-sm font-semibold uppercase tracking-[0.35em] text-syncra-action">
@@ -162,7 +194,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="grid gap-8 lg:grid-cols-3 lg:items-stretch">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 lg:items-stretch">
               {pricing.tiers.map((tier, index) => (
                 <article
                   key={tier.id}
@@ -196,22 +228,31 @@ export default function LandingPage() {
           <div className="space-y-8 rounded-3xl border border-slate-200 bg-syncra-surface-alt p-8 md:p-10">
             <div className="mx-auto max-w-3xl space-y-3 text-center">
               <p className={ui.eyebrowPrimary}>Stack on any base plan</p>
-              <h3 className="text-3xl font-semibold leading-tight text-syncra-primary">
+              <h3 className="text-xl font-semibold leading-tight text-syncra-primary sm:text-2xl md:text-3xl">
                 Premium AI & Communication Add-ons
               </h3>
               <p className={`text-base leading-relaxed ${ui.body}`}>
                 Modular automation modules societies can activate on top of Tier 1–3 — zero-touch enablement via
-                secure payment webhooks after checkout.
+                secure Syncra billing after checkout.
               </p>
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-3">
-              {premiumAddons.map((addon) => (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {premiumAddonMeta.map((addon) => (
                 <article
                   key={addon.id}
                   className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-card"
                 >
                   <h4 className="text-lg font-semibold text-syncra-primary">{addon.name}</h4>
+                  <p className="mt-3 text-2xl font-semibold tracking-tight text-syncra-blue">
+                    {formatAddonPriceLabel(addon.id, pricing)}
+                  </p>
+                  {addon.id === 'whatsapp' && (
+                    <p className="mt-1 text-xs text-slate-500">
+                      + {formatInr(pricing.premiumAddons.whatsapp.overageBlockPriceInr)} per additional{' '}
+                      {pricing.premiumAddons.whatsapp.overageBlockSize.toLocaleString('en-IN')} alerts
+                    </p>
+                  )}
                   <p className={`mt-3 flex-1 text-sm leading-relaxed ${ui.body}`}>{addon.description}</p>
                   <ul className="mt-5 space-y-2 border-t border-slate-100 pt-5">
                     {addon.highlights.map((item) => (

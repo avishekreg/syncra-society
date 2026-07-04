@@ -357,7 +357,7 @@ export default function RwaWorkspace() {
                 Add a single unit directly into the society mock layout state for President-level onboarding.
               </p>
             </header>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {(
                 [
                   { label: 'Block Name', value: blockName, setter: setBlockName, placeholder: 'e.g. Block A', type: 'text' },

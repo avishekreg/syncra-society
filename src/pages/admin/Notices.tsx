@@ -122,8 +122,8 @@ export default function AdminNotices() {
         ) : notices.length === 0 ? (
           <p className={ui.body}>No notices published yet. Use &ldquo;+ New Notice&rdquo; to broadcast your first announcement.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-sm">
+          <div className="w-full overflow-x-auto overscroll-x-contain [-webkit-overflow-scrolling:touch]">
+            <table className="min-w-[640px] w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
                   <th className="px-4 py-3 font-semibold">Title</th>

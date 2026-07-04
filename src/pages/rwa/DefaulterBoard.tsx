@@ -67,10 +67,10 @@ export default function DefaulterBoard() {
           No recorded maintenance defaulters yet. The society ledger is clean.
         </div>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {(defaulters || []).map((defaulter) => (
             <article key={defaulter.id} className={ui.innerItem}>
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                 <div>
                   <p className={ui.body}>Flat</p>
                   <p className="text-xl font-semibold text-syncra-primary">{defaulter.flat_number}</p>

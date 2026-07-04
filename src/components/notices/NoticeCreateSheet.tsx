@@ -53,7 +53,7 @@ export default function NoticeCreateSheet({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="ml-auto flex h-full w-full max-w-lg flex-col border-l border-slate-200 bg-white shadow-card-hover"
+        className="ml-auto flex h-full w-full max-w-full flex-col sm:max-w-lg border-l border-slate-200 bg-white shadow-card-hover"
         onClick={(event) => event.stopPropagation()}
       >
         <header className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5">
@@ -69,7 +69,7 @@ export default function NoticeCreateSheet({
           </button>
         </header>
 
-        <form onSubmit={onSubmit} className="flex flex-1 flex-col overflow-y-auto px-6 py-5">
+        <form onSubmit={onSubmit} className="flex flex-1 flex-col overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
           <div className="space-y-4">
             <label className="block">
               <span className={`mb-2 block ${ui.label}`}>Title</span>

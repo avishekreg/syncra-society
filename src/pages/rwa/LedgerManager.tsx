@@ -43,7 +43,7 @@ export default function LedgerManager({ embedded = false }: Props) {
     <div>
       {!embedded && <h2 className={`mb-4 ${ui.heading}`}>Add Ledger Entry</h2>}
       <form onSubmit={handleAdd} className="space-y-3">
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <select value={type} onChange={(e) => setType(e.target.value as 'credit' | 'debit')} className={ui.input}>
             <option value="credit">Credit</option>
             <option value="debit">Debit</option>
