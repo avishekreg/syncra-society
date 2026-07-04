@@ -87,6 +87,9 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
               <NavLink to="/resident/surveys" className={navLinkClass}>
                 Surveys
               </NavLink>
+              <NavLink to="/resident/gallery" className={navLinkClass}>
+                Photo Gallery
+              </NavLink>
               <NavLink to="/resident/elections" className={navLinkClass}>
                 Elections
               </NavLink>
@@ -108,6 +111,9 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
                   </NavLink>
                   <NavLink to="/rwa/surveys" className={navLinkClass}>
                     Surveys
+                  </NavLink>
+                  <NavLink to="/rwa/gallery" className={navLinkClass}>
+                    Gallery Management
                   </NavLink>
                   <NavLink to="/rwa/elections" className={navLinkClass}>
                     Elections
