@@ -1,6 +1,6 @@
-/** Production n8n webhook used for portal → automation relay (notices, auth emails, activity). */
-export const N8N_PRODUCTION_WEBHOOK_URL =
-  'https://avishekreg-syncra-society.hf.space/webhook/syncra-society'
+import { resolveClientN8nWebhookUrl } from './n8nConfig'
+
+export { N8N_PRODUCTION_WEBHOOK_URL } from './n8nConfig'
 
 export type N8nPortalEvent = {
   eventId: string
@@ -16,17 +16,19 @@ export type N8nPortalEvent = {
 }
 
 export async function dispatchToN8n(payload: N8nPortalEvent) {
+  const webhookUrl = resolveClientN8nWebhookUrl()
   try {
-    const res = await fetch(N8N_PRODUCTION_WEBHOOK_URL, {
+    const res = await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     })
-    return { ok: res.ok, status: res.status }
+    return { ok: res.ok, status: res.status, webhookUrl }
   } catch (err) {
     return {
       ok: false,
-      error: err instanceof Error ? err.message : 'n8n dispatch failed'
+      error: err instanceof Error ? err.message : 'n8n dispatch failed',
+      webhookUrl
     }
   }
 }

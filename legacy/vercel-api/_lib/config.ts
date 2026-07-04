@@ -1,16 +1,15 @@
+import { N8N_PRODUCTION_WEBHOOK_URL } from '../../../lib/n8n-config'
+
 function supabaseBaseUrl(): string {
   const raw = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL ?? ''
   return raw.replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '')
 }
 
-const PRODUCTION_N8N_WEBHOOK_URL =
-  'https://avishekreg-syncra-society.hf.space/webhook/syncra-society'
-
 function n8nWebhookUrl(): string {
   return (
     process.env.N8N_WEBHOOK_URL ??
     process.env.VITE_N8N_WEBHOOK_URL ??
-    PRODUCTION_N8N_WEBHOOK_URL
+    N8N_PRODUCTION_WEBHOOK_URL
   )
 }
 

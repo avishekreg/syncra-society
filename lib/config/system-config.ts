@@ -1,10 +1,9 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { PaymentGatewayProvider } from '@/types/database'
+import { N8N_PRODUCTION_WEBHOOK_URL } from '@/lib/n8n-config'
 
 const ENV_FALLBACKS: Record<string, string> = {
-  N8N_WEBHOOK_URL:
-    process.env.N8N_WEBHOOK_URL ??
-    'https://avishekreg-syncra-society.hf.space/webhook/syncra-society',
+  N8N_WEBHOOK_URL: process.env.N8N_WEBHOOK_URL ?? N8N_PRODUCTION_WEBHOOK_URL,
   TWILIO_DEFAULT_FROM: process.env.TWILIO_DEFAULT_FROM ?? '+14155238886',
   ACTIVE_PAYMENT_GATEWAY: process.env.ACTIVE_PAYMENT_GATEWAY ?? 'RAZORPAY',
   PAYMENT_GATEWAY_PUBLIC_KEY:

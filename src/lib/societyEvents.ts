@@ -26,19 +26,24 @@ export type DispatchSocietyEventInput = {
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ''
 
-/** Relay portal activity to /api/automation/events, with direct n8n fallback for live Vite deployments. */
+/** Relay portal activity directly to the production n8n webhook; API route is optional local fallback. */
 export async function dispatchSocietyEvent(input: DispatchSocietyEventInput) {
   const payload = {
     eventId: `evt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     type: input.type,
     societyId: input.societyId,
-    societyName: input.societyName,
+    societyName: input.societyName ?? 'Society',
     flatNumber: input.flatNumber ?? null,
     summary: input.summary,
     occurredAt: new Date().toISOString(),
     metadata: input.metadata ?? {},
     recipients: input.recipients
   }
+
+  const direct = await dispatchToN8n(payload)
+  if (direct.ok) return direct
+
+  if (!API_BASE) return direct
 
   try {
     const res = await fetch(`${API_BASE}/api/automation/events`, {
@@ -48,13 +53,10 @@ export async function dispatchSocietyEvent(input: DispatchSocietyEventInput) {
     })
     if (res.ok) return await res.json()
   } catch {
-    // fall through to direct n8n webhook
+    // keep direct n8n result
   }
 
-  return dispatchToN8n({
-    ...payload,
-    societyName: input.societyName ?? 'Society'
-  })
+  return direct
 }
 
 export function activityToEventType(entry: ActivityEntry): string {
