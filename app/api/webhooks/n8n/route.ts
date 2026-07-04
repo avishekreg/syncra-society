@@ -8,6 +8,7 @@ export async function GET() {
   return NextResponse.json({
     ok: true,
     webhook: webhook.replace(/\/webhook.*/, '/webhook/...'),
-    routes: ['/api/notices', '/api/visitors', '/api/payments', '/api/payments/webhook']
+    routes: ['/api/visitors', '/api/payments', '/api/payments/webhook'],
+    noticeDispatch: 'client-only via src/api/notices.ts'
   })
 }

@@ -54,16 +54,10 @@ export default function NoticesPage() {
     const data = await res.json()
     setLoading(false)
     if (!res.ok) {
-      setStatus(data.error ? JSON.stringify(data.error) : 'Broadcast failed to commit.')
+      setStatus(data.error ? JSON.stringify(data.error) : 'Failed to save notice.')
       return
     }
-    if (data.n8n?.skipped) {
-      setStatus('Notice archived. n8n relay deferred — WhatsApp Automation module inactive.')
-    } else if (data.n8n?.ok === false) {
-      setStatus(`Notice archived. Relay warning: ${data.n8n.error}`)
-    } else {
-      setStatus('Notice published and n8n dispatch triggered successfully.')
-    }
+    setStatus('Notice saved. WhatsApp delivery is handled by the society portal (RWA → Notices).')
     setTitle('')
     setContent('')
     void load()
@@ -74,7 +68,7 @@ export default function NoticesPage() {
       <PageHeader
         eyebrow="Live Notices Broadcast"
         title="Society announcements"
-        description="Compose authoritative notices and dispatch resident communications through the n8n WhatsApp automation bridge."
+        description="Archive society notices in Supabase. Resident WhatsApp broadcasts are sent from the RWA Notices portal."
       />
 
       {!whatsappEnabled && selectedSociety && (
@@ -84,7 +78,7 @@ export default function NoticesPage() {
       <div className="mt-8 grid gap-8 xl:grid-cols-[340px_1fr]">
         <section className="syncra-panel p-6">
           <h2 className="text-sm font-semibold text-neutral-900">Broadcast notice</h2>
-          <p className="mt-1 text-sm text-neutral-500">Persists to Supabase and triggers n8n on publish.</p>
+          <p className="mt-1 text-sm text-neutral-500">Persists to Supabase. Use the RWA Notices portal to trigger WhatsApp delivery.</p>
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div className="space-y-2">
               <Label htmlFor="society">Target society</Label>

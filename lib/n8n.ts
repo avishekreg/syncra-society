@@ -17,20 +17,6 @@ export async function dispatchN8nEvent(payload: N8nWebhookPayload) {
   return { ok: true as const }
 }
 
-export async function dispatchN8nBroadcast(phones: string[], payload: Omit<N8nWebhookPayload, 'phone_number'>) {
-  const unique = [...new Set(phones.filter(Boolean))]
-  if (unique.length === 0) {
-    await dispatchN8nEvent({ ...payload, phone_number: '' })
-    return
-  }
-  await Promise.all(unique.map((phone_number) => dispatchN8nEvent({ ...payload, phone_number })))
-}
-
-export function formatNoticeMessage(title: string, content: string, societyName?: string) {
-  const header = societyName ? `[${societyName}] ` : ''
-  return `${header}New Notice: ${title}\n\n${content}`
-}
-
 export function formatVisitorMessage(
   visitorName: string,
   purpose: string,
