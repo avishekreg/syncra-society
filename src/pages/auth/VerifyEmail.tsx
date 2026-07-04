@@ -84,9 +84,14 @@ export default function VerifyEmail() {
     setStatus(null)
     try {
       const result = await verifyEmailOtp(email.trim(), code.trim())
-      if (result.user?.email_confirmed_at) {
+      if (result.user?.email) {
         setStatus('Email verified. Finishing account setup…')
-        await completeSignupIfNeeded(result.user.id, result.user.email ?? email.trim())
+        if (result.user.id) {
+          await completeSignupIfNeeded(result.user.id, result.user.email ?? email.trim())
+        } else {
+          setStatus('Email verified successfully. Sign in to continue.')
+          navigate('/auth/signin')
+        }
       } else {
         setStatus('Verification accepted. Please sign in to continue.')
         navigate('/auth/signin')

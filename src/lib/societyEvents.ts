@@ -1,4 +1,5 @@
 import type { ActivityEntry } from './activityLog'
+import { dispatchToN8n } from './n8nClient'
 
 export type SocietyEventType =
   | 'notice.published'
@@ -25,28 +26,35 @@ export type DispatchSocietyEventInput = {
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ''
 
-/** Relay portal activity to /api/automation/events → n8n WhatsApp automation */
+/** Relay portal activity to /api/automation/events, with direct n8n fallback for live Vite deployments. */
 export async function dispatchSocietyEvent(input: DispatchSocietyEventInput) {
+  const payload = {
+    eventId: `evt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    type: input.type,
+    societyId: input.societyId,
+    societyName: input.societyName,
+    flatNumber: input.flatNumber ?? null,
+    summary: input.summary,
+    occurredAt: new Date().toISOString(),
+    metadata: input.metadata ?? {},
+    recipients: input.recipients
+  }
+
   try {
     const res = await fetch(`${API_BASE}/api/automation/events`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        eventId: `evt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-        type: input.type,
-        societyId: input.societyId,
-        societyName: input.societyName,
-        flatNumber: input.flatNumber ?? null,
-        summary: input.summary,
-        occurredAt: new Date().toISOString(),
-        metadata: input.metadata ?? {},
-        recipients: input.recipients
-      })
+      body: JSON.stringify(payload)
     })
-    return res.ok ? await res.json() : null
+    if (res.ok) return await res.json()
   } catch {
-    return null
+    // fall through to direct n8n webhook
   }
+
+  return dispatchToN8n({
+    ...payload,
+    societyName: input.societyName ?? 'Society'
+  })
 }
 
 export function activityToEventType(entry: ActivityEntry): string {

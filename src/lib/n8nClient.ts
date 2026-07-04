@@ -1,0 +1,79 @@
+/** Production n8n webhook used for portal → automation relay (notices, auth emails, activity). */
+export const N8N_PRODUCTION_WEBHOOK_URL =
+  'https://avishekreg-syncra-society.hf.space/webhook/syncra-society'
+
+export type N8nPortalEvent = {
+  eventId: string
+  type: string
+  societyId: string
+  societyName?: string
+  flatNumber?: string | null
+  summary: string
+  occurredAt: string
+  metadata?: Record<string, unknown>
+  recipients?: string[]
+  email?: string
+}
+
+export async function dispatchToN8n(payload: N8nPortalEvent) {
+  try {
+    const res = await fetch(N8N_PRODUCTION_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    return { ok: res.ok, status: res.status }
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : 'n8n dispatch failed'
+    }
+  }
+}
+
+export async function dispatchNoticePublished(input: {
+  societyId: string
+  societyName?: string
+  title: string
+  body: string
+  noticeId: string
+}) {
+  return dispatchToN8n({
+    eventId: `notice-${input.noticeId}`,
+    type: 'notice.published',
+    societyId: input.societyId,
+    societyName: input.societyName ?? 'Society',
+    flatNumber: null,
+    summary: `New notice: ${input.title}`,
+    occurredAt: new Date().toISOString(),
+    metadata: {
+      noticeId: input.noticeId,
+      title: input.title,
+      body: input.body
+    }
+  })
+}
+
+export async function dispatchEmailVerification(input: {
+  email: string
+  fullName?: string
+  code: string
+  verifyUrl: string
+}) {
+  return dispatchToN8n({
+    eventId: `verify-${Date.now()}`,
+    type: 'auth.email_verification',
+    societyId: 'system',
+    societyName: 'Syncra Society',
+    flatNumber: null,
+    email: input.email,
+    summary: `Verify your Syncra Society account (${input.fullName ?? input.email})`,
+    occurredAt: new Date().toISOString(),
+    metadata: {
+      email: input.email,
+      fullName: input.fullName ?? '',
+      code: input.code,
+      verifyUrl: input.verifyUrl
+    }
+  })
+}

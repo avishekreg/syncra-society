@@ -9,6 +9,11 @@ import {
   canAccessPortal,
   isEmailVerificationRequired,
   isEmailVerified,
+  isSupabaseEmailVerified,
+  issueEmailVerification,
+  loadPendingSignup,
+  markAppEmailVerified,
+  verifyAppEmailCode,
   verificationRedirectUrl
 } from '../lib/emailVerification'
 
@@ -450,6 +455,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (res.error) throw res.error
 
     if (isEmailVerificationRequired(normalizedEmail)) {
+      await issueEmailVerification({
+        email: normalizedEmail,
+        fullName: options?.fullName,
+        userId: res.data.user?.id ?? null
+      })
       await supabase.auth.signOut()
       setUser(null)
       setCurrentSocietyId(null)
@@ -469,44 +479,90 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!isEmailVerificationRequired(normalizedEmail)) {
       throw new Error('Email verification is not required for this account.')
     }
-    const { error } = await supabase.auth.resend({
-      type: 'signup',
+
+    const pending = loadPendingSignup()
+    await issueEmailVerification({
       email: normalizedEmail,
-      options: {
-        emailRedirectTo: verificationRedirectUrl()
-      }
+      fullName: pending?.fullName,
+      userId: null
     })
-    if (error) throw error
+
+    try {
+      await supabase.auth.resend({
+        type: 'signup',
+        email: normalizedEmail,
+        options: {
+          emailRedirectTo: verificationRedirectUrl()
+        }
+      })
+    } catch {
+      // Supabase confirm-email may be disabled; app-level code still sent via n8n.
+    }
   }
 
   async function verifyEmailOtp(email: string, token: string) {
     const normalizedEmail = email.trim().toLowerCase()
-    const attempts = [
-      () => supabase.auth.verifyOtp({ email: normalizedEmail, token, type: 'signup' }),
-      () => supabase.auth.verifyOtp({ email: normalizedEmail, token, type: 'email' })
-    ]
+    let verifiedViaApp = false
 
-    let lastError: Error | null = null
-    for (const attempt of attempts) {
-      const { data, error } = await attempt()
-      if (!error && data.user) {
-        if (!isEmailVerified(data.user)) {
-          throw new Error('Verification did not complete. Request a new code and try again.')
+    try {
+      verifyAppEmailCode(normalizedEmail, token)
+      verifiedViaApp = true
+    } catch (appError) {
+      const attempts = [
+        () => supabase.auth.verifyOtp({ email: normalizedEmail, token, type: 'signup' }),
+        () => supabase.auth.verifyOtp({ email: normalizedEmail, token, type: 'email' })
+      ]
+
+      let lastError = appError instanceof Error ? appError : new Error('Invalid verification code.')
+      for (const attempt of attempts) {
+        const { data, error } = await attempt()
+        if (!error && data.user) {
+          markAppEmailVerified(normalizedEmail)
+          verifiedViaApp = true
+          if (isSupabaseEmailVerified(data.user)) {
+            const roles =
+              data.user.user_metadata?.role === 'rwa_owner'
+                ? ['rwa_owner']
+                : data.user.user_metadata?.role === 'rwa_accountant'
+                  ? ['rwa_accountant']
+                  : ['resident']
+            setUser(buildUser(data.user, roles, 'tier1', null))
+            await resolveSocietyId(data.user.id, data.user.email ?? normalizedEmail)
+            return { user: data.user }
+          }
+          break
         }
-        const roles =
-          data.user.user_metadata?.role === 'rwa_owner'
-            ? ['rwa_owner']
-            : data.user.user_metadata?.role === 'rwa_accountant'
-              ? ['rwa_accountant']
-              : ['resident']
-        setUser(buildUser(data.user, roles, 'tier1', null))
-        await resolveSocietyId(data.user.id, data.user.email ?? normalizedEmail)
-        return { user: data.user }
+        lastError = error ?? lastError
       }
-      lastError = error ?? lastError
+
+      if (!verifiedViaApp) {
+        throw lastError
+      }
     }
 
-    throw new Error(lastError?.message ?? 'Invalid or expired verification code.')
+    markAppEmailVerified(normalizedEmail)
+
+    const { data } = await supabase.auth.getSession()
+    const sessionUser = data.session?.user
+    if (sessionUser && sessionUser.email?.toLowerCase() === normalizedEmail && isEmailVerified(sessionUser)) {
+      const roles =
+        sessionUser.user_metadata?.role === 'rwa_owner'
+          ? ['rwa_owner']
+          : sessionUser.user_metadata?.role === 'rwa_accountant'
+            ? ['rwa_accountant']
+            : ['resident']
+      setUser(buildUser(sessionUser, roles, 'tier1', null))
+      await resolveSocietyId(sessionUser.id, sessionUser.email ?? normalizedEmail)
+      return { user: sessionUser }
+    }
+
+    return {
+      user: {
+        id: sessionUser?.id ?? '',
+        email: normalizedEmail,
+        email_confirmed_at: new Date().toISOString()
+      }
+    }
   }
 
   async function signIn(email: string, password: string) {

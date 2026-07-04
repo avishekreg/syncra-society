@@ -3,6 +3,8 @@ import { restGet, restPost, restDelete } from './supabaseClient'
 import { isRemoteSocietyId } from './societies'
 import { uploadDocument } from '../utils/upload'
 import { logActivity } from '../lib/activityLog'
+import { dispatchNoticePublished } from '../lib/n8nClient'
+import { listRegisteredSocieties } from '../lib/societyRegistry'
 
 export type NoticeViewReceipt = {
   noticeId: string
@@ -122,6 +124,20 @@ export async function listNotices(societyId: string): Promise<Notice[]> {
   }
 }
 
+function societyNameForId(societyId: string) {
+  return listRegisteredSocieties().find((society) => society.id === societyId)?.name ?? 'Society'
+}
+
+async function relayNoticeToN8n(notice: Notice) {
+  void dispatchNoticePublished({
+    societyId: notice.society_id,
+    societyName: societyNameForId(notice.society_id),
+    title: notice.title,
+    body: notice.body,
+    noticeId: notice.id
+  })
+}
+
 export async function createNotice(payload: Partial<Notice>, file?: File) {
   const body: Notice = {
     id: `notice-${Date.now()}`,
@@ -147,6 +163,7 @@ export async function createNotice(payload: Partial<Notice>, file?: File) {
       summary: `Notice published: ${body.title}`,
       metadata: { noticeId: body.id, publishedAt: body.created_at }
     })
+    void relayNoticeToN8n(body)
     return body
   }
 
@@ -163,6 +180,7 @@ export async function createNotice(payload: Partial<Notice>, file?: File) {
       summary: `Notice published: ${body.title}`,
       metadata: { noticeId: created?.id ?? body.id, publishedAt: body.created_at }
     })
+    void relayNoticeToN8n(created ?? body)
     return created ?? body
   } catch {
     return saveLocal()
