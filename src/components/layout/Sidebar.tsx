@@ -84,6 +84,15 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
               <NavLink to="/resident/visitor-logs" className={navLinkClass}>
                 Visitor Logs
               </NavLink>
+              <NavLink to="/resident/surveys" className={navLinkClass}>
+                Surveys
+              </NavLink>
+              <NavLink to="/resident/elections" className={navLinkClass}>
+                Elections
+              </NavLink>
+              <NavLink to="/resident/rewards" className={navLinkClass}>
+                Rewards & Recognition
+              </NavLink>
             </>
           )}
 
@@ -96,6 +105,15 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
                 <>
                   <NavLink to="/rwa" end className={navLinkClass}>
                     RWA Dashboard
+                  </NavLink>
+                  <NavLink to="/rwa/surveys" className={navLinkClass}>
+                    Surveys
+                  </NavLink>
+                  <NavLink to="/rwa/elections" className={navLinkClass}>
+                    Elections
+                  </NavLink>
+                  <NavLink to="/rwa/rewards" className={navLinkClass}>
+                    Rewards & Governance
                   </NavLink>
                   <NavLink to="/rwa/gatekeeper" className={navLinkClass}>
                     Guard Console
