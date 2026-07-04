@@ -358,28 +358,30 @@ export default function RwaWorkspace() {
               </p>
             </header>
             <div className="grid gap-4 sm:grid-cols-2">
-              {[
-                ['Block Name', blockName, setBlockName, 'e.g. Block A', 'text'],
-                ['Flat Number', flatNumberInput, setFlatNumberInput, 'e.g. 301', 'text'],
-                ['Super Built-up Area (Sq. Ft.)', areaSize, setAreaSize, 'e.g. 1230', 'text'],
-                ['Owner Full Name', ownerFullName, setOwnerFullName, 'e.g. Anita Rao', 'text'],
-                ['Owner Email', ownerEmail, setOwnerEmail, 'e.g. owner@example.com', 'email'],
+              {(
                 [
-                  'Owner Registered Mobile Number',
-                  ownerMobile,
-                  setOwnerMobile,
-                  'Enter 10-digit phone for WhatsApp Automation',
-                  'tel'
-                ]
-              ].map(([label, value, setter, placeholder, type]) => (
-                <label key={label as string} className="space-y-1.5">
+                  { label: 'Block Name', value: blockName, setter: setBlockName, placeholder: 'e.g. Block A', type: 'text' },
+                  { label: 'Flat Number', value: flatNumberInput, setter: setFlatNumberInput, placeholder: 'e.g. 301', type: 'text' },
+                  { label: 'Super Built-up Area (Sq. Ft.)', value: areaSize, setter: setAreaSize, placeholder: 'e.g. 1230', type: 'text' },
+                  { label: 'Owner Full Name', value: ownerFullName, setter: setOwnerFullName, placeholder: 'e.g. Anita Rao', type: 'text' },
+                  { label: 'Owner Email', value: ownerEmail, setter: setOwnerEmail, placeholder: 'e.g. owner@example.com', type: 'email' },
+                  {
+                    label: 'Owner Registered Mobile Number',
+                    value: ownerMobile,
+                    setter: setOwnerMobile,
+                    placeholder: 'Enter 10-digit phone for WhatsApp Automation',
+                    type: 'tel'
+                  }
+                ] as const
+              ).map(({ label, value, setter, placeholder, type }) => (
+                <label key={label} className="space-y-1.5">
                   <span className={ui.label}>{label}</span>
                   <input
-                    type={type as string}
-                    value={value as string}
-                    onChange={(e) => (setter as (v: string) => void)(e.target.value)}
+                    type={type}
+                    value={value}
+                    onChange={(e) => setter(e.target.value)}
                     className={ui.input}
-                    placeholder={placeholder as string}
+                    placeholder={placeholder}
                   />
                 </label>
               ))}

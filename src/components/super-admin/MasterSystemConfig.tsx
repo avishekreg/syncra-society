@@ -1,15 +1,13 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { ui } from '../../lib/ui'
 import { usePlatformConfig } from '../../providers/PlatformConfigProvider'
-import { listRegisteredSocieties } from '../../lib/societyRegistry'
 import {
+  DEFAULT_PAYMENTS_WEBHOOK_RECEPTION_URL,
   N8N_PRODUCTION_WEBHOOK_URL,
   NOTICE_ENHANCER_MODEL_OPTIONS,
   SIDEBAR_MODULE_LABELS,
-  SOCIETY_ADDON_LABELS,
   VOICE_MODEL_OPTIONS,
-  type SidebarModuleKey,
-  type SocietyAddonKey
+  type SidebarModuleKey
 } from '../../types/platformConfig'
 
 const saveBtn =
@@ -90,13 +88,15 @@ function TextField({
   value,
   onChange,
   placeholder,
-  type = 'text'
+  type = 'text',
+  hint
 }: {
   label: string
   value: string
   onChange: (value: string) => void
   placeholder?: string
   type?: string
+  hint?: string
 }) {
   return (
     <label className="block">
@@ -108,6 +108,7 @@ function TextField({
         className={ui.input}
         placeholder={placeholder}
       />
+      {hint && <span className="mt-1.5 block text-xs text-slate-500">{hint}</span>}
     </label>
   )
 }
@@ -138,50 +139,55 @@ function SelectField({
 }
 
 export default function MasterSystemConfig() {
-  const { config, updateConfig, setSidebarModule, setSocietyAddon, isSocietyAddonEnabled, supabaseSynced } =
+  const { config, updateConfig, setSidebarModule, saveGlobalSettings, supabaseSynced, systemConfigSynced } =
     usePlatformConfig()
   const [status, setStatus] = useState('')
-  const [selectedSocietyId, setSelectedSocietyId] = useState('')
-  const societies = listRegisteredSocieties()
-
-  useEffect(() => {
-    if (!selectedSocietyId && societies[0]?.id) {
-      setSelectedSocietyId(societies[0].id)
-    }
-  }, [societies, selectedSocietyId])
+  const [saving, setSaving] = useState(false)
 
   function flashSaved(message: string) {
     setStatus(message)
-    window.setTimeout(() => setStatus(''), 4000)
+    window.setTimeout(() => setStatus(''), 5000)
   }
 
-  function handleSave(event: React.FormEvent) {
+  async function handleSave(event: React.FormEvent) {
     event.preventDefault()
-    flashSaved('Master configuration saved — integrations and sidebar visibility update instantly.')
+    setSaving(true)
+    try {
+      const { remoteSynced } = await saveGlobalSettings()
+      flashSaved(
+        remoteSynced
+          ? 'Global platform settings saved — local mirror, Supabase, and system_configs updated.'
+          : 'Global platform settings saved — local mirror active (API sync when SUPER_ADMIN_SECRET is configured).'
+      )
+    } finally {
+      setSaving(false)
+    }
   }
 
   const sidebarKeys = Object.keys(SIDEBAR_MODULE_LABELS) as SidebarModuleKey[]
-  const addonKeys = Object.keys(SOCIETY_ADDON_LABELS) as SocietyAddonKey[]
-  const selectedSociety = societies.find((society) => society.id === selectedSocietyId)
+  const gateways = config.paymentGateways
+  const webhooks = config.platformWebhooks
 
   return (
     <div className="space-y-6">
       <header className={ui.card}>
-        <p className={ui.eyebrow}>Master Configuration Menu</p>
-        <h1 className={`mt-2 ${ui.headingLg}`}>System integrations & feature control plane</h1>
+        <p className={ui.eyebrow}>Global Platform Settings</p>
+        <h1 className={`mt-2 ${ui.headingLg}`}>Infrastructure & integration control plane</h1>
         <p className={`mt-3 max-w-3xl ${ui.body}`}>
-          Single surface for AI engines, communication gateways, paid add-ons, and per-society feature gating.
-          All values persist in localStorage with optional Supabase mirror.
+          Configure payment gateway secrets, platform webhook endpoints, AI engines, and default automation
+          gateways from one surface — no manual env edits required. Per-society module toggles live in
+          Societies Manager.
         </p>
         <p className="mt-2 text-xs text-slate-500">
-          Storage: local · Supabase mirror: {supabaseSynced ? 'synced' : 'local-only fallback'}
+          Platform config: {supabaseSynced ? 'Supabase synced' : 'local-only'} · System configs:{' '}
+          {systemConfigSynced ? 'API mirrored' : 'local mirror only'}
         </p>
       </header>
 
-      <form onSubmit={handleSave} className="space-y-4">
+      <form onSubmit={(event) => void handleSave(event)} className="space-y-4">
         <CollapsibleSection
-          title="AI & Voice Utilities"
-          subtitle="Speech-to-text and AI notice enhancer models via Hugging Face"
+          title="AI Integrations"
+          subtitle="Hugging Face token and default speech / notice enhancer models"
           defaultOpen
         >
           <TextField
@@ -212,74 +218,97 @@ export default function MasterSystemConfig() {
         </CollapsibleSection>
 
         <CollapsibleSection
-          title="Gateways & Communications"
-          subtitle="Production n8n webhook and Twilio/BSP live sender routing"
+          title="Default n8n Gateway"
+          subtitle="Global fallback webhook for notice broadcasts and automation relays"
           defaultOpen
         >
           <TextField
-            label="n8n Production Webhook URL"
+            label="Production n8n Webhook URL"
             value={config.communications.n8nWebhookUrl}
             onChange={(n8nWebhookUrl) =>
               updateConfig({ communications: { ...config.communications, n8nWebhookUrl } })
             }
             placeholder={N8N_PRODUCTION_WEBHOOK_URL}
+            hint="Maps to system_configs.N8N_WEBHOOK_URL on save."
           />
           <TextField
-            label="Twilio / BSP Live Sender Phone"
+            label="Default Twilio / BSP Sender Phone"
             value={config.communications.twilioSenderPhone}
             onChange={(twilioSenderPhone) =>
               updateConfig({ communications: { ...config.communications, twilioSenderPhone } })
             }
             placeholder="+14155238886"
+            hint="Maps to system_configs.TWILIO_DEFAULT_FROM on save."
           />
         </CollapsibleSection>
 
         <CollapsibleSection
-          title="SaaS Monetization & Feature Gating"
-          subtitle="Per-society paid add-on toggles — instantly hides UI across Resident and RWA paths"
+          title="Global Payment Gateways"
+          subtitle="Razorpay settlement keys and verified webhook signing secrets"
           defaultOpen
         >
-          <label className="block max-w-md">
-            <span className={`mb-2 block ${ui.label}`}>Target society</span>
-            <select
-              value={selectedSocietyId}
-              onChange={(event) => setSelectedSocietyId(event.target.value)}
-              className={ui.input}
-            >
-              {societies.map((society) => (
-                <option key={society.id} value={society.id}>
-                  {society.name} · {society.city}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          {selectedSociety && (
-            <p className="text-xs text-slate-500">
-              Gating applies to <strong>{selectedSociety.name}</strong> — disabled modules disappear from sidebar
-              navigation immediately for that society.
-            </p>
-          )}
-
-          <div className="grid gap-2 sm:grid-cols-2">
-            {addonKeys.map((addon) => {
-              const meta = SOCIETY_ADDON_LABELS[addon]
-              return (
-                <ToggleRow
-                  key={addon}
-                  label={meta.label}
-                  description={meta.description}
-                  checked={isSocietyAddonEnabled(selectedSocietyId, addon)}
-                  onChange={(enabled) => setSocietyAddon(selectedSocietyId, addon, enabled)}
-                />
-              )
-            })}
+          <div className="grid gap-4 md:grid-cols-2">
+            <TextField
+              label="Razorpay Key ID"
+              value={gateways.razorpayKeyId}
+              onChange={(razorpayKeyId) =>
+                updateConfig({ paymentGateways: { ...gateways, razorpayKeyId } })
+              }
+              placeholder="rzp_live_..."
+            />
+            <TextField
+              label="Razorpay Key Secret"
+              value={gateways.razorpayKeySecret}
+              onChange={(razorpayKeySecret) =>
+                updateConfig({ paymentGateways: { ...gateways, razorpayKeySecret } })
+              }
+              placeholder="Your Razorpay secret"
+              type="password"
+            />
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <TextField
+              label="RAZORPAY_WEBHOOK_SECRET"
+              value={gateways.razorpayWebhookSecret}
+              onChange={(razorpayWebhookSecret) =>
+                updateConfig({ paymentGateways: { ...gateways, razorpayWebhookSecret } })
+              }
+              placeholder="whsec_razorpay_..."
+              type="password"
+              hint="Used to verify payment.captured events at /api/webhooks/payments."
+            />
+            <TextField
+              label="STRIPE_WEBHOOK_SECRET"
+              value={gateways.stripeWebhookSecret}
+              onChange={(stripeWebhookSecret) =>
+                updateConfig({ paymentGateways: { ...gateways, stripeWebhookSecret } })
+              }
+              placeholder="whsec_stripe_..."
+              type="password"
+              hint="Stripe signing secret for checkout.session.completed events."
+            />
           </div>
         </CollapsibleSection>
 
         <CollapsibleSection
+          title="Platform Core Webhooks"
+          subtitle="Public URLs payment providers should POST module-purchase events to"
+          defaultOpen
+        >
+          <TextField
+            label="Payments Webhook Reception URL"
+            value={webhooks.paymentsReceptionUrl}
+            onChange={(paymentsReceptionUrl) =>
+              updateConfig({ platformWebhooks: { ...webhooks, paymentsReceptionUrl } })
+            }
+            placeholder={DEFAULT_PAYMENTS_WEBHOOK_RECEPTION_URL}
+            hint="Register this URL in Razorpay / Stripe dashboards for automated module activation."
+          />
+        </CollapsibleSection>
+
+        <CollapsibleSection
           title="Global Sidebar Modules"
-          subtitle="Platform-wide navigation toggles (combined with per-society gating above)"
+          subtitle="Platform-wide navigation toggles combined with per-society gating in Societies Manager"
         >
           <div className="grid gap-2 sm:grid-cols-2">
             {sidebarKeys.map((key) => {
@@ -383,8 +412,8 @@ export default function MasterSystemConfig() {
           </div>
         </CollapsibleSection>
 
-        <button type="submit" className={saveBtn}>
-          Save Master Configuration
+        <button type="submit" disabled={saving} className={saveBtn}>
+          {saving ? 'Saving…' : 'Save Global Platform Settings'}
         </button>
         {status && <p className={ui.body}>{status}</p>}
       </form>

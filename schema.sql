@@ -82,6 +82,18 @@ create table if not exists system_configs (
   updated_at timestamptz not null default now()
 );
 
+-- Per-society SaaS module entitlements (payment webhook automation)
+create table if not exists society_module_configs (
+  society_id uuid primary key references societies(id) on delete cascade,
+  whatsapp_alerts boolean not null default false,
+  election_engine boolean not null default false,
+  voice_ticketing boolean not null default false,
+  smart_helpdesk boolean not null default false,
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists idx_society_module_configs_updated on society_module_configs(updated_at desc);
+
 -- ---------------------------------------------------------------------------
 -- Indexes
 -- ---------------------------------------------------------------------------
@@ -103,6 +115,7 @@ alter table notices enable row level security;
 alter table visitors enable row level security;
 alter table payments enable row level security;
 alter table system_configs enable row level security;
+alter table society_module_configs enable row level security;
 
 drop policy if exists "societies_read_all" on societies;
 create policy "societies_read_all" on societies for select to authenticated, anon using (true);
@@ -140,6 +153,12 @@ create policy "system_configs_read_service" on system_configs for select to serv
 drop policy if exists "system_configs_write_service" on system_configs;
 create policy "system_configs_write_service" on system_configs for all to service_role using (true) with check (true);
 
+drop policy if exists "society_module_configs_read_all" on society_module_configs;
+create policy "society_module_configs_read_all" on society_module_configs for select to authenticated, anon using (true);
+
+drop policy if exists "society_module_configs_write_service" on society_module_configs;
+create policy "society_module_configs_write_service" on society_module_configs for all to service_role using (true) with check (true);
+
 -- ---------------------------------------------------------------------------
 -- Zero-code runtime configuration defaults
 -- ---------------------------------------------------------------------------
@@ -174,6 +193,24 @@ values
     'PAYMENT_GATEWAY_SECRET_KEY',
     'rzp_secret_placeholder',
     'Secure backend API key',
+    now()
+  ),
+  (
+    'RAZORPAY_WEBHOOK_SECRET',
+    '',
+    'Razorpay webhook HMAC signing secret',
+    now()
+  ),
+  (
+    'STRIPE_WEBHOOK_SECRET',
+    '',
+    'Stripe webhook signing secret (whsec_...)',
+    now()
+  ),
+  (
+    'PLATFORM_PAYMENTS_WEBHOOK_URL',
+    'https://syncra-society.vercel.app/api/webhooks/payments',
+    'Public URL for Razorpay/Stripe module-purchase webhooks',
     now()
   )
 on conflict (key) do update set

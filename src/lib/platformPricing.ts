@@ -27,7 +27,7 @@ export const DEFAULT_PLATFORM_PRICING: PlatformPricingConfig = {
       price: 149,
       headline: 'Small Societies',
       description: 'Basic society operations for up to 50 flats.',
-      features: ['Resident dashboard', 'Notice Board', 'Syncra Gatekeeper', 'Basic ledger view']
+      features: ['Resident dashboard', 'Notice Board', 'Syncra Gate Visitor Log', 'Basic ledger view']
     },
     {
       id: 'tier2',

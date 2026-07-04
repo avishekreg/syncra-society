@@ -1,10 +1,13 @@
-import { getPlatformConfig } from './platformConfig'
+import { getPlatformConfig, getSocietyGatewayConfig } from './platformConfig'
 import { N8N_PRODUCTION_WEBHOOK_URL } from '../../lib/n8n-config'
 
 export { N8N_PRODUCTION_WEBHOOK_URL }
 
-/** Client-side resolver — master config → env override → production default. */
-export function resolveClientN8nWebhookUrl() {
+/** Client-side resolver — society override → master config → env → production default. */
+export function resolveClientN8nWebhookUrl(societyId?: string | null) {
+  const societyOverride = getSocietyGatewayConfig(societyId).n8nWebhookUrl?.trim()
+  if (societyOverride) return societyOverride
+
   const fromMaster = getPlatformConfig().communications.n8nWebhookUrl?.trim()
   if (fromMaster) return fromMaster
 
@@ -14,7 +17,10 @@ export function resolveClientN8nWebhookUrl() {
   return trimmed || N8N_PRODUCTION_WEBHOOK_URL
 }
 
-export function resolveTwilioSenderPhone() {
+export function resolveTwilioSenderPhone(societyId?: string | null) {
+  const societyOverride = getSocietyGatewayConfig(societyId).twilioSenderPhone?.trim()
+  if (societyOverride) return societyOverride
+
   const fromMaster = getPlatformConfig().communications.twilioSenderPhone?.trim()
   if (fromMaster) return fromMaster
 

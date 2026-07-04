@@ -28,6 +28,24 @@ export type CommunicationsConfig = {
   twilioSenderPhone: string
 }
 
+export type PaymentGatewaysConfig = {
+  razorpayKeyId: string
+  razorpayKeySecret: string
+  razorpayWebhookSecret: string
+  stripeWebhookSecret: string
+}
+
+export type PlatformWebhooksConfig = {
+  /** Public endpoint for Razorpay/Stripe module-purchase webhooks */
+  paymentsReceptionUrl: string
+}
+
+/** Per-society gateway overrides — empty fields inherit global defaults. */
+export type SocietyGatewayConfig = {
+  n8nWebhookUrl?: string
+  twilioSenderPhone?: string
+}
+
 export type SurveyEngineConfig = {
   enabled: boolean
   maxQuestionsPerSurvey: number
@@ -48,11 +66,17 @@ export type PlatformConfig = {
   sidebarModules: Record<SidebarModuleKey, boolean>
   aiUtilities: AiUtilitiesConfig
   communications: CommunicationsConfig
+  paymentGateways: PaymentGatewaysConfig
+  platformWebhooks: PlatformWebhooksConfig
   societyAddons: Record<string, Partial<Record<SocietyAddonKey, boolean>>>
+  societyGateways: Record<string, SocietyGatewayConfig>
   surveyEngine: SurveyEngineConfig
   electionModule: ElectionModuleConfig
   updatedAt: string
 }
+
+export const DEFAULT_PAYMENTS_WEBHOOK_RECEPTION_URL =
+  'https://syncra-society.vercel.app/api/webhooks/payments'
 
 export const VOICE_MODEL_OPTIONS = [
   { value: 'openai/whisper-large-v3', label: 'openai/whisper-large-v3 (default)' },

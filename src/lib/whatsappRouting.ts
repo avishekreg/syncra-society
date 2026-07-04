@@ -30,7 +30,7 @@ export async function resolveSocietySenderWhatsapp(societyId: string): Promise<s
   const cached = readCachedSettings(societyId)
   if (cached?.whatsappNumber?.trim()) return cached.whatsappNumber.trim()
 
-  return resolveTwilioSenderPhone()
+  return resolveTwilioSenderPhone(societyId)
 }
 
 export async function resolveNoticeReceiverPhones(societyId: string): Promise<string[]> {

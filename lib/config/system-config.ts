@@ -10,7 +10,11 @@ const ENV_FALLBACKS: Record<string, string> = {
     process.env.PAYMENT_GATEWAY_PUBLIC_KEY ?? process.env.RAZORPAY_KEY_ID ?? 'rzp_test_placeholder',
   PAYMENT_GATEWAY_SECRET_KEY:
     process.env.PAYMENT_GATEWAY_SECRET_KEY ?? process.env.RAZORPAY_KEY_SECRET ?? 'rzp_secret_placeholder',
-  RAZORPAY_WEBHOOK_SECRET: process.env.RAZORPAY_WEBHOOK_SECRET ?? ''
+  RAZORPAY_WEBHOOK_SECRET: process.env.RAZORPAY_WEBHOOK_SECRET ?? '',
+  STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET ?? '',
+  PLATFORM_PAYMENTS_WEBHOOK_URL:
+    process.env.PLATFORM_PAYMENTS_WEBHOOK_URL ??
+    'https://syncra-society.vercel.app/api/webhooks/payments'
 }
 
 let cache: Map<string, string> | null = null

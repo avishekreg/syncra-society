@@ -68,16 +68,21 @@ export class RazorpayProvider implements IPaymentGateway {
     const orderEntity = event.payload?.order?.entity
 
     if (eventType === 'payment.captured' || eventType === 'order.paid') {
-      const notes = paymentEntity?.notes ?? orderEntity?.notes
+      const notes = paymentEntity?.notes ?? orderEntity?.notes ?? {}
+      const societyId = notes.societyId ?? notes.society_id
+      const purchasedModule = notes.purchasedModule ?? notes.purchased_module
       return {
         provider: this.provider,
         eventType,
         orderId: paymentEntity?.order_id ?? orderEntity?.id,
         paymentId: paymentEntity?.id,
-        paymentRecordId: notes?.payment_record_id,
+        paymentRecordId: notes.payment_record_id,
         amount: paymentEntity?.amount ? paymentEntity.amount / 100 : undefined,
         currency: paymentEntity?.currency ?? 'INR',
         status: 'paid',
+        societyId,
+        purchasedModule,
+        metadata: notes,
         raw: event
       }
     }

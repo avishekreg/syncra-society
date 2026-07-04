@@ -88,13 +88,18 @@ export default function FlatConfigurationPage() {
         })
         setShowcaseData?.({
           ...(showcaseData ?? {
-            society: { id: currentSocietyId, name: societyName },
+            society: { id: currentSocietyId, name: societyName, subscription: 'trial', totalFlats: 0 },
             units: [],
             defaulters: [],
             ledgerEntries: []
           }),
           society: {
-            ...(showcaseData?.society ?? { id: currentSocietyId, name: societyName }),
+            ...(showcaseData?.society ?? {
+              id: currentSocietyId,
+              name: societyName,
+              subscription: 'trial',
+              totalFlats: 0
+            }),
             totalFlats: Number(totalFlats)
           }
         })

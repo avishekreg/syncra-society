@@ -57,6 +57,15 @@ export type SystemConfig = {
 
 export type PaymentGatewayProvider = 'RAZORPAY' | 'STRIPE' | 'CHILE_LOCAL'
 
+export type SocietyModuleConfigRow = {
+  society_id: string
+  whatsapp_alerts: boolean
+  election_engine: boolean
+  voice_ticketing: boolean
+  smart_helpdesk: boolean
+  updated_at: string
+}
+
 export type FlatWithSociety = Flat & {
   societies: Pick<Society, 'name' | 'active_addons'> | null
 }

@@ -16,7 +16,7 @@ export default function TierGuard({
   children
 }: {
   requiredTier: TierLevel
-  children: JSX.Element
+  children: React.ReactElement
 }) {
   const { user } = useAuth()
 

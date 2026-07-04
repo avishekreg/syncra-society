@@ -24,8 +24,8 @@ export function isRwaStaff(user: AuthUser | null | undefined): boolean {
   return (
     role === 'rwa_owner' ||
     role === 'rwa_accountant' ||
-    user.roles?.includes('rwa_owner') ||
-    user.roles?.includes('rwa_accountant')
+    Boolean(user.roles?.includes('rwa_owner')) ||
+    Boolean(user.roles?.includes('rwa_accountant'))
   )
 }
 

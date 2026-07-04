@@ -1,4 +1,7 @@
 import React, { useState } from 'react'
+import SocietyModuleConfigSheet, {
+  type SocietyModuleTarget
+} from '../../components/super-admin/SocietyModuleConfigSheet'
 import { updateSociety } from '../../api/societies'
 import { flagDefaulter } from '../../api/visitorLogs'
 import { ensureSocietyJoinCode, listRegisteredSocieties } from '../../lib/societyRegistry'
@@ -42,6 +45,8 @@ export default function SuperAdminSocieties() {
   const [tier, setTier] = useState<SocietyTier>('tier1')
   const [status, setStatus] = useState('')
   const [saving, setSaving] = useState(false)
+  const [moduleConfigSociety, setModuleConfigSociety] = useState<SocietyModuleTarget | null>(null)
+  const [moduleConfigOpen, setModuleConfigOpen] = useState(false)
 
   const joinCodes = Object.fromEntries(listRegisteredSocieties().map((s) => [s.id, s.joinCode]))
 
@@ -160,6 +165,16 @@ export default function SuperAdminSocieties() {
     }
   }
 
+  function openModuleConfig(society: SocietyRow) {
+    setModuleConfigSociety({ id: society.id, name: society.name, city: society.city })
+    setModuleConfigOpen(true)
+  }
+
+  function closeModuleConfig() {
+    setModuleConfigOpen(false)
+    setModuleConfigSociety(null)
+  }
+
   async function handleFlagDefaulter(society: SocietyRow) {
     try {
       await flagDefaulter({
@@ -228,6 +243,9 @@ export default function SuperAdminSocieties() {
                     <td className="px-4 py-4 font-mono text-xs text-syncra-blue">{joinCodes[society.id] ?? '—'}</td>
                     <td className="px-4 py-4">
                       <div className="flex flex-wrap gap-2">
+                        <button type="button" onClick={() => openModuleConfig(society)} className={ui.btnSecondary}>
+                          Configure Modules
+                        </button>
                         <button type="button" onClick={() => openEditModal(society)} className={ui.btnSecondary}>
                           Edit
                         </button>
@@ -242,6 +260,12 @@ export default function SuperAdminSocieties() {
             </table>
           </div>
         </section>
+
+      <SocietyModuleConfigSheet
+        society={moduleConfigSociety}
+        open={moduleConfigOpen}
+        onClose={closeModuleConfig}
+      />
 
       {modalOpen && (
         <div className={ui.overlay}>

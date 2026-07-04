@@ -9,7 +9,6 @@ import SuperAdminOverview from '../pages/super-admin/Overview'
 import SuperAdminSocieties from '../pages/super-admin/Societies'
 import SuperAdminPricingHub from '../pages/super-admin/PricingHub'
 import SuperAdminMasterConfig from '../pages/super-admin/MasterConfig'
-import SuperAdminPayments from '../pages/super-admin/Payments'
 import { ui } from '../lib/ui'
 
 const LandingPage = lazy(() => import('../pages/LandingPage'))
@@ -44,7 +43,7 @@ export default function AppRouter() {
             <Route path="societies" element={<SuperAdminSocieties />} />
             <Route path="pricing" element={<SuperAdminPricingHub />} />
             <Route path="master-config" element={<SuperAdminMasterConfig />} />
-            <Route path="payments" element={<SuperAdminPayments />} />
+            <Route path="payments" element={<Navigate to="/super-admin/master-config" replace />} />
             <Route path="subscriptions" element={<Navigate to="/super-admin/pricing" replace />} />
           </Route>
 

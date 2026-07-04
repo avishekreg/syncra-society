@@ -19,7 +19,7 @@ export type N8nPortalEvent = {
 }
 
 export async function dispatchToN8n(payload: N8nPortalEvent) {
-  const webhookUrl = resolveClientN8nWebhookUrl()
+  const webhookUrl = resolveClientN8nWebhookUrl(payload.societyId)
   try {
     const res = await fetch(webhookUrl, {
       method: 'POST',

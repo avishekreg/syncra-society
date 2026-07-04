@@ -130,8 +130,7 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
   const superAdminPaths = [
     '/super-admin/societies',
     '/super-admin/pricing',
-    '/super-admin/master-config',
-    '/super-admin/payments'
+    '/super-admin/master-config'
   ]
 
   const presidentConsolePaths = ['/admin/dashboard', '/admin/notices', '/rwa/workspace']
@@ -272,9 +271,6 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
                   </NavLink>
                   <NavLink to="/super-admin/master-config" className={subNavLinkClass}>
                     Global Platform Settings
-                  </NavLink>
-                  <NavLink to="/super-admin/payments" className={subNavLinkClass}>
-                    Razorpay API Keys
                   </NavLink>
                 </NavGroup>
               )}

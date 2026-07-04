@@ -30,6 +30,9 @@ export type VerifiedWebhookEvent = {
   amount?: number
   currency?: string
   status: 'paid' | 'pending' | 'failed' | 'unknown'
+  societyId?: string
+  purchasedModule?: string
+  metadata?: Record<string, string>
   raw: unknown
 }
 

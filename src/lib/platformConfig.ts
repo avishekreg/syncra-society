@@ -2,13 +2,20 @@ import type {
   AiUtilitiesConfig,
   CommunicationsConfig,
   ElectionModuleConfig,
+  PaymentGatewaysConfig,
   PlatformConfig,
+  PlatformWebhooksConfig,
   SidebarModuleKey,
   SocietyAddonKey,
+  SocietyGatewayConfig,
   SurveyEngineConfig
 } from '../types/platformConfig'
-import { N8N_PRODUCTION_WEBHOOK_URL } from '../../lib/n8n-config'
+import {
+  DEFAULT_PAYMENTS_WEBHOOK_RECEPTION_URL,
+  N8N_PRODUCTION_WEBHOOK_URL
+} from '../types/platformConfig'
 import { restGet, restPatch, restPost } from '../api/supabaseClient'
+import { migrateLegacyRazorpayKeys } from './systemConfigSync'
 
 export const PLATFORM_CONFIG_STORAGE_KEY = 'syncra-platform-config'
 export const PLATFORM_CONFIG_CHANGED_EVENT = 'syncra-platform-config-changed'
@@ -43,7 +50,17 @@ export const DEFAULT_PLATFORM_CONFIG: PlatformConfig = {
     n8nWebhookUrl: N8N_PRODUCTION_WEBHOOK_URL,
     twilioSenderPhone: '+14155238886'
   },
+  paymentGateways: {
+    razorpayKeyId: '',
+    razorpayKeySecret: '',
+    razorpayWebhookSecret: '',
+    stripeWebhookSecret: ''
+  },
+  platformWebhooks: {
+    paymentsReceptionUrl: DEFAULT_PAYMENTS_WEBHOOK_RECEPTION_URL
+  },
   societyAddons: {},
+  societyGateways: {},
   surveyEngine: {
     enabled: true,
     maxQuestionsPerSurvey: 10,
@@ -82,6 +99,14 @@ function mergeCommunications(partial?: Partial<CommunicationsConfig>): Communica
   return { ...DEFAULT_PLATFORM_CONFIG.communications, ...partial }
 }
 
+function mergePaymentGateways(partial?: Partial<PaymentGatewaysConfig>): PaymentGatewaysConfig {
+  return { ...DEFAULT_PLATFORM_CONFIG.paymentGateways, ...partial }
+}
+
+function mergePlatformWebhooks(partial?: Partial<PlatformWebhooksConfig>): PlatformWebhooksConfig {
+  return { ...DEFAULT_PLATFORM_CONFIG.platformWebhooks, ...partial }
+}
+
 function mergeSurveyEngine(partial?: Partial<SurveyEngineConfig>): SurveyEngineConfig {
   return { ...DEFAULT_PLATFORM_CONFIG.surveyEngine, ...partial }
 }
@@ -101,7 +126,10 @@ export function normalizePlatformConfig(raw: Partial<PlatformConfig> | null | un
     sidebarModules: mergeSidebarModules(raw?.sidebarModules),
     aiUtilities: mergeAiUtilities(raw?.aiUtilities),
     communications: mergeCommunications(raw?.communications),
+    paymentGateways: mergePaymentGateways(raw?.paymentGateways),
+    platformWebhooks: mergePlatformWebhooks(raw?.platformWebhooks),
     societyAddons: raw?.societyAddons ?? {},
+    societyGateways: raw?.societyGateways ?? {},
     surveyEngine: mergeSurveyEngine(raw?.surveyEngine),
     electionModule: mergeElectionModule(raw?.electionModule),
     updatedAt: raw?.updatedAt ?? new Date().toISOString()
@@ -111,15 +139,33 @@ export function normalizePlatformConfig(raw: Partial<PlatformConfig> | null | un
 export function readPlatformConfigFromStorage(): PlatformConfig {
   try {
     const raw = localStorage.getItem(PLATFORM_CONFIG_STORAGE_KEY)
-    if (!raw) return { ...DEFAULT_PLATFORM_CONFIG, updatedAt: new Date().toISOString() }
-    return normalizePlatformConfig(JSON.parse(raw) as Partial<PlatformConfig>)
+    if (!raw) {
+      return migrateLegacyRazorpayKeys({
+        ...DEFAULT_PLATFORM_CONFIG,
+        updatedAt: new Date().toISOString()
+      })
+    }
+    return migrateLegacyRazorpayKeys(
+      normalizePlatformConfig(JSON.parse(raw) as Partial<PlatformConfig>)
+    )
   } catch {
-    return { ...DEFAULT_PLATFORM_CONFIG, updatedAt: new Date().toISOString() }
+    return migrateLegacyRazorpayKeys({
+      ...DEFAULT_PLATFORM_CONFIG,
+      updatedAt: new Date().toISOString()
+    })
   }
 }
 
 export function getPlatformConfig(): PlatformConfig {
   return readPlatformConfigFromStorage()
+}
+
+export function getSocietyGatewayConfig(
+  societyId: string | null | undefined,
+  config = getPlatformConfig()
+): SocietyGatewayConfig {
+  if (!societyId) return {}
+  return config.societyGateways[societyId] ?? {}
 }
 
 export function isSocietyAddonEnabled(
@@ -176,9 +222,18 @@ export function patchPlatformConfig(patch: Partial<PlatformConfig>): PlatformCon
     communications: patch.communications
       ? mergeCommunications({ ...current.communications, ...patch.communications })
       : current.communications,
+    paymentGateways: patch.paymentGateways
+      ? mergePaymentGateways({ ...current.paymentGateways, ...patch.paymentGateways })
+      : current.paymentGateways,
+    platformWebhooks: patch.platformWebhooks
+      ? mergePlatformWebhooks({ ...current.platformWebhooks, ...patch.platformWebhooks })
+      : current.platformWebhooks,
     societyAddons: patch.societyAddons
       ? { ...current.societyAddons, ...patch.societyAddons }
       : current.societyAddons,
+    societyGateways: patch.societyGateways
+      ? { ...current.societyGateways, ...patch.societyGateways }
+      : current.societyGateways,
     surveyEngine: patch.surveyEngine
       ? mergeSurveyEngine({ ...current.surveyEngine, ...patch.surveyEngine })
       : current.surveyEngine,
@@ -201,6 +256,19 @@ export function patchSocietyAddon(
   return patchPlatformConfig({
     societyAddons: {
       [societyId]: { ...existing, [addon]: enabled }
+    }
+  })
+}
+
+export function patchSocietyGateway(
+  societyId: string,
+  patch: Partial<SocietyGatewayConfig>
+): PlatformConfig {
+  const current = readPlatformConfigFromStorage()
+  const existing = current.societyGateways[societyId] ?? {}
+  return patchPlatformConfig({
+    societyGateways: {
+      [societyId]: { ...existing, ...patch }
     }
   })
 }

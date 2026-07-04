@@ -73,6 +73,10 @@ export default function RwaSettings() {
     setSaveMessage('Local emergency directory saved successfully.')
   }
 
+  if (!user) {
+    return null
+  }
+
   const userRole = user.user_metadata?.role ?? user.role ?? 'resident'
   const isRwaFinance =
     userRole === 'rwa_owner' ||

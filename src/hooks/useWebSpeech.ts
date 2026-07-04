@@ -3,14 +3,37 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 /** BCP-47 tags for Indian English and Hindi voice input on mobile browsers. */
 export type WebSpeechLanguage = 'en-IN' | 'hi-IN'
 
-type SpeechRecognitionInstance = SpeechRecognition
-
 declare global {
+  interface SpeechRecognition extends EventTarget {
+    lang: string
+    continuous: boolean
+    interimResults: boolean
+    maxAlternatives: number
+    onstart: (() => void) | null
+    onresult: ((event: SpeechRecognitionEvent) => void) | null
+    onerror: ((event: SpeechRecognitionErrorEvent) => void) | null
+    onend: (() => void) | null
+    start(): void
+    stop(): void
+    abort(): void
+  }
+
+  interface SpeechRecognitionEvent extends Event {
+    resultIndex: number
+    results: SpeechRecognitionResultList
+  }
+
+  interface SpeechRecognitionErrorEvent extends Event {
+    error: string
+  }
+
   interface Window {
-    SpeechRecognition?: new () => SpeechRecognitionInstance
-    webkitSpeechRecognition?: new () => SpeechRecognitionInstance
+    SpeechRecognition?: new () => SpeechRecognition
+    webkitSpeechRecognition?: new () => SpeechRecognition
   }
 }
+
+type SpeechRecognitionInstance = SpeechRecognition
 
 export type WebSpeechErrorCode =
   | 'not-supported'

@@ -134,7 +134,7 @@ function actionPoints(entry: ActivityEntry, role: 'resident' | 'admin'): number 
 
 function labelForAction(action: string, role: 'resident' | 'admin') {
   const weights = role === 'resident' ? RESIDENT_WEIGHTS : ADMIN_WEIGHTS
-  const map: Record<string, keyof typeof weights> = {
+  const map: Record<string, string> = {
     maintenance_paid: 'payment_on_time',
     payment_late: 'payment_late',
     payment_defaulter: 'payment_defaulter',
@@ -147,8 +147,8 @@ function labelForAction(action: string, role: 'resident' | 'admin') {
     election_created: 'election_conducted',
     photo_uploaded: 'gallery_upload'
   }
-  const key = map[action]
-  return key ? weights[key as keyof typeof weights].label : action
+  const key = map[action] as keyof typeof weights | undefined
+  return key ? weights[key].label : action
 }
 
 export function calculateResidentScore(

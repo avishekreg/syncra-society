@@ -4,6 +4,7 @@ import { isRemoteSocietyId } from './societies'
 import { uploadDocument } from '../utils/upload'
 import { logActivity } from '../lib/activityLog'
 import { resolveClientN8nWebhookUrl } from '../lib/n8nConfig'
+import { isWhatsAppAlertsActive } from '../lib/societyModuleConfig'
 import { listRegisteredSocieties } from '../lib/societyRegistry'
 import {
   resolveNoticeReceiverPhones,
@@ -137,8 +138,16 @@ function buildNoticeMessageBody(notice: Notice, societyName: string) {
   return `📢 ${societyName}\n\n${notice.title}\n\n${notice.body}\n\nPublished: ${timestamp}`
 }
 
-/** Sole notice webhook dispatcher — always POSTs to production n8n after publish. */
+/** Sole notice webhook dispatcher — POSTs to n8n only when whatsapp_alerts is active. */
 async function postNoticePublishedToN8n(notice: Notice) {
+  const whatsappActive = await isWhatsAppAlertsActive(notice.society_id)
+  if (!whatsappActive) {
+    console.info(
+      `[notices] whatsapp_alerts inactive for society ${notice.society_id} — skipping n8n dispatch`
+    )
+    return
+  }
+
   const societyName = societyNameForId(notice.society_id)
   const messageBody = buildNoticeMessageBody(notice, societyName)
   const publishedAt = notice.created_at ?? new Date().toISOString()
@@ -176,7 +185,7 @@ async function postNoticePublishedToN8n(notice: Notice) {
         }
       }
 
-      const webhookUrl = resolveClientN8nWebhookUrl()
+      const webhookUrl = resolveClientN8nWebhookUrl(notice.society_id)
       const res = await fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

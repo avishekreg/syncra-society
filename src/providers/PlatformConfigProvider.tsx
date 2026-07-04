@@ -1,5 +1,4 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import type { PlatformConfig, SidebarModuleKey, SocietyAddonKey } from '../types/platformConfig'
 import {
   isSidebarModuleEnabled as resolveSidebarModuleEnabled,
   isSocietyAddonEnabled as resolveSocietyAddonEnabled,
@@ -7,18 +6,28 @@ import {
   loadPlatformConfigFromSupabase,
   patchPlatformConfig,
   patchSocietyAddon,
+  patchSocietyGateway,
   PLATFORM_CONFIG_CHANGED_EVENT,
   readPlatformConfigFromStorage,
   syncPlatformConfigToSupabase
 } from '../lib/platformConfig'
+import {
+  migrateLegacyRazorpayKeys,
+  syncInfrastructureFromPlatformConfig,
+  writeSystemConfigMirror
+} from '../lib/systemConfigSync'
+import type { PlatformConfig, SidebarModuleKey, SocietyAddonKey, SocietyGatewayConfig } from '../types/platformConfig'
 
 type PlatformConfigContextValue = {
   config: PlatformConfig
   loading: boolean
   supabaseSynced: boolean
+  systemConfigSynced: boolean
   updateConfig: (patch: Partial<PlatformConfig>) => PlatformConfig
+  saveGlobalSettings: (patch?: Partial<PlatformConfig>) => Promise<{ config: PlatformConfig; remoteSynced: boolean }>
   setSidebarModule: (key: SidebarModuleKey, enabled: boolean) => PlatformConfig
   setSocietyAddon: (societyId: string, addon: SocietyAddonKey, enabled: boolean) => PlatformConfig
+  setSocietyGateway: (societyId: string, patch: Partial<SocietyGatewayConfig>) => PlatformConfig
   isModuleEnabled: (key: SidebarModuleKey, societyId?: string | null) => boolean
   isSocietyAddonEnabled: (societyId: string | null | undefined, addon: SocietyAddonKey) => boolean
   isVoiceTicketingEnabled: (societyId?: string | null) => boolean
@@ -31,6 +40,7 @@ export function PlatformConfigProvider({ children }: { children: React.ReactNode
   const [config, setConfig] = useState<PlatformConfig>(() => readPlatformConfigFromStorage())
   const [loading, setLoading] = useState(true)
   const [supabaseSynced, setSupabaseSynced] = useState(false)
+  const [systemConfigSynced, setSystemConfigSynced] = useState(false)
 
   const refresh = useCallback(() => {
     setConfig(readPlatformConfigFromStorage())
@@ -43,8 +53,14 @@ export function PlatformConfigProvider({ children }: { children: React.ReactNode
       const remote = await loadPlatformConfigFromSupabase()
       if (!active) return
       if (remote) {
-        setConfig(remote)
+        const migrated = migrateLegacyRazorpayKeys(remote)
+        setConfig(migrated)
+        writeSystemConfigMirror(migrated)
         setSupabaseSynced(true)
+      } else {
+        const local = migrateLegacyRazorpayKeys(readPlatformConfigFromStorage())
+        setConfig(local)
+        writeSystemConfigMirror(local)
       }
       setLoading(false)
     })()
@@ -72,8 +88,20 @@ export function PlatformConfigProvider({ children }: { children: React.ReactNode
   const updateConfig = useCallback((patch: Partial<PlatformConfig>) => {
     const next = patchPlatformConfig(patch)
     setConfig(next)
+    writeSystemConfigMirror(next)
     void syncPlatformConfigToSupabase(next).then(setSupabaseSynced)
     return next
+  }, [])
+
+  const saveGlobalSettings = useCallback(async (patch?: Partial<PlatformConfig>) => {
+    const next = patch ? patchPlatformConfig(patch) : readPlatformConfigFromStorage()
+    setConfig(next)
+    writeSystemConfigMirror(next)
+    const supabaseOk = await syncPlatformConfigToSupabase(next)
+    setSupabaseSynced(supabaseOk)
+    const { remoteSynced } = await syncInfrastructureFromPlatformConfig(next)
+    setSystemConfigSynced(remoteSynced)
+    return { config: next, remoteSynced }
   }, [])
 
   const setSidebarModule = useCallback(
@@ -85,6 +113,15 @@ export function PlatformConfigProvider({ children }: { children: React.ReactNode
   const setSocietyAddon = useCallback((societyId: string, addon: SocietyAddonKey, enabled: boolean) => {
     const next = patchSocietyAddon(societyId, addon, enabled)
     setConfig(next)
+    writeSystemConfigMirror(next)
+    void syncPlatformConfigToSupabase(next).then(setSupabaseSynced)
+    return next
+  }, [])
+
+  const setSocietyGateway = useCallback((societyId: string, patch: Partial<SocietyGatewayConfig>) => {
+    const next = patchSocietyGateway(societyId, patch)
+    setConfig(next)
+    writeSystemConfigMirror(next)
     void syncPlatformConfigToSupabase(next).then(setSupabaseSynced)
     return next
   }, [])
@@ -111,9 +148,12 @@ export function PlatformConfigProvider({ children }: { children: React.ReactNode
       config,
       loading,
       supabaseSynced,
+      systemConfigSynced,
       updateConfig,
+      saveGlobalSettings,
       setSidebarModule,
       setSocietyAddon,
+      setSocietyGateway,
       isModuleEnabled,
       isSocietyAddonEnabled,
       isVoiceTicketingEnabled,
@@ -123,9 +163,12 @@ export function PlatformConfigProvider({ children }: { children: React.ReactNode
       config,
       loading,
       supabaseSynced,
+      systemConfigSynced,
       updateConfig,
+      saveGlobalSettings,
       setSidebarModule,
       setSocietyAddon,
+      setSocietyGateway,
       isModuleEnabled,
       isSocietyAddonEnabled,
       isVoiceTicketingEnabled,

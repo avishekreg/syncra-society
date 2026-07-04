@@ -29,7 +29,7 @@ export default function BankStatementReconciliation() {
       if (unit.flat_number === paymentMatchedFlat) {
         return {
           ...unit,
-          balance_status: 'paid',
+          balance_status: 'paid' as const,
           balance_due: 0,
           payment_history: [
             ...unit.payment_history,
@@ -41,7 +41,9 @@ export default function BankStatementReconciliation() {
     })
 
     const updatedDefaulters = showcaseData.defaulters.map((defaulter) =>
-      defaulter.flat_number === paymentMatchedFlat ? { ...defaulter, status: 'paid', amount_due: 0, penalty: 0 } : defaulter
+      defaulter.flat_number === paymentMatchedFlat
+        ? { ...defaulter, status: 'paid' as const, amount_due: 0, penalty: 0 }
+        : defaulter
     )
 
     const newLedgerEntry = {

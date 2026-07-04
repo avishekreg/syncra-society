@@ -83,7 +83,7 @@ export default function DefaulterBoard() {
               <div className={`mt-4 grid gap-3 text-sm ${ui.body}`}>
                 <div>
                   <p className="text-slate-500">Billing month</p>
-                  <p>{defaulter.due_month}</p>
+                  <p>{new Date(defaulter.created_at).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</p>
                 </div>
                 <div>
                   <p className="text-slate-500">Outstanding</p>
