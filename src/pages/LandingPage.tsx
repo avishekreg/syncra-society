@@ -283,21 +283,21 @@ export default function LandingPage() {
       </main>
 
       <footer className="border-t border-slate-200 bg-syncra-surface-alt py-8 text-slate-600">
-        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 md:flex-row md:items-center md:justify-between">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 sm:px-6 md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
             <p className="text-sm font-semibold text-syncra-primary">Developed by Syncra Systems</p>
             <p className="text-sm">Premium society management for modern communities.</p>
           </div>
           <div className="flex flex-wrap gap-4 text-sm text-slate-600">
-            <a href="#" className="hover:text-syncra-blue">
+            <Link to="/legal/terms" className="hover:text-syncra-blue">
               Terms & Conditions
-            </a>
-            <a href="#" className="hover:text-syncra-blue">
-              Rules
-            </a>
-            <a href="#" className="hover:text-syncra-blue">
-              Refund Policies
-            </a>
+            </Link>
+            <Link to="/legal/privacy" className="hover:text-syncra-blue">
+              Privacy Policy
+            </Link>
+            <Link to="/legal/refund" className="hover:text-syncra-blue">
+              Refund & Cancellation
+            </Link>
           </div>
         </div>
       </footer>

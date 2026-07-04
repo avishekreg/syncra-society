@@ -12,6 +12,9 @@ import SuperAdminMasterConfig from '../pages/super-admin/MasterConfig'
 import { ui } from '../lib/ui'
 
 const LandingPage = lazy(() => import('../pages/LandingPage'))
+const TermsAndConditions = lazy(() => import('../pages/legal/TermsAndConditions'))
+const PrivacyPolicy = lazy(() => import('../pages/legal/PrivacyPolicy'))
+const RefundPolicy = lazy(() => import('../pages/legal/RefundPolicy'))
 const AuthRouter = lazy(() => import('./AuthRouter'))
 const SignUp = lazy(() => import('../pages/auth/SignUp'))
 const OnboardingRouter = lazy(() => import('./OnboardingRouter'))
@@ -25,6 +28,9 @@ export default function AppRouter() {
       <Suspense fallback={<div className={ui.loading}>Loading...</div>}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/legal/terms" element={<TermsAndConditions />} />
+          <Route path="/legal/privacy" element={<PrivacyPolicy />} />
+          <Route path="/legal/refund" element={<RefundPolicy />} />
           <Route path="/auth/*" element={<AuthRouter />} />
           <Route path="/register" element={<SignUp />} />
           <Route
