@@ -82,9 +82,13 @@ function NavGroup({ label, paths, defaultOpen = false, children }: NavGroupProps
 }
 
 export default function Sidebar({ children }: { children?: React.ReactNode }) {
-  const { user, signOut } = useAuth()
+  const { user, signOut, currentSocietyId } = useAuth()
   const { isModuleEnabled } = usePlatformConfig()
   const navigate = useNavigate()
+
+  const societyScope = currentSocietyId
+  const moduleEnabled = (key: Parameters<typeof isModuleEnabled>[0]) =>
+    isModuleEnabled(key, societyScope)
 
   if (!user) {
     return (
@@ -104,24 +108,24 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
   }
 
   const residentCommunityPaths = [
-    ...(isModuleEnabled('surveys') ? ['/resident/surveys'] : []),
-    ...(isModuleEnabled('gallery') ? ['/resident/gallery'] : []),
-    ...(isModuleEnabled('elections') ? ['/resident/elections'] : []),
-    ...(isModuleEnabled('rewards') ? ['/resident/rewards'] : [])
+    ...(moduleEnabled('surveys') ? ['/resident/surveys'] : []),
+    ...(moduleEnabled('gallery') ? ['/resident/gallery'] : []),
+    ...(moduleEnabled('elections') ? ['/resident/elections'] : []),
+    ...(moduleEnabled('rewards') ? ['/resident/rewards'] : [])
   ]
 
   const rwaControlPaths = [
-    ...(isModuleEnabled('surveys') ? ['/rwa/surveys'] : []),
-    ...(isModuleEnabled('gallery') ? ['/rwa/gallery'] : []),
-    ...(isModuleEnabled('elections') ? ['/rwa/elections'] : []),
-    ...(isModuleEnabled('rewards') ? ['/rwa/rewards'] : [])
+    ...(moduleEnabled('surveys') ? ['/rwa/surveys'] : []),
+    ...(moduleEnabled('gallery') ? ['/rwa/gallery'] : []),
+    ...(moduleEnabled('elections') ? ['/rwa/elections'] : []),
+    ...(moduleEnabled('rewards') ? ['/rwa/rewards'] : [])
   ]
 
   const showResidentCommunity =
-    isModuleEnabled('surveys') ||
-    isModuleEnabled('gallery') ||
-    isModuleEnabled('elections') ||
-    isModuleEnabled('rewards')
+    moduleEnabled('surveys') ||
+    moduleEnabled('gallery') ||
+    moduleEnabled('elections') ||
+    moduleEnabled('rewards')
 
   const superAdminPaths = [
     '/super-admin/societies',
@@ -162,34 +166,34 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
               <NavLink to="/resident" end className={navLinkClass}>
                 Resident Dashboard
               </NavLink>
-              {isModuleEnabled('helpdesk') && (
+              {moduleEnabled('helpdesk') && (
                 <NavLink to="/resident/helpdesk" className={navLinkClass}>
                   Smart Helpdesk
                 </NavLink>
               )}
-              {isModuleEnabled('visitorLogs') && (
+              {moduleEnabled('visitorLogs') && (
                 <NavLink to="/resident/visitor-logs" className={navLinkClass}>
                   Visitor Logs
                 </NavLink>
               )}
               {showResidentCommunity && (
                 <NavGroup label="Community & Governance" paths={residentCommunityPaths}>
-                  {isModuleEnabled('surveys') && (
+                  {moduleEnabled('surveys') && (
                     <NavLink to="/resident/surveys" className={subNavLinkClass}>
                       Surveys
                     </NavLink>
                   )}
-                  {isModuleEnabled('gallery') && (
+                  {moduleEnabled('gallery') && (
                     <NavLink to="/resident/gallery" className={subNavLinkClass}>
                       Photo Gallery
                     </NavLink>
                   )}
-                  {isModuleEnabled('elections') && (
+                  {moduleEnabled('elections') && (
                     <NavLink to="/resident/elections" className={subNavLinkClass}>
                       Elections
                     </NavLink>
                   )}
-                  {isModuleEnabled('rewards') && (
+                  {moduleEnabled('rewards') && (
                     <NavLink to="/resident/rewards" className={subNavLinkClass}>
                       Rewards & Recognition
                     </NavLink>
@@ -210,7 +214,7 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
                     <NavLink to="/admin/dashboard" className={subNavLinkClass}>
                       Analytics Overview
                     </NavLink>
-                    {isModuleEnabled('notices') && (
+                    {moduleEnabled('notices') && (
                       <NavLink to="/admin/notices" className={subNavLinkClass}>
                         Notices
                       </NavLink>
@@ -221,34 +225,34 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
                   </NavGroup>
                   {showRwaControls && (
                     <NavGroup label="RWA Controls" paths={rwaControlPaths}>
-                      {isModuleEnabled('surveys') && (
+                      {moduleEnabled('surveys') && (
                         <NavLink to="/rwa/surveys" className={subNavLinkClass}>
                           Surveys
                         </NavLink>
                       )}
-                      {isModuleEnabled('gallery') && (
+                      {moduleEnabled('gallery') && (
                         <NavLink to="/rwa/gallery" className={subNavLinkClass}>
                           Gallery Management
                         </NavLink>
                       )}
-                      {isModuleEnabled('elections') && (
+                      {moduleEnabled('elections') && (
                         <NavLink to="/rwa/elections" className={subNavLinkClass}>
                           Elections
                         </NavLink>
                       )}
-                      {isModuleEnabled('rewards') && (
+                      {moduleEnabled('rewards') && (
                         <NavLink to="/rwa/rewards" className={subNavLinkClass}>
                           Rewards & Governance
                         </NavLink>
                       )}
                     </NavGroup>
                   )}
-                  {isModuleEnabled('gatekeeper') && (
+                  {moduleEnabled('gatekeeper') && (
                     <NavLink to="/rwa/gatekeeper" className={navLinkClass}>
                       Guard Console
                     </NavLink>
                   )}
-                  {isModuleEnabled('whatsappAutomation') && (
+                  {moduleEnabled('whatsappAutomation') && (
                     <NavLink to="/rwa/whatsapp" className={navLinkClass}>
                       WhatsApp Automation
                     </NavLink>

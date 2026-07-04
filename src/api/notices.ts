@@ -3,7 +3,7 @@ import { restGet, restPost, restDelete } from './supabaseClient'
 import { isRemoteSocietyId } from './societies'
 import { uploadDocument } from '../utils/upload'
 import { logActivity } from '../lib/activityLog'
-import { N8N_PRODUCTION_WEBHOOK_URL } from '../lib/n8nConfig'
+import { resolveClientN8nWebhookUrl } from '../lib/n8nConfig'
 import { listRegisteredSocieties } from '../lib/societyRegistry'
 import {
   resolveNoticeReceiverPhones,
@@ -176,7 +176,8 @@ async function postNoticePublishedToN8n(notice: Notice) {
         }
       }
 
-      const res = await fetch(N8N_PRODUCTION_WEBHOOK_URL, {
+      const webhookUrl = resolveClientN8nWebhookUrl()
+      const res = await fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -187,7 +188,7 @@ async function postNoticePublishedToN8n(notice: Notice) {
         console.warn(
           `[notices] n8n webhook failed (${res.status})`,
           text || res.statusText,
-          N8N_PRODUCTION_WEBHOOK_URL
+          webhookUrl
         )
       }
     })

@@ -1,3 +1,5 @@
+import { N8N_PRODUCTION_WEBHOOK_URL } from '../../lib/n8n-config'
+
 export type SidebarModuleKey =
   | 'helpdesk'
   | 'visitorLogs'
@@ -8,6 +10,23 @@ export type SidebarModuleKey =
   | 'gatekeeper'
   | 'notices'
   | 'whatsappAutomation'
+
+export type SocietyAddonKey =
+  | 'whatsappAlerts'
+  | 'electionModule'
+  | 'voiceTicketing'
+  | 'smartHelpdesk'
+
+export type AiUtilitiesConfig = {
+  huggingFaceToken: string
+  voiceModel: string
+  noticeEnhancerModel: string
+}
+
+export type CommunicationsConfig = {
+  n8nWebhookUrl: string
+  twilioSenderPhone: string
+}
 
 export type SurveyEngineConfig = {
   enabled: boolean
@@ -27,9 +46,53 @@ export type ElectionModuleConfig = {
 
 export type PlatformConfig = {
   sidebarModules: Record<SidebarModuleKey, boolean>
+  aiUtilities: AiUtilitiesConfig
+  communications: CommunicationsConfig
+  societyAddons: Record<string, Partial<Record<SocietyAddonKey, boolean>>>
   surveyEngine: SurveyEngineConfig
   electionModule: ElectionModuleConfig
   updatedAt: string
+}
+
+export const VOICE_MODEL_OPTIONS = [
+  { value: 'openai/whisper-large-v3', label: 'openai/whisper-large-v3 (default)' },
+  { value: 'openai/whisper-large-v2', label: 'openai/whisper-large-v2' },
+  { value: 'openai/whisper-medium', label: 'openai/whisper-medium' }
+] as const
+
+export const NOTICE_ENHANCER_MODEL_OPTIONS = [
+  {
+    value: 'meta-llama/Meta-Llama-3-8B-Instruct',
+    label: 'meta-llama/Meta-Llama-3-8B-Instruct (default)'
+  },
+  { value: 'meta-llama/Meta-Llama-3-70B-Instruct', label: 'meta-llama/Meta-Llama-3-70B-Instruct' },
+  { value: 'mistralai/Mistral-7B-Instruct-v0.2', label: 'mistralai/Mistral-7B-Instruct-v0.2' }
+] as const
+
+export const SOCIETY_ADDON_LABELS: Record<
+  SocietyAddonKey,
+  { label: string; description: string; sidebarKeys: SidebarModuleKey[] }
+> = {
+  whatsappAlerts: {
+    label: 'WhatsApp Alerts',
+    description: 'n8n notice broadcasts and WhatsApp automation',
+    sidebarKeys: ['whatsappAutomation', 'notices']
+  },
+  electionModule: {
+    label: 'Election Module',
+    description: 'Encrypted multi-position resident elections',
+    sidebarKeys: ['elections']
+  },
+  voiceTicketing: {
+    label: 'Voice Ticketing',
+    description: 'Speech-to-text on Smart Helpdesk tickets',
+    sidebarKeys: ['helpdesk']
+  },
+  smartHelpdesk: {
+    label: 'Smart Helpdesk',
+    description: 'Resident complaint and ticket portal',
+    sidebarKeys: ['helpdesk']
+  }
 }
 
 export const SIDEBAR_MODULE_LABELS: Record<
@@ -46,3 +109,5 @@ export const SIDEBAR_MODULE_LABELS: Record<
   notices: { label: 'Notices', description: 'Society announcements', scope: 'rwa' },
   whatsappAutomation: { label: 'WhatsApp Automation', description: 'n8n broadcast routing', scope: 'rwa' }
 }
+
+export { N8N_PRODUCTION_WEBHOOK_URL }

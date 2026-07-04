@@ -1,8 +1,12 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import type { PlatformConfig, SidebarModuleKey } from '../types/platformConfig'
+import type { PlatformConfig, SidebarModuleKey, SocietyAddonKey } from '../types/platformConfig'
 import {
+  isSidebarModuleEnabled as resolveSidebarModuleEnabled,
+  isSocietyAddonEnabled as resolveSocietyAddonEnabled,
+  isVoiceTicketingEnabled as resolveVoiceTicketingEnabled,
   loadPlatformConfigFromSupabase,
   patchPlatformConfig,
+  patchSocietyAddon,
   PLATFORM_CONFIG_CHANGED_EVENT,
   readPlatformConfigFromStorage,
   syncPlatformConfigToSupabase
@@ -14,7 +18,10 @@ type PlatformConfigContextValue = {
   supabaseSynced: boolean
   updateConfig: (patch: Partial<PlatformConfig>) => PlatformConfig
   setSidebarModule: (key: SidebarModuleKey, enabled: boolean) => PlatformConfig
-  isModuleEnabled: (key: SidebarModuleKey) => boolean
+  setSocietyAddon: (societyId: string, addon: SocietyAddonKey, enabled: boolean) => PlatformConfig
+  isModuleEnabled: (key: SidebarModuleKey, societyId?: string | null) => boolean
+  isSocietyAddonEnabled: (societyId: string | null | undefined, addon: SocietyAddonKey) => boolean
+  isVoiceTicketingEnabled: (societyId?: string | null) => boolean
   refresh: () => void
 }
 
@@ -75,9 +82,28 @@ export function PlatformConfigProvider({ children }: { children: React.ReactNode
     [config.sidebarModules, updateConfig]
   )
 
+  const setSocietyAddon = useCallback((societyId: string, addon: SocietyAddonKey, enabled: boolean) => {
+    const next = patchSocietyAddon(societyId, addon, enabled)
+    setConfig(next)
+    void syncPlatformConfigToSupabase(next).then(setSupabaseSynced)
+    return next
+  }, [])
+
   const isModuleEnabled = useCallback(
-    (key: SidebarModuleKey) => config.sidebarModules[key],
-    [config.sidebarModules]
+    (key: SidebarModuleKey, societyId?: string | null) =>
+      resolveSidebarModuleEnabled(key, { societyId, config }),
+    [config]
+  )
+
+  const isSocietyAddonEnabled = useCallback(
+    (societyId: string | null | undefined, addon: SocietyAddonKey) =>
+      resolveSocietyAddonEnabled(societyId, addon, config),
+    [config]
+  )
+
+  const isVoiceTicketingEnabled = useCallback(
+    (societyId?: string | null) => resolveVoiceTicketingEnabled(societyId, config),
+    [config]
   )
 
   const value = useMemo<PlatformConfigContextValue>(
@@ -87,10 +113,24 @@ export function PlatformConfigProvider({ children }: { children: React.ReactNode
       supabaseSynced,
       updateConfig,
       setSidebarModule,
+      setSocietyAddon,
       isModuleEnabled,
+      isSocietyAddonEnabled,
+      isVoiceTicketingEnabled,
       refresh
     }),
-    [config, loading, supabaseSynced, updateConfig, setSidebarModule, isModuleEnabled, refresh]
+    [
+      config,
+      loading,
+      supabaseSynced,
+      updateConfig,
+      setSidebarModule,
+      setSocietyAddon,
+      isModuleEnabled,
+      isSocietyAddonEnabled,
+      isVoiceTicketingEnabled,
+      refresh
+    ]
   )
 
   return <PlatformConfigContext.Provider value={value}>{children}</PlatformConfigContext.Provider>

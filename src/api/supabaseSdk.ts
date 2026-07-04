@@ -8,9 +8,15 @@ if (!rawUrl || !ANON_KEY) {
   console.warn('[syncra-society] Missing Supabase env — auth features may be limited until .env is configured.')
 }
 
-// supabase-js expects the project URL (not the /rest/v1 path). Strip rest/v1 if present.
 const PROJECT_URL = (rawUrl || 'https://placeholder.supabase.co').replace(/\/rest\/v1\/?$/i, '')
 
-const supabase: SupabaseClient = createClient(PROJECT_URL, ANON_KEY || 'placeholder-anon-key')
+const supabase: SupabaseClient = createClient(PROJECT_URL, ANON_KEY || 'placeholder-anon-key', {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined
+  }
+})
 
 export default supabase

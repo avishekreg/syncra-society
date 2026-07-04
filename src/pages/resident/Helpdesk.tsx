@@ -6,6 +6,7 @@ import {
   useWebSpeech,
   type WebSpeechLanguage
 } from '../../hooks/useWebSpeech'
+import { usePlatformConfig } from '../../providers/PlatformConfigProvider'
 import { ui } from '../../lib/ui'
 
 const categories = ['Infrastructure', 'Security', 'Sanitation', 'Electrical']
@@ -22,6 +23,8 @@ function mergeTranscriptIntoDescription(existing: string, spoken: string) {
 
 export default function ResidentHelpdesk() {
   const { currentSocietyId, user } = useAuth()
+  const { isModuleEnabled, isVoiceTicketingEnabled } = usePlatformConfig()
+  const voiceEnabled = isVoiceTicketingEnabled(currentSocietyId)
   const { complaints, loading, submitComplaint, refresh } = useComplaints(currentSocietyId, user?.id ?? null)
   const [subject, setSubject] = useState('')
   const [category, setCategory] = useState(categories[0])
@@ -100,6 +103,18 @@ export default function ResidentHelpdesk() {
     }
   }
 
+  if (!isModuleEnabled('helpdesk', currentSocietyId)) {
+    return (
+      <div className={ui.card}>
+        <p className={ui.eyebrow}>Smart Helpdesk</p>
+        <h2 className={`mt-3 ${ui.heading}`}>Module unavailable</h2>
+        <p className={`mt-3 ${ui.body}`}>
+          Smart Helpdesk is disabled for your society. Contact your RWA or platform administrator.
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div className={ui.sectionGap}>
       <section className={ui.card}>
@@ -144,6 +159,7 @@ export default function ResidentHelpdesk() {
           <div className="space-y-3">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <span className={ui.label}>Description</span>
+              {voiceEnabled && (
               <div className="flex flex-wrap items-center gap-2">
                 <div className="inline-flex rounded-xl border border-slate-200 bg-syncra-surface-alt p-1 text-xs font-semibold">
                   <button
@@ -197,6 +213,7 @@ export default function ResidentHelpdesk() {
                   {isListening ? 'Stop recording' : 'Record voice note'}
                 </button>
               </div>
+              )}
             </div>
 
             <textarea
@@ -207,10 +224,16 @@ export default function ResidentHelpdesk() {
               }}
               rows={6}
               className={`${ui.input} ${isListening ? 'border-syncra-accent ring-2 ring-syncra-accent/15' : ''}`}
-              placeholder="Type your issue or tap the mic to dictate in English or Hindi"
+              placeholder={voiceEnabled ? 'Type your issue or tap the mic to dictate in English or Hindi' : 'Type your issue details'}
             />
 
-            {isListening && (
+            {!voiceEnabled && (
+              <p className="text-xs text-slate-500">
+                Voice ticketing is disabled for your society. Type your issue manually above.
+              </p>
+            )}
+
+            {voiceEnabled && isListening && (
               <div className="rounded-xl border border-syncra-accent/30 bg-cyan-50 px-4 py-3">
                 <p className="text-sm font-semibold text-syncra-blue">
                   Listening… speak clearly. We will append your voice note without erasing typed text.
@@ -221,19 +244,19 @@ export default function ResidentHelpdesk() {
               </div>
             )}
 
-            {!isSupported && (
+            {voiceEnabled && !isSupported && (
               <p className="text-sm text-syncra-action-alt">
                 Voice dictation is not supported in this browser. Use Chrome on Android or Safari on iOS.
               </p>
             )}
 
-            {permissionDenied && speechError === 'not-allowed' && (
+            {voiceEnabled && permissionDenied && speechError === 'not-allowed' && (
               <div className="rounded-xl border border-syncra-action-alt/30 bg-red-50 px-4 py-3">
                 <p className="whitespace-pre-line text-sm text-red-700">{getMicrophonePermissionHelpMessage()}</p>
               </div>
             )}
 
-            {speechError && speechError !== 'not-allowed' && (
+            {voiceEnabled && speechError && speechError !== 'not-allowed' && (
               <p className="text-sm text-syncra-action-alt">
                 Voice capture interrupted ({speechError}). You can keep typing manually.
               </p>

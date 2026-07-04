@@ -16,6 +16,15 @@ import {
   verifyAppEmailCode,
   verificationRedirectUrl
 } from '../lib/emailVerification'
+import {
+  clearAuthPersistence,
+  hasSuperAdminSession,
+  markSuperAdminSession,
+  readAuthSnapshot,
+  readPersistedSocietyId,
+  saveAuthSnapshot,
+  type AuthSnapshot
+} from '../lib/authSession'
 
 type SubscriptionTier = 'tier1' | 'tier2' | 'tier3'
 
@@ -81,6 +90,7 @@ export interface ShowcaseData {
 const AuthContext = createContext<
   | {
       user: User | null
+      initializing: boolean
       setUser: (u: User | null) => void
       currentSocietyId: string | null
       setCurrentSocietyId: (s: string | null) => void
@@ -97,8 +107,22 @@ const AuthContext = createContext<
 >(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [currentSocietyId, setCurrentSocietyId] = useState<string | null>(null)
+  const [user, setUser] = useState<User | null>(() => {
+    const snapshot = readAuthSnapshot()
+    if (!snapshot) return null
+    return {
+      id: snapshot.id,
+      email: snapshot.email,
+      roles: snapshot.roles,
+      tier: snapshot.tier,
+      role: snapshot.role,
+      flatNumber: snapshot.flatNumber ?? null,
+      user_metadata: { role: snapshot.role, tier: snapshot.tier },
+      app_metadata: { provider: snapshot.kind === 'supabase' ? 'email' : 'local' }
+    }
+  })
+  const [initializing, setInitializing] = useState(true)
+  const [currentSocietyId, setCurrentSocietyId] = useState<string | null>(() => readPersistedSocietyId())
   const [showcaseData, setShowcaseData] = useState<ShowcaseData | null>(null)
 
   const demoShowcaseData: ShowcaseData = {
@@ -224,6 +248,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     ]
   }
 
+  function persistAuthSession(nextUser: User | null, societyId?: string | null, kind?: AuthSnapshot['kind']) {
+    if (!nextUser) {
+      clearAuthPersistence()
+      return
+    }
+
+    saveAuthSnapshot(
+      {
+        id: nextUser.id,
+        email: nextUser.email,
+        roles: nextUser.roles,
+        tier: nextUser.tier,
+        role: nextUser.role,
+        flatNumber: nextUser.flatNumber,
+        kind: kind ?? (nextUser.id.startsWith('demo-') ? 'demo' : 'supabase')
+      },
+      societyId
+    )
+  }
+
+  function restoreSuperAdminSession() {
+    if (!hasSuperAdminSession()) return false
+    const nextUser = buildUser(
+      { id: DEV_SUPER_ADMIN.id, email: DEV_SUPER_ADMIN.email },
+      DEV_SUPER_ADMIN.roles,
+      'tier3'
+    )
+    setUser(nextUser)
+    setCurrentSocietyId(null)
+    setShowcaseData(null)
+    persistAuthSession(nextUser, null, 'super_admin')
+    return true
+  }
+
   function restoreDemoSession() {
     const storedDemo = localStorage.getItem(DEMO_AUTH_KEY)
     if (!storedDemo) return false
@@ -250,6 +308,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(nextUser)
       setCurrentSocietyId(parsed.currentSocietyId)
       setShowcaseData(demoShowcaseData)
+      persistAuthSession(nextUser, parsed.currentSocietyId, 'demo')
       if (parsed.currentSocietyId) {
         seedDemoBillingStatus(parsed.currentSocietyId, demoShowcaseData.society.name)
       }
@@ -381,58 +440,112 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
-    restoreDemoSession()
+    let active = true
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    async function bootstrapAuth() {
+      if (restoreDemoSession()) {
+        if (active) setInitializing(false)
+        return
+      }
+      if (restoreSuperAdminSession()) {
+        if (active) setInitializing(false)
+        return
+      }
+
+      const { data } = await supabase.auth.getSession()
+      if (!active) return
+
+      const session = data.session
+      if (session?.user) {
+        if (!canAccessPortal(session.user)) {
+          setUser(null)
+          setCurrentSocietyId(null)
+          setShowcaseData(null)
+          clearAuthPersistence()
+        } else {
+          localStorage.removeItem(DEMO_AUTH_KEY)
+          markSuperAdminSession(isSuperAdminEmail(session.user.email ?? ''))
+          const roles = isSuperAdminEmail(session.user.email ?? '') ? DEV_SUPER_ADMIN.roles : []
+          const nextUser = buildUser(session.user, roles)
+          setUser(nextUser)
+          persistAuthSession(
+            nextUser,
+            readPersistedSocietyId(),
+            isSuperAdminEmail(session.user.email ?? '') ? 'super_admin' : 'supabase'
+          )
+          await resolveSocietyId(session.user.id, session.user.email ?? undefined)
+        }
+      } else if (!hasSuperAdminSession() && !localStorage.getItem(DEMO_AUTH_KEY)) {
+        const snapshot = readAuthSnapshot()
+        if (!snapshot) {
+          setUser(null)
+          setCurrentSocietyId(null)
+          setShowcaseData(null)
+        }
+      }
+
+      if (active) setInitializing(false)
+    }
+
+    void bootstrapAuth()
+
+    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         if (!canAccessPortal(session.user)) {
           void supabase.auth.signOut()
           setUser(null)
           setCurrentSocietyId(null)
           setShowcaseData(null)
+          clearAuthPersistence()
           return
         }
 
         localStorage.removeItem(DEMO_AUTH_KEY)
+        markSuperAdminSession(isSuperAdminEmail(session.user.email ?? ''))
         const roles = isSuperAdminEmail(session.user.email ?? '') ? DEV_SUPER_ADMIN.roles : []
         const nextUser = buildUser(session.user, roles)
         setUser(nextUser)
-        void resolveSocietyId(session.user.id, session.user.email ?? undefined)
+        persistAuthSession(
+          nextUser,
+          readPersistedSocietyId(),
+          isSuperAdminEmail(session.user.email ?? '') ? 'super_admin' : 'supabase'
+        )
+        await resolveSocietyId(session.user.id, session.user.email ?? undefined)
         return
       }
 
-      if (!localStorage.getItem(DEMO_AUTH_KEY)) {
-        setUser(null)
-        setCurrentSocietyId(null)
-        setShowcaseData(null)
-      } else {
-        restoreDemoSession()
-      }
-    })
-
-    supabase.auth.getSession().then(({ data }) => {
-      const session = data.session
       if (localStorage.getItem(DEMO_AUTH_KEY)) {
         restoreDemoSession()
         return
       }
-      if (session?.user) {
-        if (!canAccessPortal(session.user)) {
-          setUser(null)
-          setCurrentSocietyId(null)
-          setShowcaseData(null)
-          return
-        }
-        const roles = isSuperAdminEmail(session.user.email ?? '') ? DEV_SUPER_ADMIN.roles : []
-        setUser(buildUser(session.user, roles))
-        void resolveSocietyId(session.user.id, session.user.email ?? undefined)
+      if (hasSuperAdminSession()) {
+        restoreSuperAdminSession()
+        return
+      }
+
+      if (!readAuthSnapshot()) {
+        setUser(null)
+        setCurrentSocietyId(null)
+        setShowcaseData(null)
+        clearAuthPersistence()
       }
     })
 
     return () => {
+      active = false
       listener?.subscription.unsubscribe()
     }
   }, [])
+
+  useEffect(() => {
+    if (!user || initializing) return
+    if (user.id.startsWith('demo-')) return
+    persistAuthSession(
+      user,
+      currentSocietyId,
+      hasSuperAdminSession() ? 'super_admin' : 'supabase'
+    )
+  }, [user, currentSocietyId, initializing])
 
   async function signUp(
     email: string,
@@ -577,6 +690,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(fallbackUser)
       setCurrentSocietyId(null)
       setShowcaseData(null)
+      markSuperAdminSession(true)
+      persistAuthSession(fallbackUser, null, 'super_admin')
       return { data: { user: fallbackUser }, user: fallbackUser, societyId: null }
     }
 
@@ -632,6 +747,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           flatNumber: demoLogin.flatNumber ?? null
         })
       )
+      markSuperAdminSession(false)
+      persistAuthSession(nextUser, DEMO_SOCIETY_ID, 'demo')
       return {
         session: sessionPayload.session,
         data: { user: nextUser },
@@ -715,6 +832,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       setShowcaseData(null)
       localStorage.removeItem(DEMO_AUTH_KEY)
+      markSuperAdminSession(false)
+      persistAuthSession(nextUser, societyId, 'supabase')
       return { ...res, user: nextUser, societyId }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
@@ -728,12 +847,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setCurrentSocietyId(null)
     setShowcaseData(null)
     localStorage.removeItem(DEMO_AUTH_KEY)
+    clearAuthPersistence()
   }
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        initializing,
         setUser,
         currentSocietyId,
         setCurrentSocietyId,

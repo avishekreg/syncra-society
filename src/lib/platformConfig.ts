@@ -1,15 +1,26 @@
 import type {
+  AiUtilitiesConfig,
+  CommunicationsConfig,
   ElectionModuleConfig,
   PlatformConfig,
   SidebarModuleKey,
+  SocietyAddonKey,
   SurveyEngineConfig
 } from '../types/platformConfig'
+import { N8N_PRODUCTION_WEBHOOK_URL } from '../../lib/n8n-config'
 import { restGet, restPatch, restPost } from '../api/supabaseClient'
 
 export const PLATFORM_CONFIG_STORAGE_KEY = 'syncra-platform-config'
 export const PLATFORM_CONFIG_CHANGED_EVENT = 'syncra-platform-config-changed'
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || import.meta.env.NEXT_PUBLIC_SUPABASE_URL || ''
+
+export const DEFAULT_SOCIETY_ADDONS: Record<SocietyAddonKey, boolean> = {
+  whatsappAlerts: true,
+  electionModule: true,
+  voiceTicketing: true,
+  smartHelpdesk: true
+}
 
 export const DEFAULT_PLATFORM_CONFIG: PlatformConfig = {
   sidebarModules: {
@@ -23,6 +34,16 @@ export const DEFAULT_PLATFORM_CONFIG: PlatformConfig = {
     notices: true,
     whatsappAutomation: true
   },
+  aiUtilities: {
+    huggingFaceToken: '',
+    voiceModel: 'openai/whisper-large-v3',
+    noticeEnhancerModel: 'meta-llama/Meta-Llama-3-8B-Instruct'
+  },
+  communications: {
+    n8nWebhookUrl: N8N_PRODUCTION_WEBHOOK_URL,
+    twilioSenderPhone: '+14155238886'
+  },
+  societyAddons: {},
   surveyEngine: {
     enabled: true,
     maxQuestionsPerSurvey: 10,
@@ -40,10 +61,25 @@ export const DEFAULT_PLATFORM_CONFIG: PlatformConfig = {
   updatedAt: new Date(0).toISOString()
 }
 
+const MODULE_ADDON_MAP: Partial<Record<SidebarModuleKey, SocietyAddonKey>> = {
+  helpdesk: 'smartHelpdesk',
+  elections: 'electionModule',
+  whatsappAutomation: 'whatsappAlerts',
+  notices: 'whatsappAlerts'
+}
+
 function mergeSidebarModules(
   partial?: Partial<Record<SidebarModuleKey, boolean>>
 ): Record<SidebarModuleKey, boolean> {
   return { ...DEFAULT_PLATFORM_CONFIG.sidebarModules, ...partial }
+}
+
+function mergeAiUtilities(partial?: Partial<AiUtilitiesConfig>): AiUtilitiesConfig {
+  return { ...DEFAULT_PLATFORM_CONFIG.aiUtilities, ...partial }
+}
+
+function mergeCommunications(partial?: Partial<CommunicationsConfig>): CommunicationsConfig {
+  return { ...DEFAULT_PLATFORM_CONFIG.communications, ...partial }
 }
 
 function mergeSurveyEngine(partial?: Partial<SurveyEngineConfig>): SurveyEngineConfig {
@@ -63,6 +99,9 @@ function mergeElectionModule(partial?: Partial<ElectionModuleConfig>): ElectionM
 export function normalizePlatformConfig(raw: Partial<PlatformConfig> | null | undefined): PlatformConfig {
   return {
     sidebarModules: mergeSidebarModules(raw?.sidebarModules),
+    aiUtilities: mergeAiUtilities(raw?.aiUtilities),
+    communications: mergeCommunications(raw?.communications),
+    societyAddons: raw?.societyAddons ?? {},
     surveyEngine: mergeSurveyEngine(raw?.surveyEngine),
     electionModule: mergeElectionModule(raw?.electionModule),
     updatedAt: raw?.updatedAt ?? new Date().toISOString()
@@ -79,13 +118,43 @@ export function readPlatformConfigFromStorage(): PlatformConfig {
   }
 }
 
-/** Synchronous read for API modules outside React context. */
 export function getPlatformConfig(): PlatformConfig {
   return readPlatformConfigFromStorage()
 }
 
-export function isSidebarModuleEnabled(key: SidebarModuleKey, config = getPlatformConfig()): boolean {
-  return config.sidebarModules[key] ?? DEFAULT_PLATFORM_CONFIG.sidebarModules[key]
+export function isSocietyAddonEnabled(
+  societyId: string | null | undefined,
+  addon: SocietyAddonKey,
+  config = getPlatformConfig()
+): boolean {
+  if (!societyId) return true
+  const societyGate = config.societyAddons[societyId]
+  if (!societyGate || societyGate[addon] === undefined) return DEFAULT_SOCIETY_ADDONS[addon]
+  return societyGate[addon] ?? DEFAULT_SOCIETY_ADDONS[addon]
+}
+
+export function isSidebarModuleEnabled(
+  key: SidebarModuleKey,
+  options?: { societyId?: string | null; config?: PlatformConfig }
+): boolean {
+  const config = options?.config ?? getPlatformConfig()
+  if (!config.sidebarModules[key]) return false
+
+  const addon = MODULE_ADDON_MAP[key]
+  if (addon && options?.societyId) {
+    if (!isSocietyAddonEnabled(options.societyId, addon, config)) return false
+  }
+
+  if (key === 'elections' && !config.electionModule.enabled) return false
+  if (key === 'surveys' && !config.surveyEngine.enabled) return false
+
+  return true
+}
+
+export function isVoiceTicketingEnabled(societyId?: string | null, config = getPlatformConfig()) {
+  if (!config.sidebarModules.helpdesk) return false
+  if (!isSocietyAddonEnabled(societyId, 'voiceTicketing', config)) return false
+  return isSocietyAddonEnabled(societyId, 'smartHelpdesk', config)
 }
 
 export function writePlatformConfigToStorage(config: PlatformConfig) {
@@ -101,6 +170,15 @@ export function patchPlatformConfig(patch: Partial<PlatformConfig>): PlatformCon
     sidebarModules: patch.sidebarModules
       ? mergeSidebarModules({ ...current.sidebarModules, ...patch.sidebarModules })
       : current.sidebarModules,
+    aiUtilities: patch.aiUtilities
+      ? mergeAiUtilities({ ...current.aiUtilities, ...patch.aiUtilities })
+      : current.aiUtilities,
+    communications: patch.communications
+      ? mergeCommunications({ ...current.communications, ...patch.communications })
+      : current.communications,
+    societyAddons: patch.societyAddons
+      ? { ...current.societyAddons, ...patch.societyAddons }
+      : current.societyAddons,
     surveyEngine: patch.surveyEngine
       ? mergeSurveyEngine({ ...current.surveyEngine, ...patch.surveyEngine })
       : current.surveyEngine,
@@ -113,7 +191,20 @@ export function patchPlatformConfig(patch: Partial<PlatformConfig>): PlatformCon
   return next
 }
 
-/** Best-effort Supabase mirror — falls back silently to localStorage-only mode. */
+export function patchSocietyAddon(
+  societyId: string,
+  addon: SocietyAddonKey,
+  enabled: boolean
+): PlatformConfig {
+  const current = readPlatformConfigFromStorage()
+  const existing = current.societyAddons[societyId] ?? {}
+  return patchPlatformConfig({
+    societyAddons: {
+      [societyId]: { ...existing, [addon]: enabled }
+    }
+  })
+}
+
 export async function syncPlatformConfigToSupabase(config: PlatformConfig): Promise<boolean> {
   if (!SUPABASE_URL) return false
 

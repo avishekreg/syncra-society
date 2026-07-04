@@ -1,9 +1,5 @@
 import { fetchAutomationSettings, fetchWhatsAppContacts } from './societyEvents'
-
-const DEFAULT_SENDER =
-  import.meta.env.VITE_SOCIETY_WHATSAPP_SENDER?.trim() ||
-  import.meta.env.NEXT_PUBLIC_SOCIETY_WHATSAPP_SENDER?.trim() ||
-  '+14155238886'
+import { resolveTwilioSenderPhone } from './n8nConfig'
 
 function readCachedSettings(societyId: string): { whatsappNumber?: string | null } | null {
   try {
@@ -34,7 +30,7 @@ export async function resolveSocietySenderWhatsapp(societyId: string): Promise<s
   const cached = readCachedSettings(societyId)
   if (cached?.whatsappNumber?.trim()) return cached.whatsappNumber.trim()
 
-  return DEFAULT_SENDER
+  return resolveTwilioSenderPhone()
 }
 
 export async function resolveNoticeReceiverPhones(societyId: string): Promise<string[]> {
