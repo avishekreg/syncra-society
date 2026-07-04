@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useAuth } from '../../providers/AuthProvider'
+import { usePlatformConfig } from '../../providers/PlatformConfigProvider'
 import { createSurvey, listSurveys, closeSurvey, getSurveyResults } from '../../api/surveys'
 import { ui } from '../../lib/ui'
 
@@ -8,17 +9,20 @@ type QuestionDraft = {
   options: string
 }
 
-const DEFAULT_QUESTIONS: QuestionDraft[] = [
+const FALLBACK_QUESTIONS: QuestionDraft[] = [
   { prompt: 'Should we approve the rooftop solar proposal?', options: 'Yes\nNo\nAbstain' },
   { prompt: 'Preferred vendor for annual painting?', options: 'Vendor A\nVendor B\nNeed more quotes' }
 ]
 
 export default function SurveysManager() {
   const { currentSocietyId } = useAuth()
+  const { config } = usePlatformConfig()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [questions, setQuestions] = useState<QuestionDraft[]>(DEFAULT_QUESTIONS)
+  const [questions, setQuestions] = useState<QuestionDraft[]>(FALLBACK_QUESTIONS)
   const [refresh, setRefresh] = useState(0)
+
+  const surveyConfig = config.surveyEngine
 
   const surveys = currentSocietyId ? listSurveys(currentSocietyId) : []
 
@@ -27,6 +31,7 @@ export default function SurveysManager() {
   }
 
   function addQuestion() {
+    if (questions.length >= surveyConfig.maxQuestionsPerSurvey) return
     setQuestions((current) => [...current, { prompt: '', options: 'Yes\nNo\nAbstain' }])
   }
 
@@ -49,11 +54,24 @@ export default function SurveysManager() {
       })
       setTitle('')
       setDescription('')
-      setQuestions(DEFAULT_QUESTIONS)
+      setQuestions(FALLBACK_QUESTIONS)
       setRefresh((n) => n + 1)
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : 'Unable to create survey')
     }
+  }
+
+  if (!surveyConfig.enabled) {
+    return (
+      <div className={ui.card}>
+        <p className={ui.eyebrow}>Surveys</p>
+        <h2 className={`mt-3 ${ui.heading}`}>Survey engine disabled</h2>
+        <p className={`mt-3 ${ui.body}`}>
+          The platform super admin has disabled the survey module globally. Enable it under Super Admin → Global
+          Platform Settings.
+        </p>
+      </div>
+    )
   }
 
   return (
@@ -67,8 +85,16 @@ export default function SurveysManager() {
 
           <div className="space-y-4">
             <div className="flex items-center justify-between gap-3">
-              <p className={ui.label}>Questions</p>
-              <button type="button" onClick={addQuestion} className={ui.btnGhost}>
+              <p className={ui.label}>
+                Questions ({questions.length}/{surveyConfig.maxQuestionsPerSurvey} max ·{' '}
+                {surveyConfig.maxOptionsPerQuestion} options each)
+              </p>
+              <button
+                type="button"
+                onClick={addQuestion}
+                disabled={questions.length >= surveyConfig.maxQuestionsPerSurvey}
+                className={ui.btnGhost}
+              >
                 Add question
               </button>
             </div>

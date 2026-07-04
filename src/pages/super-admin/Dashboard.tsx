@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ui } from '../../lib/ui'
+import MasterSystemConfig from '../../components/super-admin/MasterSystemConfig'
 
 const dashboardCards = [
   {
@@ -50,7 +51,8 @@ export default function SuperAdminDashboard() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-3 xl:grid-cols-4">
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {dashboardCards.map((card) => (
           <div key={card.title} className={`flex flex-col justify-between transition hover:-translate-y-0.5 ${ui.card}`}>
             <div>
@@ -63,7 +65,9 @@ export default function SuperAdminDashboard() {
             </Link>
           </div>
         ))}
+      </div>
 
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <div className={ui.card}>
           <div>
             <p className={ui.eyebrow}>Global Payment Settlement Engine</p>
@@ -88,6 +92,9 @@ export default function SuperAdminDashboard() {
             {status && <p className={ui.body}>{status}</p>}
           </form>
         </div>
+
+        <MasterSystemConfig />
       </div>
+    </div>
   )
 }

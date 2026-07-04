@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../providers/AuthProvider'
+import { usePlatformConfig } from '../../providers/PlatformConfigProvider'
 import { canAccessResidentPortal, isGlobalSuperAdmin, isRwaStaff } from '../../lib/roles'
 import { ui } from '../../lib/ui'
 
@@ -82,6 +83,7 @@ function NavGroup({ label, paths, defaultOpen = false, children }: NavGroupProps
 
 export default function Sidebar({ children }: { children?: React.ReactNode }) {
   const { user, signOut } = useAuth()
+  const { isModuleEnabled } = usePlatformConfig()
   const navigate = useNavigate()
 
   if (!user) {
@@ -102,13 +104,26 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
   }
 
   const residentCommunityPaths = [
-    '/resident/surveys',
-    '/resident/gallery',
-    '/resident/elections',
-    '/resident/rewards'
+    ...(isModuleEnabled('surveys') ? ['/resident/surveys'] : []),
+    ...(isModuleEnabled('gallery') ? ['/resident/gallery'] : []),
+    ...(isModuleEnabled('elections') ? ['/resident/elections'] : []),
+    ...(isModuleEnabled('rewards') ? ['/resident/rewards'] : [])
   ]
 
-  const rwaControlPaths = ['/rwa/surveys', '/rwa/gallery', '/rwa/elections', '/rwa/rewards']
+  const rwaControlPaths = [
+    ...(isModuleEnabled('surveys') ? ['/rwa/surveys'] : []),
+    ...(isModuleEnabled('gallery') ? ['/rwa/gallery'] : []),
+    ...(isModuleEnabled('elections') ? ['/rwa/elections'] : []),
+    ...(isModuleEnabled('rewards') ? ['/rwa/rewards'] : [])
+  ]
+
+  const showResidentCommunity =
+    isModuleEnabled('surveys') ||
+    isModuleEnabled('gallery') ||
+    isModuleEnabled('elections') ||
+    isModuleEnabled('rewards')
+
+  const showRwaControls = rwaControlPaths.length > 0
 
   return (
     <div className="flex min-h-screen bg-syncra-surface">
@@ -138,26 +153,40 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
               <NavLink to="/resident" end className={navLinkClass}>
                 Resident Dashboard
               </NavLink>
-              <NavLink to="/resident/helpdesk" className={navLinkClass}>
-                Smart Helpdesk
-              </NavLink>
-              <NavLink to="/resident/visitor-logs" className={navLinkClass}>
-                Visitor Logs
-              </NavLink>
-              <NavGroup label="Community & Governance" paths={residentCommunityPaths}>
-                <NavLink to="/resident/surveys" className={subNavLinkClass}>
-                  Surveys
+              {isModuleEnabled('helpdesk') && (
+                <NavLink to="/resident/helpdesk" className={navLinkClass}>
+                  Smart Helpdesk
                 </NavLink>
-                <NavLink to="/resident/gallery" className={subNavLinkClass}>
-                  Photo Gallery
+              )}
+              {isModuleEnabled('visitorLogs') && (
+                <NavLink to="/resident/visitor-logs" className={navLinkClass}>
+                  Visitor Logs
                 </NavLink>
-                <NavLink to="/resident/elections" className={subNavLinkClass}>
-                  Elections
-                </NavLink>
-                <NavLink to="/resident/rewards" className={subNavLinkClass}>
-                  Rewards & Recognition
-                </NavLink>
-              </NavGroup>
+              )}
+              {showResidentCommunity && (
+                <NavGroup label="Community & Governance" paths={residentCommunityPaths}>
+                  {isModuleEnabled('surveys') && (
+                    <NavLink to="/resident/surveys" className={subNavLinkClass}>
+                      Surveys
+                    </NavLink>
+                  )}
+                  {isModuleEnabled('gallery') && (
+                    <NavLink to="/resident/gallery" className={subNavLinkClass}>
+                      Photo Gallery
+                    </NavLink>
+                  )}
+                  {isModuleEnabled('elections') && (
+                    <NavLink to="/resident/elections" className={subNavLinkClass}>
+                      Elections
+                    </NavLink>
+                  )}
+                  {isModuleEnabled('rewards') && (
+                    <NavLink to="/resident/rewards" className={subNavLinkClass}>
+                      Rewards & Recognition
+                    </NavLink>
+                  )}
+                </NavGroup>
+              )}
             </>
           )}
 
@@ -171,23 +200,35 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
                   <NavLink to="/rwa" end className={navLinkClass}>
                     RWA Dashboard
                   </NavLink>
-                  <NavGroup label="RWA Controls" paths={rwaControlPaths}>
-                    <NavLink to="/rwa/surveys" className={subNavLinkClass}>
-                      Surveys
+                  {showRwaControls && (
+                    <NavGroup label="RWA Controls" paths={rwaControlPaths}>
+                      {isModuleEnabled('surveys') && (
+                        <NavLink to="/rwa/surveys" className={subNavLinkClass}>
+                          Surveys
+                        </NavLink>
+                      )}
+                      {isModuleEnabled('gallery') && (
+                        <NavLink to="/rwa/gallery" className={subNavLinkClass}>
+                          Gallery Management
+                        </NavLink>
+                      )}
+                      {isModuleEnabled('elections') && (
+                        <NavLink to="/rwa/elections" className={subNavLinkClass}>
+                          Elections
+                        </NavLink>
+                      )}
+                      {isModuleEnabled('rewards') && (
+                        <NavLink to="/rwa/rewards" className={subNavLinkClass}>
+                          Rewards & Governance
+                        </NavLink>
+                      )}
+                    </NavGroup>
+                  )}
+                  {isModuleEnabled('gatekeeper') && (
+                    <NavLink to="/rwa/gatekeeper" className={navLinkClass}>
+                      Guard Console
                     </NavLink>
-                    <NavLink to="/rwa/gallery" className={subNavLinkClass}>
-                      Gallery Management
-                    </NavLink>
-                    <NavLink to="/rwa/elections" className={subNavLinkClass}>
-                      Elections
-                    </NavLink>
-                    <NavLink to="/rwa/rewards" className={subNavLinkClass}>
-                      Rewards & Governance
-                    </NavLink>
-                  </NavGroup>
-                  <NavLink to="/rwa/gatekeeper" className={navLinkClass}>
-                    Guard Console
-                  </NavLink>
+                  )}
                   <NavLink to="/rwa/settings" className={navLinkClass}>
                     RWA Settings
                   </NavLink>

@@ -9,6 +9,7 @@ import {
   type ElectionKeyPair
 } from '../lib/electionCrypto'
 import { logActivity } from '../lib/activityLog'
+import { getPlatformConfig } from '../lib/platformConfig'
 
 export type ElectionCandidate = { id: string; name: string }
 
@@ -134,15 +135,25 @@ export async function createElection(input: {
   positions: { title: string; candidates: string[] }[]
   closesAt?: string | null
 }) {
+  const platform = getPlatformConfig()
+  if (!platform.electionModule.enabled) {
+    throw new Error('Election module is disabled by platform configuration.')
+  }
+  if (!platform.electionModule.allowAnonymousVoting) {
+    throw new Error('Anonymous encrypted voting is disabled by platform configuration.')
+  }
+
   const keys: ElectionKeyPair = await generateElectionKeyPair()
   const positions: ElectionPosition[] = input.positions
     .filter((position) => position.title.trim())
+    .slice(0, platform.electionModule.maxPositionsPerElection)
     .map((position, positionIndex) => ({
       id: buildPositionId(positionIndex),
       title: position.title.trim(),
       candidates: position.candidates
         .map((name) => name.trim())
         .filter(Boolean)
+        .slice(0, platform.electionModule.maxCandidatesPerPosition)
         .map((name, candidateIndex) => ({
           id: buildCandidateId(positionIndex, candidateIndex),
           name
@@ -152,6 +163,14 @@ export async function createElection(input: {
 
   if (positions.length === 0) {
     throw new Error('Add at least one contested position with candidates.')
+  }
+
+  for (const position of positions) {
+    if (position.candidates.length > platform.electionModule.maxCandidatesPerPosition) {
+      throw new Error(
+        `Each position may have at most ${platform.electionModule.maxCandidatesPerPosition} candidates.`
+      )
+    }
   }
 
   const election: Election = {

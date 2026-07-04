@@ -1,4 +1,5 @@
 import { logActivity } from '../lib/activityLog'
+import { getPlatformConfig } from '../lib/platformConfig'
 
 export type SurveyOption = { id: string; label: string }
 
@@ -115,6 +116,11 @@ export function createSurvey(input: {
   questions: { prompt: string; options: string[] }[]
   closesAt?: string | null
 }) {
+  const platform = getPlatformConfig()
+  if (!platform.surveyEngine.enabled) {
+    throw new Error('Survey engine is disabled by platform configuration.')
+  }
+
   const questions: SurveyQuestion[] = input.questions
     .filter((question) => question.prompt.trim())
     .map((question, questionIndex) => ({
@@ -123,16 +129,31 @@ export function createSurvey(input: {
       options: question.options
         .map((label) => label.trim())
         .filter(Boolean)
+        .slice(0, platform.surveyEngine.maxOptionsPerQuestion)
         .map((label, optionIndex) => ({
           id: buildOptionId(questionIndex, optionIndex),
           label
         }))
     }))
     .filter((question) => question.options.length > 0)
+    .slice(0, platform.surveyEngine.maxQuestionsPerSurvey)
 
   if (questions.length === 0) {
     throw new Error('Add at least one question with answer options.')
   }
+
+  for (const question of questions) {
+    if (question.options.length > platform.surveyEngine.maxOptionsPerQuestion) {
+      throw new Error(
+        `Each question may have at most ${platform.surveyEngine.maxOptionsPerQuestion} options.`
+      )
+    }
+  }
+
+  const defaultClose = platform.surveyEngine.defaultClosingDays
+  const closesAt =
+    input.closesAt ??
+    new Date(Date.now() + defaultClose * 24 * 60 * 60 * 1000).toISOString()
 
   const survey: Survey = {
     id: `survey-${Date.now()}`,
@@ -142,7 +163,7 @@ export function createSurvey(input: {
     questions,
     status: 'active',
     createdAt: new Date().toISOString(),
-    closesAt: input.closesAt ?? null
+    closesAt
   }
 
   const surveys = loadSurveys(input.societyId)
@@ -177,7 +198,11 @@ export function submitSurveyResponse(input: {
   if (!survey || survey.status !== 'active') throw new Error('Survey is not open for responses.')
 
   const responses = loadResponses(input.surveyId)
-  if (responses.some((r) => r.flatNumber === input.flatNumber)) {
+  const platform = getPlatformConfig()
+  if (
+    !platform.surveyEngine.allowMultipleResponses &&
+    responses.some((r) => r.flatNumber === input.flatNumber)
+  ) {
     throw new Error('This flat has already submitted a response.')
   }
 

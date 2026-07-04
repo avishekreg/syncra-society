@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../providers/AuthProvider'
+import { usePlatformConfig } from '../../providers/PlatformConfigProvider'
 import { createElection, listElections, closeElection, tallyElection } from '../../api/elections'
 import { ui } from '../../lib/ui'
 
@@ -8,19 +9,29 @@ type PositionDraft = {
   candidates: string
 }
 
-const DEFAULT_POSITIONS: PositionDraft[] = [
-  { title: 'President', candidates: 'Candidate A\nCandidate B' },
-  { title: 'Secretary', candidates: 'Candidate C\nCandidate D' },
-  { title: 'Cashier', candidates: 'Candidate E\nCandidate F' }
-]
-
 export default function ElectionsManager() {
   const { currentSocietyId } = useAuth()
+  const { config } = usePlatformConfig()
+  const electionConfig = config.electionModule
+
+  const templatePositions = useMemo<PositionDraft[]>(
+    () =>
+      electionConfig.defaultPositionTemplates.map((title) => ({
+        title,
+        candidates: 'Candidate A\nCandidate B'
+      })),
+    [electionConfig.defaultPositionTemplates]
+  )
+
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [positions, setPositions] = useState<PositionDraft[]>(DEFAULT_POSITIONS)
+  const [positions, setPositions] = useState<PositionDraft[]>(templatePositions)
   const [refresh, setRefresh] = useState(0)
   const [tally, setTally] = useState<Record<string, Awaited<ReturnType<typeof tallyElection>>>>({})
+
+  useEffect(() => {
+    setPositions(templatePositions)
+  }, [templatePositions])
 
   const elections = currentSocietyId ? listElections(currentSocietyId) : []
 
@@ -29,6 +40,7 @@ export default function ElectionsManager() {
   }
 
   function addPosition() {
+    if (positions.length >= electionConfig.maxPositionsPerElection) return
     setPositions((current) => [...current, { title: '', candidates: '' }])
   }
 
@@ -39,25 +51,42 @@ export default function ElectionsManager() {
   async function handleCreate(event: React.FormEvent) {
     event.preventDefault()
     if (!currentSocietyId) return
-    await createElection({
-      societyId: currentSocietyId,
-      title,
-      description,
-      positions: positions.map((position) => ({
-        title: position.title,
-        candidates: position.candidates.split('\n').map((name) => name.trim()).filter(Boolean)
-      }))
-    })
-    setTitle('')
-    setDescription('')
-    setPositions(DEFAULT_POSITIONS)
-    setRefresh((n) => n + 1)
+    try {
+      await createElection({
+        societyId: currentSocietyId,
+        title,
+        description,
+        positions: positions.map((position) => ({
+          title: position.title,
+          candidates: position.candidates.split('\n').map((name) => name.trim()).filter(Boolean)
+        }))
+      })
+      setTitle('')
+      setDescription('')
+      setPositions(templatePositions)
+      setRefresh((n) => n + 1)
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Unable to create election')
+    }
   }
 
   async function handleTally(electionId: string) {
     if (!currentSocietyId) return
     const result = await tallyElection(currentSocietyId, electionId)
     if (result) setTally((prev) => ({ ...prev, [electionId]: result }))
+  }
+
+  if (!electionConfig.enabled) {
+    return (
+      <div className={ui.card}>
+        <p className={ui.eyebrow}>Elections</p>
+        <h2 className={`mt-3 ${ui.heading}`}>Election module disabled</h2>
+        <p className={`mt-3 ${ui.body}`}>
+          The platform super admin has disabled elections globally. Enable it under Super Admin → Global Platform
+          Settings.
+        </p>
+      </div>
+    )
   }
 
   return (
@@ -75,8 +104,16 @@ export default function ElectionsManager() {
 
           <div className="space-y-4">
             <div className="flex items-center justify-between gap-3">
-              <p className={ui.label}>Contested positions</p>
-              <button type="button" onClick={addPosition} className={ui.btnGhost}>
+              <p className={ui.label}>
+                Contested positions ({positions.length}/{electionConfig.maxPositionsPerElection} max ·{' '}
+                {electionConfig.maxCandidatesPerPosition} candidates each)
+              </p>
+              <button
+                type="button"
+                onClick={addPosition}
+                disabled={positions.length >= electionConfig.maxPositionsPerElection}
+                className={ui.btnGhost}
+              >
                 Add position
               </button>
             </div>
