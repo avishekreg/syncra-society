@@ -123,6 +123,15 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
     isModuleEnabled('elections') ||
     isModuleEnabled('rewards')
 
+  const superAdminPaths = [
+    '/super-admin/societies',
+    '/super-admin/pricing',
+    '/super-admin/master-config',
+    '/super-admin/payments'
+  ]
+
+  const presidentConsolePaths = ['/admin/dashboard', '/admin/notices', '/rwa/workspace']
+
   const showRwaControls = rwaControlPaths.length > 0
 
   return (
@@ -197,9 +206,19 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
               </p>
               {showRwaNav && (
                 <>
-                  <NavLink to="/rwa" end className={navLinkClass}>
-                    RWA Dashboard
-                  </NavLink>
+                  <NavGroup label="President Console" paths={presidentConsolePaths} defaultOpen>
+                    <NavLink to="/admin/dashboard" className={subNavLinkClass}>
+                      Analytics Overview
+                    </NavLink>
+                    {isModuleEnabled('notices') && (
+                      <NavLink to="/admin/notices" className={subNavLinkClass}>
+                        Notices
+                      </NavLink>
+                    )}
+                    <NavLink to="/rwa/workspace" className={subNavLinkClass}>
+                      Society Operations
+                    </NavLink>
+                  </NavGroup>
                   {showRwaControls && (
                     <NavGroup label="RWA Controls" paths={rwaControlPaths}>
                       {isModuleEnabled('surveys') && (
@@ -229,15 +248,31 @@ export default function Sidebar({ children }: { children?: React.ReactNode }) {
                       Guard Console
                     </NavLink>
                   )}
+                  {isModuleEnabled('whatsappAutomation') && (
+                    <NavLink to="/rwa/whatsapp" className={navLinkClass}>
+                      WhatsApp Automation
+                    </NavLink>
+                  )}
                   <NavLink to="/rwa/settings" className={navLinkClass}>
                     RWA Settings
                   </NavLink>
                 </>
               )}
               {isSuperAdmin && (
-                <NavLink to="/super-admin" end className={navLinkClass}>
-                  Super Admin
-                </NavLink>
+                <NavGroup label="Super Admin" paths={superAdminPaths} defaultOpen>
+                  <NavLink to="/super-admin/societies" className={subNavLinkClass}>
+                    Societies Manager
+                  </NavLink>
+                  <NavLink to="/super-admin/pricing" className={subNavLinkClass}>
+                    Pricing & Subscriptions
+                  </NavLink>
+                  <NavLink to="/super-admin/master-config" className={subNavLinkClass}>
+                    Global Platform Settings
+                  </NavLink>
+                  <NavLink to="/super-admin/payments" className={subNavLinkClass}>
+                    Razorpay API Keys
+                  </NavLink>
+                </NavGroup>
               )}
             </>
           )}

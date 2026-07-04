@@ -49,5 +49,5 @@ export function calculateMonthlyDues(totalFlats: number, ratePerFlatInr: number)
 export function onboardingPathForStatus(status: ActivationStatus): string {
   if (status === 'pending') return '/onboarding/activation'
   if (status === 'activation_paid') return '/onboarding/flats'
-  return '/rwa'
+  return '/admin/dashboard'
 }

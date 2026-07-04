@@ -45,7 +45,7 @@ export default function FlatConfigurationPage() {
           return
         }
         if (status.activationStatus === 'active_subscription') {
-          navigate('/rwa', { replace: true })
+          navigate('/admin/dashboard', { replace: true })
           return
         }
 
@@ -99,7 +99,7 @@ export default function FlatConfigurationPage() {
           }
         })
         setMessage(result.message ?? 'Subscription active. Redirecting to RWA Dashboard…')
-        navigate('/rwa', { replace: true })
+        navigate('/admin/dashboard', { replace: true })
         return
       }
 
@@ -150,7 +150,7 @@ export default function FlatConfigurationPage() {
                 subscription: 'Active'
               }
             })
-            navigate('/rwa', { replace: true })
+            navigate('/admin/dashboard', { replace: true })
           } catch (verifyErr: any) {
             setError(verifyErr.message ?? 'Subscription authorization failed')
           } finally {

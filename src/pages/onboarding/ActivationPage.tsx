@@ -38,7 +38,7 @@ export default function ActivationPage() {
           return
         }
         if (status.activationStatus === 'active_subscription') {
-          navigate('/rwa', { replace: true })
+          navigate('/admin/dashboard', { replace: true })
         }
       } catch (err: any) {
         setError(err.message ?? 'Unable to load activation status')

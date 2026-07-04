@@ -5,10 +5,11 @@ import RoleScopeGuard from './RoleScopeGuard'
 import SocietySetupGuard from './SocietySetupGuard'
 import SubscriptionActivationGuard from './SubscriptionActivationGuard'
 import SuperAdminRouteShell from './SuperAdminRouteShell'
-import SuperAdminDashboard from '../pages/super-admin/Dashboard'
+import SuperAdminOverview from '../pages/super-admin/Overview'
 import SuperAdminSocieties from '../pages/super-admin/Societies'
-import SuperAdminPricing from '../pages/super-admin/Pricing'
-import SuperAdminSubscriptions from '../pages/super-admin/Subscriptions'
+import SuperAdminPricingHub from '../pages/super-admin/PricingHub'
+import SuperAdminMasterConfig from '../pages/super-admin/MasterConfig'
+import SuperAdminPayments from '../pages/super-admin/Payments'
 import { ui } from '../lib/ui'
 
 const LandingPage = lazy(() => import('../pages/LandingPage'))
@@ -16,6 +17,7 @@ const AuthRouter = lazy(() => import('./AuthRouter'))
 const SignUp = lazy(() => import('../pages/auth/SignUp'))
 const OnboardingRouter = lazy(() => import('./OnboardingRouter'))
 const RwaRouter = lazy(() => import('./RwaRouter'))
+const AdminRouter = lazy(() => import('./AdminRouter'))
 const ResidentRouter = lazy(() => import('./ResidentRouter'))
 
 export default function AppRouter() {
@@ -38,11 +40,28 @@ export default function AppRouter() {
           />
 
           <Route path="/super-admin" element={<SuperAdminRouteShell />}>
-            <Route index element={<SuperAdminDashboard />} />
+            <Route index element={<SuperAdminOverview />} />
             <Route path="societies" element={<SuperAdminSocieties />} />
-            <Route path="pricing" element={<SuperAdminPricing />} />
-            <Route path="subscriptions" element={<SuperAdminSubscriptions />} />
+            <Route path="pricing" element={<SuperAdminPricingHub />} />
+            <Route path="master-config" element={<SuperAdminMasterConfig />} />
+            <Route path="payments" element={<SuperAdminPayments />} />
+            <Route path="subscriptions" element={<Navigate to="/super-admin/pricing" replace />} />
           </Route>
+
+          <Route
+            path="/admin/*"
+            element={
+              <ProtectedRoute>
+                <RoleScopeGuard scope="society">
+                  <SocietySetupGuard>
+                    <SubscriptionActivationGuard>
+                      <AdminRouter />
+                    </SubscriptionActivationGuard>
+                  </SocietySetupGuard>
+                </RoleScopeGuard>
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="/rwa/*"

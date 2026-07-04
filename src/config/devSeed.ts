@@ -86,7 +86,7 @@ export function getPostLoginPath(roles: string[], societyId: string | null, role
     role === 'rwa_owner' ||
     role === 'rwa_accountant'
   ) {
-    return '/rwa'
+    return '/admin/dashboard'
   }
   return '/resident'
 }
