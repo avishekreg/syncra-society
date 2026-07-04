@@ -13,6 +13,9 @@ export type N8nPortalEvent = {
   metadata?: Record<string, unknown>
   recipients?: string[]
   email?: string
+  sender_whatsapp?: string
+  receiver_whatsapp?: string
+  message_body?: string
 }
 
 export async function dispatchToN8n(payload: N8nPortalEvent) {
@@ -39,19 +42,30 @@ export async function dispatchNoticePublished(input: {
   title: string
   body: string
   noticeId: string
+  publishedAt: string
+  sender_whatsapp: string
+  receiver_whatsapp: string
+  message_body: string
 }) {
   return dispatchToN8n({
-    eventId: `notice-${input.noticeId}`,
+    eventId: `notice-${input.noticeId}-${input.receiver_whatsapp.replace(/\D/g, '')}`,
     type: 'notice.published',
     societyId: input.societyId,
     societyName: input.societyName ?? 'Society',
     flatNumber: null,
     summary: `New notice: ${input.title}`,
-    occurredAt: new Date().toISOString(),
+    occurredAt: input.publishedAt,
+    sender_whatsapp: input.sender_whatsapp,
+    receiver_whatsapp: input.receiver_whatsapp,
+    message_body: input.message_body,
     metadata: {
       noticeId: input.noticeId,
       title: input.title,
-      body: input.body
+      body: input.body,
+      publishedAt: input.publishedAt,
+      sender_whatsapp: input.sender_whatsapp,
+      receiver_whatsapp: input.receiver_whatsapp,
+      message_body: input.message_body
     }
   })
 }

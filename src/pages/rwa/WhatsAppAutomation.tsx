@@ -8,6 +8,7 @@ import {
   saveWhatsAppContacts,
   sendAutomationTest
 } from '../../lib/societyEvents'
+import { cacheAutomationSettings, cacheWhatsAppContacts } from '../../lib/whatsappRouting'
 import { ui } from '../../lib/ui'
 
 type Contact = { flatNumber: string; phone: string; name?: string; optedIn: boolean }
@@ -42,12 +43,14 @@ export default function WhatsAppAutomation() {
   async function handleSaveSettings() {
     if (!currentSocietyId) return
     await saveAutomationSettings(currentSocietyId, { ...settings, societyId: currentSocietyId, societyName })
+    cacheAutomationSettings(currentSocietyId, { whatsappNumber: settings.whatsappNumber })
     setStatus('WhatsApp automation settings saved.')
   }
 
   async function handleSaveContacts() {
     if (!currentSocietyId) return
     await saveWhatsAppContacts(currentSocietyId, contacts)
+    cacheWhatsAppContacts(currentSocietyId, contacts)
     setStatus('Resident WhatsApp contacts saved.')
   }
 

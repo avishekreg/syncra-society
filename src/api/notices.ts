@@ -5,6 +5,10 @@ import { uploadDocument } from '../utils/upload'
 import { logActivity } from '../lib/activityLog'
 import { dispatchNoticePublished } from '../lib/n8nClient'
 import { listRegisteredSocieties } from '../lib/societyRegistry'
+import {
+  resolveNoticeReceiverPhones,
+  resolveSocietySenderWhatsapp
+} from '../lib/whatsappRouting'
 
 export type NoticeViewReceipt = {
   noticeId: string
@@ -128,14 +132,35 @@ function societyNameForId(societyId: string) {
   return listRegisteredSocieties().find((society) => society.id === societyId)?.name ?? 'Society'
 }
 
+function buildNoticeMessageBody(notice: Notice, societyName: string) {
+  const timestamp = formatNoticeTimestamp(notice.created_at)
+  return `📢 ${societyName}\n\n${notice.title}\n\n${notice.body}\n\nPublished: ${timestamp}`
+}
+
 async function relayNoticeToN8n(notice: Notice) {
-  void dispatchNoticePublished({
-    societyId: notice.society_id,
-    societyName: societyNameForId(notice.society_id),
-    title: notice.title,
-    body: notice.body,
-    noticeId: notice.id
-  })
+  const societyName = societyNameForId(notice.society_id)
+  const senderWhatsapp = await resolveSocietySenderWhatsapp(notice.society_id)
+  const receiverPhones = await resolveNoticeReceiverPhones(notice.society_id)
+  if (receiverPhones.length === 0) return
+
+  const messageBody = buildNoticeMessageBody(notice, societyName)
+  const publishedAt = notice.created_at ?? new Date().toISOString()
+
+  await Promise.all(
+    receiverPhones.map((receiverWhatsapp) =>
+      dispatchNoticePublished({
+        societyId: notice.society_id,
+        societyName,
+        title: notice.title,
+        body: notice.body,
+        noticeId: notice.id,
+        publishedAt,
+        sender_whatsapp: senderWhatsapp,
+        receiver_whatsapp: receiverWhatsapp,
+        message_body: messageBody
+      })
+    )
+  )
 }
 
 export async function createNotice(payload: Partial<Notice>, file?: File) {

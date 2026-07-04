@@ -2,7 +2,6 @@ import type { ActivityEntry } from './activityLog'
 import { dispatchToN8n } from './n8nClient'
 
 export type SocietyEventType =
-  | 'notice.published'
   | 'visitor.pending'
   | 'visitor.approved'
   | 'payment.reminder'
@@ -26,8 +25,12 @@ export type DispatchSocietyEventInput = {
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ''
 
-/** Relay portal activity directly to the production n8n webhook; API route is optional local fallback. */
+/** Relay non-notice portal activity to n8n. Notice broadcasts use src/api/notices.ts only. */
 export async function dispatchSocietyEvent(input: DispatchSocietyEventInput) {
+  if (input.type === 'notice.published' || input.type.startsWith('notice.')) {
+    return null
+  }
+
   const payload = {
     eventId: `evt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     type: input.type,
@@ -61,7 +64,6 @@ export async function dispatchSocietyEvent(input: DispatchSocietyEventInput) {
 
 export function activityToEventType(entry: ActivityEntry): string {
   const map: Record<string, string> = {
-    notice_published: 'notice.published',
     visitor_approved: 'visitor.approved',
     maintenance_paid: 'payment.received',
     payment_reminder: 'payment.reminder',
@@ -76,6 +78,11 @@ export function activityToEventType(entry: ActivityEntry): string {
 }
 
 export async function dispatchFromActivity(entry: ActivityEntry, societyName?: string) {
+  // Notice WhatsApp delivery is owned exclusively by createNotice() → src/api/notices.ts.
+  if (entry.category === 'notice') {
+    return null
+  }
+
   return dispatchSocietyEvent({
     type: activityToEventType(entry),
     societyId: entry.societyId,
