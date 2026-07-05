@@ -3,12 +3,14 @@ import { Navigate } from 'react-router-dom'
 import ComplaintsDashboard from '../../components/helpdesk/ComplaintsDashboard'
 import { useAuth } from '../../providers/AuthProvider'
 import { usePlatformConfig } from '../../providers/PlatformConfigProvider'
+import { useResolvedSocietyUuid } from '../../hooks/useResolvedSocietyUuid'
 import { isGlobalSuperAdmin } from '../../lib/roles'
 import { ui } from '../../lib/ui'
 
 export default function AdminHelpdeskDashboard() {
   const { user, currentSocietyId } = useAuth()
   const { isModuleEnabled } = usePlatformConfig()
+  const { uuid, loading: resolvingUuid } = useResolvedSocietyUuid()
 
   if (!user) {
     return <div className={ui.loading}>Loading Syncra Workspace Safely...</div>
@@ -30,10 +32,24 @@ export default function AdminHelpdeskDashboard() {
     )
   }
 
-  return (
-    <ComplaintsDashboard
-      title="Live complaints dashboard"
-      description="Monitor every ticket from residents — including WhatsApp messages routed through n8n — without refreshing the page."
-    />
-  )
+  if (resolvingUuid) {
+    return (
+      <div className={ui.card} aria-busy="true">
+        <p className={ui.body}>Resolving society context…</p>
+      </div>
+    )
+  }
+
+  if (!uuid) {
+    return (
+      <div className={ui.card}>
+        <p className={ui.body}>
+          Unable to resolve a PostgreSQL society UUID for realtime filtering. Complete society onboarding or check
+          Society Configuration.
+        </p>
+      </div>
+    )
+  }
+
+  return <ComplaintsDashboard societyId={uuid} />
 }
