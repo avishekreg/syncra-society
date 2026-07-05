@@ -194,14 +194,14 @@ export default function RwaSettings() {
             <p className={`mt-2 ${ui.body}`}>Review flat assignments and trigger mock password overrides without exposing raw credentials.</p>
           </div>
           <div className="w-full overflow-x-auto overscroll-x-contain rounded-2xl border border-slate-200 bg-syncra-surface-alt [-webkit-overflow-scrolling:touch]">
-            <div className="grid grid-cols-1 gap-0 text-xs uppercase tracking-[0.35em] bg-syncra-surface px-6 py-4 text-slate-500 md:grid-cols-[1fr_2fr_1fr_150px]">
+            <div className="grid grid-cols-1 gap-0 text-xs uppercase tracking-[0.35em] bg-syncra-surface px-4 py-4 sm:px-6 text-slate-500 md:grid-cols-[1fr_2fr_1fr_150px]">
               <span>Flat / Role</span>
               <span>Name</span>
               <span>Username</span>
               <span className="sr-only">Action</span>
             </div>
             {directoryUsers.map((directoryUser) => (
-              <div key={`${directoryUser.username}-${directoryUser.flat_number}`} className="grid grid-cols-1 gap-4 border-t border-slate-200 px-6 py-4 text-sm text-slate-700 md:grid-cols-[1fr_2fr_1fr_150px]">
+              <div key={`${directoryUser.username}-${directoryUser.flat_number}`} className="grid grid-cols-1 gap-4 border-t border-slate-200 px-4 py-4 text-sm text-slate-700 sm:px-6 md:grid-cols-[1fr_2fr_1fr_150px]">
                 <div className="flex flex-col gap-1">
                   <span className="font-semibold text-syncra-primary">{directoryUser.flat_number}</span>
                   <span className="text-xs text-slate-500 uppercase">{directoryUser.role}</span>

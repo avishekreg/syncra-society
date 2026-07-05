@@ -262,7 +262,7 @@ export default function RwaWorkspace() {
             <div className={`${ui.cardBody} space-y-3`}>
               {mockEmergencyTickets.map((ticket) => (
                 <div key={ticket.id} className={ui.innerItem}>
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
                     <div className="min-w-0">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-slate-500">
                         Flat {ticket.flat}

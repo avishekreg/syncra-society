@@ -100,7 +100,7 @@ export default function SurveysManager() {
             </div>
             {questions.map((question, index) => (
               <div key={`question-${index}`} className={`${ui.innerItem} space-y-3`}>
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
                   <input
                     value={question.prompt}
                     onChange={(e) => updateQuestion(index, { prompt: e.target.value })}

@@ -145,7 +145,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
           <SyncraBrandLogo to="/" />
           <button
             type="button"
-            className={`${ui.btnIcon} lg:hidden`}
+            className={`${ui.btnIcon} md:hidden`}
             aria-label="Close navigation menu"
             onClick={() => setMobileOpen(false)}
           >
@@ -294,9 +294,9 @@ export default function Sidebar({ children, title }: SidebarProps) {
   )
 
   return (
-    <div className="flex min-h-screen flex-col bg-syncra-surface lg:flex-row">
+    <div className="flex min-h-screen flex-col bg-syncra-surface md:flex-row">
       {/* Mobile top bar */}
-      <header className="sticky top-0 z-40 flex min-h-14 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 lg:hidden">
+      <header className="sticky top-0 z-40 flex min-h-14 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 md:hidden">
         <button
           type="button"
           className={ui.btnIcon}
@@ -317,7 +317,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
         <button
           type="button"
           aria-label="Close navigation menu"
-          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-[1px] lg:hidden"
+          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-[1px] md:hidden"
           onClick={() => setMobileOpen(false)}
         />
       )}
@@ -325,8 +325,8 @@ export default function Sidebar({ children, title }: SidebarProps) {
       {/* Sidebar drawer / desktop rail */}
       <aside
         className={[
-          'fixed inset-y-0 left-0 z-50 flex w-[min(100vw-3rem,17.5rem)] flex-col border-r border-slate-200 bg-white shadow-xl transition-transform duration-200 ease-out lg:static lg:z-auto lg:h-screen lg:w-[17.5rem] lg:shrink-0 lg:translate-x-0 lg:shadow-none',
-          mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          'fixed inset-y-0 left-0 z-50 flex w-[min(100vw-3rem,17.5rem)] flex-col border-r border-slate-200 bg-white shadow-xl transition-transform duration-200 ease-out md:static md:z-auto md:h-screen md:w-[17.5rem] md:shrink-0 md:translate-x-0 md:shadow-none',
+          mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         ].join(' ')}
       >
         {navContent}

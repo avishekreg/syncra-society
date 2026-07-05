@@ -17,10 +17,10 @@ function MockStat({ label, value, accent }: { label: string; value: string; acce
 
 export default function HeroDashboardMockup() {
   return (
-    <div className="relative mx-auto w-full max-w-xl lg:mx-0 lg:max-w-none">
+    <div className="relative mx-auto w-full max-w-xl overflow-hidden lg:mx-0 lg:max-w-none">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -inset-6 rounded-[2rem] bg-gradient-to-br from-syncra-accent/20 via-syncra-blue/10 to-transparent blur-2xl"
+        className="pointer-events-none absolute -inset-2 rounded-[2rem] bg-gradient-to-br from-syncra-accent/20 via-syncra-blue/10 to-transparent blur-2xl sm:-inset-6"
       />
       <div
         aria-hidden="true"
@@ -62,7 +62,7 @@ export default function HeroDashboardMockup() {
           </aside>
 
           <div className="space-y-3 p-3 sm:space-y-4 sm:p-4">
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-syncra-accent sm:text-[11px]">
                   RWA Command Center

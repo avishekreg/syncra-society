@@ -105,7 +105,7 @@ export default function VisitorsPage() {
       )}
 
       <div className="mt-8 grid gap-8 xl:grid-cols-[340px_1fr]">
-        <section className="syncra-panel p-6">
+        <section className="syncra-panel p-4 sm:p-6">
           <h2 className="text-sm font-semibold text-neutral-900">Register entry</h2>
           <p className="mt-1 text-sm text-neutral-500">Requires WhatsApp Automation entitlement for live dispatch.</p>
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -146,7 +146,9 @@ export default function VisitorsPage() {
           {visitors.length === 0 ? (
             <p className="px-4 py-10 sm:px-6 sm:py-12 text-sm text-neutral-500">No gatekeeper activity recorded.</p>
           ) : (
-            <Table>
+            <div className="w-full overflow-x-auto overscroll-x-contain [-webkit-overflow-scrolling:touch]">
+
+              <Table className="min-w-[640px] w-full">
               <TableHeader>
                 <TableRow className="border-neutral-200 hover:bg-transparent">
                   <TableHead className="text-neutral-500">Visitor</TableHead>

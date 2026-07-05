@@ -27,7 +27,7 @@ export default function PortalEntryPage() {
         </p>
       </div>
 
-      <section className="w-full max-w-[400px] rounded-lg border border-neutral-200 bg-white p-8 shadow-sm">
+      <section className="w-full max-w-[400px] rounded-lg border border-neutral-200 bg-white p-5 shadow-sm sm:p-8">
         <div className="mb-6 flex h-10 w-10 items-center justify-center rounded-md border border-neutral-200 bg-neutral-50">
           <Building2 className="h-4 w-4 text-neutral-700" strokeWidth={1.5} />
         </div>

@@ -244,7 +244,7 @@ export default function SuperAdminSocieties() {
                 UUID). Use Copy ID for WhatsApp gateway and helpdesk integrations.
               </p>
             </div>
-            <button type="button" onClick={openCreateModal} className={saveBtn}>
+            <button type="button" onClick={openCreateModal} className={`w-full sm:w-auto ${saveBtn}`}>
               Add New Society
             </button>
           </div>

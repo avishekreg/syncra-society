@@ -117,7 +117,7 @@ export default function ResidentDashboard() {
         <ul className="space-y-2">
           {complaints.slice(0, 5).map((ticket) => (
             <li key={ticket.id} className={ui.innerItem}>
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
                 <div>
                   <p className="font-medium text-syncra-primary">{ticket.subject}</p>
                   {ticket.description && <p className={`mt-0.5 line-clamp-2 ${ui.body}`}>{ticket.description}</p>}

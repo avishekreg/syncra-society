@@ -119,7 +119,7 @@ export default function ElectionsManager() {
             </div>
             {positions.map((position, index) => (
               <div key={`position-${index}`} className={`${ui.innerItem} space-y-3`}>
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
                   <input
                     value={position.title}
                     onChange={(e) => updatePosition(index, { title: e.target.value })}

@@ -40,7 +40,7 @@ export default function SignIn() {
 
   return (
     <AuthLayout title="Welcome Back">
-      <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr]">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_1.1fr] lg:gap-10">
         <div className={`space-y-6 ${ui.cardSurface}`}>
           <p className={ui.eyebrow}>Premium access</p>
           <h2 className={ui.heading}>Sign in with your email and password.</h2>
@@ -107,8 +107,8 @@ export default function SignIn() {
               {DEMO_CREDENTIALS.map((cred) => (
                 <li key={cred.email} className="rounded-lg border border-slate-200 bg-white px-3 py-2">
                   <p className="font-semibold text-syncra-primary">{cred.label}</p>
-                  <p className="mt-1 font-mono">{cred.email}</p>
-                  <p className="font-mono text-slate-500">{cred.password}</p>
+                  <p className="mt-1 break-all font-mono text-sm">{cred.email}</p>
+                  <p className="break-all font-mono text-sm text-slate-500">{cred.password}</p>
                 </li>
               ))}
             </ul>

@@ -206,13 +206,13 @@ export default function FlatConfigurationPage() {
           </label>
 
           <div className="mt-6 rounded-2xl border border-slate-200 bg-syncra-surface-alt px-5 py-4">
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between text-sm">
               <span className="text-slate-600">Per-flat monthly rate</span>
               <span className="font-semibold text-syncra-primary">₹{monthlyRatePerFlat}/flat</span>
             </div>
-            <div className="mt-3 flex items-center justify-between">
+            <div className="mt-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
               <span className="text-sm text-slate-600">Total monthly recurring dues</span>
-              <span className="text-2xl font-semibold text-syncra-blue">
+              <span className="text-xl font-semibold text-syncra-blue sm:text-2xl">
                 ₹{dues.monthlyTotalInr.toLocaleString('en-IN')}
               </span>
             </div>

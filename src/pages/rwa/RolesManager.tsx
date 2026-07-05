@@ -42,7 +42,7 @@ export default function RolesManager({ embedded = false }: Props) {
     <div className="flex h-full flex-col">
       {!embedded && <h2 className={`mb-4 ${ui.heading}`}>Custom Roles</h2>}
 
-      <form onSubmit={handleCreate} className="mb-4 flex gap-2">
+      <form onSubmit={handleCreate} className="mb-4 flex flex-col gap-2 sm:flex-row">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -56,7 +56,7 @@ export default function RolesManager({ embedded = false }: Props) {
 
       <ul className="space-y-2">
         {roles.map((r) => (
-          <li key={r.id} className={`flex items-center justify-between gap-3 ${ui.innerItem}`}>
+          <li key={r.id} className={`flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3 ${ui.innerItem}`}>
             <div className="min-w-0">
               <div className="font-medium text-syncra-primary">{r.name}</div>
               {r.permissions?.length ? (

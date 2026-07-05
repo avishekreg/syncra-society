@@ -44,7 +44,7 @@ export default function CopySocietyIdButton({ societyId, compact = false, label 
   return (
     <div className="flex items-center gap-2">
       <code
-        className={`max-w-[14rem] truncate rounded-lg border px-2.5 py-1.5 font-mono text-xs ${
+        className={`max-w-full truncate sm:max-w-[14rem] rounded-lg border px-2.5 py-1.5 font-mono text-xs ${
           isUuid
             ? 'border-slate-200 bg-syncra-surface-alt text-slate-800'
             : 'border-amber-200 bg-amber-50 text-amber-800'

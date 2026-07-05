@@ -67,7 +67,7 @@ export default function SignUp() {
 
   return (
     <AuthLayout title="Create Your Account">
-      <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr]">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_1.1fr] lg:gap-10">
         <div className={`space-y-6 ${ui.cardSurface}`}>
           <p className={ui.eyebrow}>Premium onboarding</p>
           <h2 className={ui.heading}>Register as a Society Admin or Resident.</h2>

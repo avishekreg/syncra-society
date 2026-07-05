@@ -104,7 +104,7 @@ export default function LandingPage() {
       </header>
 
       <main className="relative z-10 mx-auto max-w-7xl space-y-16 px-4 py-12 sm:space-y-24 sm:px-6 sm:py-16 md:py-24">
-        <section className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-14">
+        <section className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-14">
           <div className="space-y-8 text-center lg:text-left">
             <div className="mx-auto max-w-2xl space-y-6 lg:mx-0">
               <p className={ui.eyebrow}>World-class society management</p>
@@ -165,7 +165,7 @@ export default function LandingPage() {
             {landingFeatures.map((feature) => (
               <div
                 key={feature.title}
-                className={`flex h-full flex-col text-center transition hover:-translate-y-1 ${ui.innerItem} p-8`}
+                className={`flex h-full flex-col text-center transition hover:-translate-y-1 ${ui.innerItem} p-5 sm:p-6 md:p-8`}
               >
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-syncra-accent/10 text-2xl">
                   {feature.icon}
@@ -198,13 +198,13 @@ export default function LandingPage() {
               {pricing.tiers.map((tier, index) => (
                 <article
                   key={tier.id}
-                  className={`flex h-full flex-col rounded-2xl border bg-white p-8 shadow-card transition hover:-translate-y-1 ${
+                  className={`flex h-full flex-col rounded-2xl border bg-white p-5 shadow-card sm:p-6 md:p-8 transition hover:-translate-y-1 ${
                     index === 1 ? 'border-syncra-accent/40 ring-1 ring-syncra-accent/20' : 'border-slate-200'
                   }`}
                 >
                   <p className={ui.eyebrow}>{tier.label}</p>
                   <p className="mt-3 text-2xl font-semibold text-syncra-primary">{tier.headline}</p>
-                  <div className="mt-6 flex items-end gap-1">
+                  <div className="mt-6 flex flex-wrap items-end gap-1">
                     <p className="text-5xl font-semibold tracking-tight text-syncra-primary">
                       {formatInr(tier.price)}
                     </p>
@@ -225,7 +225,7 @@ export default function LandingPage() {
           </div>
 
           {/* Premium modular add-ons */}
-          <div className="space-y-8 rounded-3xl border border-slate-200 bg-syncra-surface-alt p-8 md:p-10">
+          <div className="space-y-8 rounded-3xl border border-slate-200 bg-syncra-surface-alt p-4 sm:p-6 md:p-10">
             <div className="mx-auto max-w-3xl space-y-3 text-center">
               <p className={ui.eyebrowPrimary}>Stack on any base plan</p>
               <h3 className="text-xl font-semibold leading-tight text-syncra-primary sm:text-2xl md:text-3xl">
@@ -241,7 +241,7 @@ export default function LandingPage() {
               {premiumAddonMeta.map((addon) => (
                 <article
                   key={addon.id}
-                  className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-card"
+                  className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-card sm:p-6"
                 >
                   <h4 className="text-lg font-semibold text-syncra-primary">{addon.name}</h4>
                   <p className="mt-3 text-2xl font-semibold tracking-tight text-syncra-blue">
