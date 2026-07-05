@@ -6,8 +6,8 @@ import { useComplaints, formatComplaintStatus } from '../../hooks/useComplaints'
 import NoticesList from '../../components/NoticesList'
 import ResidentAccountsOverview, { ResidentGateApprovals } from '../../components/ResidentAccountsOverview'
 import type { VisitorLog } from '../../types/db'
-import { listPendingVisitorLogs } from '../../api/visitorLogs'
-import { ui } from '../../lib/ui'
+import GatekeeperAlert from '../../components/GatekeeperAlert'
+import { useResolvedSocietyUuid } from '../../hooks/useResolvedSocietyUuid'
 
 const DEFAULT_EMERGENCY_DIRECTORY = [
   { label: 'Nearest Hospital', phone: '108' },
@@ -26,6 +26,7 @@ export default function ResidentDashboard() {
   const [emergencyContacts, setEmergencyContacts] = useState(DEFAULT_EMERGENCY_DIRECTORY)
   const [speedDialOpen, setSpeedDialOpen] = useState(false)
   const flatNumber = user?.flatNumber
+  const { uuid: societyUuid } = useResolvedSocietyUuid()
   const isLoading = entries === null
 
   const myUnit = useMemo(() => {
@@ -93,6 +94,9 @@ export default function ResidentDashboard() {
 
   return (
     <div className={ui.sectionGap}>
+      {societyUuid && flatNumber ? (
+        <GatekeeperAlert societyId={societyUuid} myFlatNo={flatNumber} />
+      ) : null}
       <ResidentAccountsOverview
         totalPaid={accountSummary.totalPaid}
         outstanding={accountSummary.outstanding}
