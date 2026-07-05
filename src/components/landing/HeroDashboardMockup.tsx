@@ -17,10 +17,10 @@ function MockStat({ label, value, accent }: { label: string; value: string; acce
 
 export default function HeroDashboardMockup() {
   return (
-    <div className="relative mx-auto w-full max-w-xl overflow-hidden lg:mx-0 lg:max-w-none">
+    <div className="relative mx-auto w-full max-w-xl lg:mx-0 lg:max-w-none">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -inset-2 rounded-[2rem] bg-gradient-to-br from-syncra-accent/20 via-syncra-blue/10 to-transparent blur-2xl sm:-inset-6"
+        className="pointer-events-none absolute -inset-6 rounded-[2rem] bg-gradient-to-br from-syncra-accent/20 via-syncra-blue/10 to-transparent blur-2xl"
       />
       <div
         aria-hidden="true"

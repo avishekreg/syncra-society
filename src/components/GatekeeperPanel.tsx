@@ -136,7 +136,7 @@ export default function GatekeeperPanel({ onPending }: GatekeeperPanelProps) {
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-card sm:p-6">
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
         <h3 className="text-lg font-semibold text-syncra-primary">Syncra Gatekeeper</h3>
         {loading && <span className="text-xs font-medium text-syncra-accent">Live</span>}
@@ -158,16 +158,16 @@ export default function GatekeeperPanel({ onPending }: GatekeeperPanelProps) {
             <p className="mt-1 text-xs text-syncra-action">
               Requested {new Date(log.requested_at).toLocaleString()}
             </p>
-            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            <div className="mt-3 flex gap-2">
               <button
                 onClick={() => handleAction(log.id, 'approved')}
-                className="min-h-11 flex-1 rounded-lg bg-emerald-600 px-3 py-2.5 text-xs font-semibold text-white hover:bg-emerald-500 sm:text-sm"
+                className="flex-1 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-500"
               >
                 Allow Entry
               </button>
               <button
                 onClick={() => handleAction(log.id, 'denied')}
-                className="min-h-11 flex-1 rounded-lg border border-syncra-action-alt/40 bg-red-50 px-3 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-100 sm:text-sm"
+                className="flex-1 rounded-lg border border-syncra-action-alt/40 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-100"
               >
                 Deny Entry
               </button>

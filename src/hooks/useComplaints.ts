@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { Complaint } from '../types/db'
 import { createComplaint, listComplaintsForUser } from '../api/complaints'
+import { subscribeToComplaints } from '../api/complaintsRealtime'
+
+function mergeComplaint(prev: Complaint[], incoming: Complaint) {
+  if (prev.some((item) => item.id === incoming.id)) return prev
+  return [incoming, ...prev]
+}
 
 export function useComplaints(societyId: string | null, userId: string | null) {
   const [complaints, setComplaints] = useState<Complaint[]>([])
@@ -28,6 +34,17 @@ export function useComplaints(societyId: string | null, userId: string | null) {
   useEffect(() => {
     refresh()
   }, [refresh])
+
+  useEffect(() => {
+    if (!societyId || !userId) return
+
+    const unsubscribe = subscribeToComplaints(societyId, (complaint) => {
+      if (complaint.raised_by_user_id !== userId) return
+      setComplaints((prev) => mergeComplaint(prev, complaint))
+    })
+
+    return unsubscribe
+  }, [societyId, userId])
 
   async function submitComplaint(subject: string, description: string) {
     if (!societyId || !userId) throw new Error('Sign in required')

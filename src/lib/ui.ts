@@ -3,9 +3,7 @@ export const ui = {
   page: 'min-h-screen bg-white text-slate-900',
   pageMuted: 'bg-syncra-surface-alt',
   /** Dashboard / app content shell */
-  pageShell: 'mx-auto w-full min-w-0 max-w-7xl px-4 py-4 sm:px-6 sm:py-6 md:px-8 md:py-8 lg:py-10',
-  panelPadding: 'p-4 sm:p-6',
-  panelPaddingX: 'px-4 sm:px-6',
+  pageShell: 'mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-10',
   card: 'rounded-2xl border border-slate-200 bg-white p-4 shadow-card sm:p-6 md:p-8',
   cardSurface: 'rounded-2xl border border-slate-200 bg-syncra-surface p-4 shadow-card sm:p-6 md:p-8',
   innerItem:

@@ -7,7 +7,7 @@ export default function DashboardLayout({ title, children }: { title?: string; c
     <Sidebar title={title}>
       <div className={ui.pageShell}>
         {title && (
-          <header className="mb-4 hidden md:mb-8 md:block lg:mb-10">
+          <header className="mb-6 sm:mb-8 md:mb-10">
             <h1 className={ui.headingLg}>{title}</h1>
             <div className="mt-3 h-px w-12 bg-gradient-to-r from-syncra-accent to-transparent sm:w-16" />
           </header>

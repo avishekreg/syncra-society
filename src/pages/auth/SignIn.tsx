@@ -107,8 +107,8 @@ export default function SignIn() {
               {DEMO_CREDENTIALS.map((cred) => (
                 <li key={cred.email} className="rounded-lg border border-slate-200 bg-white px-3 py-2">
                   <p className="font-semibold text-syncra-primary">{cred.label}</p>
-                  <p className="mt-1 break-all font-mono text-sm">{cred.email}</p>
-                  <p className="break-all font-mono text-sm text-slate-500">{cred.password}</p>
+                  <p className="mt-1 font-mono">{cred.email}</p>
+                  <p className="font-mono text-slate-500">{cred.password}</p>
                 </li>
               ))}
             </ul>
