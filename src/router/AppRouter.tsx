@@ -5,6 +5,7 @@ import RoleScopeGuard from './RoleScopeGuard'
 import SocietySetupGuard from './SocietySetupGuard'
 import SubscriptionActivationGuard from './SubscriptionActivationGuard'
 import SuperAdminRouteShell from './SuperAdminRouteShell'
+import NativeShellBootstrap from '../components/mobile/NativeShellBootstrap'
 import { ui } from '../lib/ui'
 
 const LandingPage = lazy(() => import('../pages/LandingPage'))
@@ -22,8 +23,9 @@ const ResidentRouter = lazy(() => import('./ResidentRouter'))
 export default function AppRouter() {
   return (
     <BrowserRouter>
-      <Suspense fallback={<div className={ui.loading}>Loading...</div>}>
-        <Routes>
+      <NativeShellBootstrap>
+        <Suspense fallback={<div className={ui.loading}>Loading...</div>}>
+          <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/legal/terms" element={<TermsAndConditions />} />
           <Route path="/legal/privacy" element={<PrivacyPolicy />} />
@@ -100,8 +102,9 @@ export default function AppRouter() {
             }
           />
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Suspense>
+          </Routes>
+        </Suspense>
+      </NativeShellBootstrap>
     </BrowserRouter>
   )
 }

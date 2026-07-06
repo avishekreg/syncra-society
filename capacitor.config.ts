@@ -11,7 +11,9 @@ const config: CapacitorConfig = {
   },
   server: {
     url: 'https://syncra-society.vercel.app',
-    cleartext: false
+    cleartext: false,
+    androidScheme: 'https',
+    allowNavigation: ['syncra-society.vercel.app', '*.vercel.app']
   }
 }
 

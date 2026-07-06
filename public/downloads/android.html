@@ -41,19 +41,16 @@
       .brand {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 14px;
         margin-bottom: 20px;
       }
-      .brand-mark {
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #f8fafc, #eef2ff);
-        border: 1px solid rgba(0, 82, 204, 0.12);
-        display: grid;
-        place-items: center;
-        font-weight: 700;
-        color: var(--blue);
+      .brand-logo {
+        width: clamp(44px, 12vw, 56px);
+        height: clamp(44px, 12vw, 56px);
+        border-radius: 14px;
+        object-fit: contain;
+        flex-shrink: 0;
+        box-shadow: 0 8px 24px rgba(0, 82, 204, 0.12);
       }
       .brand-text strong {
         display: block;
@@ -139,7 +136,13 @@
   <body>
     <main class="wrap">
       <div class="brand">
-        <div class="brand-mark" aria-hidden="true">S</div>
+        <img
+          class="brand-logo"
+          src="/logo.png"
+          width="56"
+          height="56"
+          alt="Syncra Society logo"
+        />
         <div class="brand-text">
           <strong>Syncra</strong>
           <span>Society</span>

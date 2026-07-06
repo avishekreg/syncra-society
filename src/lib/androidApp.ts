@@ -24,3 +24,6 @@ export function resolveAndroidDownloadHref(origin?: string) {
 export const SYNCRA_CAPACITOR_APP_ID = 'in.syncrasystems.society'
 
 export const SYNCRA_CAPACITOR_APP_NAME = 'Syncra Society'
+
+/** Runtime deployment manifest emitted at build time for native OTA refresh checks. */
+export const SYNCRA_APP_VERSION_MANIFEST = '/app-version.json'

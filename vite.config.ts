@@ -16,6 +16,20 @@ export default defineConfig({
           fs.copyFileSync(indexPath, path.join(distDir, '404.html'))
         }
       }
+    },
+    {
+      name: 'emit-app-version',
+      closeBundle() {
+        const distDir = path.resolve(__dirname, 'dist')
+        const buildSha =
+          process.env.VERCEL_GIT_COMMIT_SHA || process.env.GITHUB_SHA || 'local-dev'
+        const builtAt = new Date().toISOString()
+        const appVersion = process.env.VITE_APP_VERSION || 'v1.0.0'
+        fs.writeFileSync(
+          path.join(distDir, 'app-version.json'),
+          `${JSON.stringify({ appVersion, buildSha, builtAt }, null, 2)}\n`
+        )
+      }
     }
   ],
   resolve: {
