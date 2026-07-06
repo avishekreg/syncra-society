@@ -1,11 +1,11 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import AuthLayout from '../../layouts/AuthLayout'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { useAuth } from '../../providers/AuthProvider'
-import { useNavigate, Link } from 'react-router-dom'
-import { listRegisteredSocieties } from '../../lib/societyRegistry'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
+import { ensureSocietyJoinCode, listRegisteredSocieties } from '../../lib/societyRegistry'
 import { savePendingSignup } from '../../lib/emailVerification'
 import { ui } from '../../lib/ui'
 
@@ -33,12 +33,39 @@ type Form = z.infer<typeof schema>
 export default function SignUp() {
   const { signUp } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const societies = listRegisteredSocieties()
   const [status, setStatus] = useState<string | null>(null)
-  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<Form>({
+
+  const societyIdFromLink = searchParams.get('society_id')?.trim() ?? ''
+  const linkedSociety = societies.find((s) => s.id === societyIdFromLink)
+  const linkedJoinCode =
+    linkedSociety?.joinCode ??
+    (societyIdFromLink ? ensureSocietyJoinCode(societyIdFromLink, linkedSociety?.name ?? 'Society') : '')
+
+  const { register, handleSubmit, watch, reset, formState: { errors, isSubmitting } } = useForm<Form>({
     resolver: zodResolver(schema),
-    defaultValues: { accountType: 'society_admin' }
+    defaultValues: {
+      accountType: societyIdFromLink ? 'resident' : 'society_admin',
+      societyJoinCode: linkedJoinCode || '',
+      flatNumber: '',
+      building: ''
+    }
   })
+
+  useEffect(() => {
+    if (!societyIdFromLink) return
+    reset({
+      accountType: 'resident',
+      societyJoinCode: linkedJoinCode || '',
+      flatNumber: '',
+      building: '',
+      fullName: '',
+      email: '',
+      password: '',
+      confirm: ''
+    })
+  }, [societyIdFromLink, linkedJoinCode, reset])
 
   const accountType = watch('accountType')
 
@@ -75,7 +102,14 @@ export default function SignUp() {
             Every new account must verify email ownership before accessing the portal. You will receive a clickable
             link and a one-time code. Super Admin accounts are the only exception.
           </p>
-          {accountType === 'resident' && (
+          {societyIdFromLink && linkedJoinCode ? (
+            <div className={`${ui.innerItem} text-sm text-syncra-blue`}>
+              Registration link detected for society{' '}
+              <strong>{linkedSociety?.name ?? societyIdFromLink}</strong>. Join code pre-filled — enter your flat
+              details to complete resident onboarding.
+            </div>
+          ) : null}
+          {accountType === 'resident' && !societyIdFromLink && (
             <div className={`${ui.innerItem} text-sm`}>
               <p className="font-semibold text-syncra-primary">Demo society codes</p>
               <ul className="mt-2 space-y-1 text-slate-600">

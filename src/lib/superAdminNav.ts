@@ -2,7 +2,7 @@
 export const SUPER_ADMIN_HOME = '/super-admin/dashboard'
 
 export const SUPER_ADMIN_NAV = [
-  { path: '/super-admin/dashboard', label: 'Global Dashboard', description: 'Platform overview & metrics' },
+  { path: '/super-admin/dashboard', label: 'Global Dashboard', description: 'Platform control tower' },
   { path: '/super-admin/societies', label: 'Society Onboarding', description: 'Add & manage registered societies' },
   { path: '/super-admin/access', label: 'Global Access Management', description: 'Admin & staff role assignment' },
   { path: '/super-admin/audit-logs', label: 'Platform Audit Logs', description: 'Cross-society activity trail' },
