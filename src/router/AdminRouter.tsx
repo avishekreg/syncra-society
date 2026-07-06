@@ -16,7 +16,7 @@ export default function AdminRouter() {
         <Route
           path="dashboard"
           element={
-            <RoleGuard allow={['super_admin', 'president']}>
+            <RoleGuard allow={['president']}>
               <TierGuard requiredTier="tier2">
                 <AdminDashboard />
               </TierGuard>
@@ -26,7 +26,7 @@ export default function AdminRouter() {
         <Route
           path="notices"
           element={
-            <RoleGuard allow={['super_admin', 'president', 'secretary']}>
+            <RoleGuard allow={['president', 'secretary']}>
               <TierGuard requiredTier="tier2">
                 <AdminNotices />
               </TierGuard>
@@ -36,7 +36,7 @@ export default function AdminRouter() {
         <Route
           path="helpdesk"
           element={
-            <RoleGuard allow={['super_admin', 'president', 'secretary']}>
+            <RoleGuard allow={['president', 'secretary']}>
               <TierGuard requiredTier="tier2">
                 <AdminHelpdeskDashboard />
               </TierGuard>
@@ -46,7 +46,7 @@ export default function AdminRouter() {
         <Route
           path="configuration"
           element={
-            <RoleGuard allow={['super_admin', 'president']}>
+            <RoleGuard allow={['president']}>
               <TierGuard requiredTier="tier2">
                 <SocietyConfiguration />
               </TierGuard>

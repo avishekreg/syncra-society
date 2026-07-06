@@ -12,7 +12,7 @@ export default function FinanceRouter() {
     <Routes>
       <Route
         element={
-          <RoleGuard allow={['super_admin', 'president', 'accountant']}>
+          <RoleGuard allow={['president', 'accountant']}>
             <FinanceRouteLayout />
           </RoleGuard>
         }

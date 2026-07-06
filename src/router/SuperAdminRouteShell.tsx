@@ -1,16 +1,15 @@
 import React from 'react'
-import { Outlet } from 'react-router-dom'
 import ProtectedRoute from './ProtectedRoute'
-import RoleScopeGuard from './RoleScopeGuard'
-import DashboardRouteLayout from '../layouts/DashboardRouteLayout'
+import SuperAdminGuard from './SuperAdminGuard'
+import SuperAdminRouter from './SuperAdminRouter'
 
-/** Layout shell for all /super-admin/* pages — sidebar persists via DashboardRouteLayout. */
+/** Isolated platform shell — dedicated sidebar, strict guard, nested outlet routing. */
 export default function SuperAdminRouteShell() {
   return (
     <ProtectedRoute>
-      <RoleScopeGuard scope="platform">
-        <DashboardRouteLayout title="Syncra Super Admin" />
-      </RoleScopeGuard>
+      <SuperAdminGuard>
+        <SuperAdminRouter />
+      </SuperAdminGuard>
     </ProtectedRoute>
   )
 }

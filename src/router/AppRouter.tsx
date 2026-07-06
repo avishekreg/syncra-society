@@ -5,10 +5,6 @@ import RoleScopeGuard from './RoleScopeGuard'
 import SocietySetupGuard from './SocietySetupGuard'
 import SubscriptionActivationGuard from './SubscriptionActivationGuard'
 import SuperAdminRouteShell from './SuperAdminRouteShell'
-import SuperAdminOverview from '../pages/super-admin/Overview'
-import SuperAdminSocieties from '../pages/super-admin/Societies'
-import SuperAdminPricingHub from '../pages/super-admin/PricingHub'
-import SuperAdminMasterConfig from '../pages/super-admin/MasterConfig'
 import { ui } from '../lib/ui'
 
 const LandingPage = lazy(() => import('../pages/LandingPage'))
@@ -45,14 +41,7 @@ export default function AppRouter() {
             }
           />
 
-          <Route path="/super-admin" element={<SuperAdminRouteShell />}>
-            <Route index element={<SuperAdminOverview />} />
-            <Route path="societies" element={<SuperAdminSocieties />} />
-            <Route path="pricing" element={<SuperAdminPricingHub />} />
-            <Route path="master-config" element={<SuperAdminMasterConfig />} />
-            <Route path="payments" element={<Navigate to="/super-admin/master-config" replace />} />
-            <Route path="subscriptions" element={<Navigate to="/super-admin/pricing" replace />} />
-          </Route>
+          <Route path="/super-admin/*" element={<SuperAdminRouteShell />} />
 
           <Route
             path="/admin/*"

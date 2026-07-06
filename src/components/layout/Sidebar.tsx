@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Menu, X } from 'lucide-react'
-import { NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { NavLink, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import SyncraBrandLogo from '../brand/SyncraBrandLogo'
 import { useAuth } from '../../providers/AuthProvider'
 import { usePlatformConfig } from '../../providers/PlatformConfigProvider'
@@ -22,6 +22,7 @@ import {
   resolveWorkspaceRole,
   workspaceRoleLabel
 } from '../../lib/workspaceAccess'
+import { SUPER_ADMIN_HOME } from '../../lib/superAdminNav'
 import { ui } from '../../lib/ui'
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -134,10 +135,13 @@ export default function Sidebar({ children, title }: SidebarProps) {
     )
   }
 
+  if (isGlobalSuperAdmin(user)) {
+    return <Navigate to={SUPER_ADMIN_HOME} replace />
+  }
+
   const workspaceRole = resolveWorkspaceRole(user)
-  const isSuperAdmin = isGlobalSuperAdmin(user)
   const showResidentNav = canAccessResidentPortal(user)
-  const showStaffNav = isRwaStaff(user) || isSuperAdmin
+  const showStaffNav = isRwaStaff(user)
 
   async function handleSignOut() {
     setMobileOpen(false)
@@ -178,12 +182,6 @@ export default function Sidebar({ children, title }: SidebarProps) {
     '/admin/helpdesk',
     '/admin/configuration',
     ...workspacePaths
-  ]
-
-  const superAdminPaths = [
-    '/super-admin/societies',
-    '/super-admin/pricing',
-    '/super-admin/master-config'
   ]
 
   const showResidentCommunity =
@@ -407,20 +405,6 @@ export default function Sidebar({ children, title }: SidebarProps) {
               <SidebarNavLink to="/rwa/settings" className={navLinkClass}>
                 RWA Settings
               </SidebarNavLink>
-            )}
-
-            {isSuperAdmin && (
-              <NavGroup label="Super Admin" paths={superAdminPaths} defaultOpen>
-                <SidebarNavLink to="/super-admin/societies" className={subNavLinkClass}>
-                  Societies Manager
-                </SidebarNavLink>
-                <SidebarNavLink to="/super-admin/pricing" className={subNavLinkClass}>
-                  Pricing & Subscriptions
-                </SidebarNavLink>
-                <SidebarNavLink to="/super-admin/master-config" className={subNavLinkClass}>
-                  Global Platform Settings
-                </SidebarNavLink>
-              </NavGroup>
             )}
           </>
         )}

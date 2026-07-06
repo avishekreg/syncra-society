@@ -13,7 +13,7 @@ export default function SocietySetupGuard({ children }: { children: React.ReactN
   const isSuperAdmin = isGlobalSuperAdmin(user)
 
   if (isSuperAdmin) {
-    return <Navigate to="/super-admin" replace />
+    return <Navigate to="/super-admin/dashboard" replace />
   }
 
   if (isSocietyAdmin && !currentSocietyId) {

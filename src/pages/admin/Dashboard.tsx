@@ -45,7 +45,7 @@ export default function AdminDashboard() {
   }
 
   if (isGlobalSuperAdmin(user)) {
-    return <Navigate to="/super-admin" replace />
+    return <Navigate to="/super-admin/dashboard" replace />
   }
 
   const totalResidents = showcaseData?.units?.length ?? 0

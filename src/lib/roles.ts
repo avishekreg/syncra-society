@@ -40,9 +40,9 @@ export function rolesFromStaffRole(role: string | undefined): string[] {
   return []
 }
 
-/** Resident portal access — residents, presidents, and super admins only. */
+/** Resident portal access — residents and presidents only. */
 export function canAccessResidentPortal(user: AuthUser | null | undefined): boolean {
-  if (!user || isGlobalSuperAdmin(user)) return true
+  if (!user || isGlobalSuperAdmin(user)) return false
   const role = user.user_metadata?.role ?? user.role ?? 'resident'
   const roles = user.roles ?? []
   if (role === 'rwa_secretary' || roles.includes('rwa_secretary')) return false

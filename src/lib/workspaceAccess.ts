@@ -33,7 +33,7 @@ export function workspaceRoleLabel(role: WorkspaceRole): string {
 export function defaultPathForRole(role: WorkspaceRole): string {
   switch (role) {
     case 'super_admin':
-      return '/super-admin'
+      return '/super-admin/dashboard'
     case 'president':
       return '/admin/dashboard'
     case 'secretary':
@@ -47,7 +47,7 @@ export function defaultPathForRole(role: WorkspaceRole): string {
 
 export function canAccessResidentPortal(user: AuthUser | null | undefined): boolean {
   const role = resolveWorkspaceRole(user)
-  return role === 'resident' || role === 'president' || role === 'super_admin'
+  return role === 'resident' || role === 'president'
 }
 
 export function canAccessPresidentConsole(user: AuthUser | null | undefined): boolean {

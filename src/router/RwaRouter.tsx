@@ -27,7 +27,7 @@ export default function RwaRouter() {
         <Route
           path="workspace"
           element={
-            <RoleGuard allow={['super_admin', 'president', 'secretary']}>
+            <RoleGuard allow={['president', 'secretary']}>
               <WorkspaceIndexRedirect />
             </RoleGuard>
           }
@@ -35,7 +35,7 @@ export default function RwaRouter() {
         <Route
           path="workspace/cashflow"
           element={
-            <RoleGuard allow={['super_admin', 'president']}>
+            <RoleGuard allow={['president']}>
               <TierGuard requiredTier="tier2">
                 <WorkspaceCashflowPage />
               </TierGuard>
@@ -45,7 +45,7 @@ export default function RwaRouter() {
         <Route
           path="workspace/complaints"
           element={
-            <RoleGuard allow={['super_admin', 'president', 'secretary']}>
+            <RoleGuard allow={['president', 'secretary']}>
               <TierGuard requiredTier="tier2">
                 <WorkspaceComplaintsPage />
               </TierGuard>
@@ -55,7 +55,7 @@ export default function RwaRouter() {
         <Route
           path="workspace/flats"
           element={
-            <RoleGuard allow={['super_admin', 'president']}>
+            <RoleGuard allow={['president']}>
               <TierGuard requiredTier="tier2">
                 <WorkspaceFlatsPage />
               </TierGuard>
@@ -65,7 +65,7 @@ export default function RwaRouter() {
         <Route
           path="workspace/*"
           element={
-            <RoleGuard allow={['super_admin', 'president', 'secretary']}>
+            <RoleGuard allow={['president', 'secretary']}>
               <RwaWorkspace />
             </RoleGuard>
           }
@@ -73,7 +73,7 @@ export default function RwaRouter() {
         <Route
           path="settings"
           element={
-            <RoleGuard allow={['super_admin', 'president']}>
+            <RoleGuard allow={['president']}>
               <TierGuard requiredTier="tier2">
                 <RwaSettings />
               </TierGuard>
@@ -83,7 +83,7 @@ export default function RwaRouter() {
         <Route
           path="gatekeeper"
           element={
-            <RoleGuard allow={['super_admin', 'president']}>
+            <RoleGuard allow={['president']}>
               <GatekeeperGuard />
             </RoleGuard>
           }
@@ -91,7 +91,7 @@ export default function RwaRouter() {
         <Route
           path="notices"
           element={
-            <RoleGuard allow={['super_admin', 'president', 'secretary']}>
+            <RoleGuard allow={['president', 'secretary']}>
               <NoticesPage />
             </RoleGuard>
           }
@@ -99,7 +99,7 @@ export default function RwaRouter() {
         <Route
           path="surveys"
           element={
-            <RoleGuard allow={['super_admin', 'president', 'secretary']}>
+            <RoleGuard allow={['president', 'secretary']}>
               <TierGuard requiredTier="tier2">
                 <SurveysManager />
               </TierGuard>
@@ -109,7 +109,7 @@ export default function RwaRouter() {
         <Route
           path="gallery"
           element={
-            <RoleGuard allow={['super_admin', 'president', 'secretary']}>
+            <RoleGuard allow={['president', 'secretary']}>
               <TierGuard requiredTier="tier2">
                 <GalleryManager />
               </TierGuard>
@@ -119,7 +119,7 @@ export default function RwaRouter() {
         <Route
           path="elections"
           element={
-            <RoleGuard allow={['super_admin', 'president', 'secretary']}>
+            <RoleGuard allow={['president', 'secretary']}>
               <TierGuard requiredTier="tier2">
                 <ElectionsManager />
               </TierGuard>
@@ -129,7 +129,7 @@ export default function RwaRouter() {
         <Route
           path="activity"
           element={
-            <RoleGuard allow={['super_admin', 'president', 'secretary']}>
+            <RoleGuard allow={['president', 'secretary']}>
               <TierGuard requiredTier="tier2">
                 <RwaActivityLog />
               </TierGuard>
@@ -139,7 +139,7 @@ export default function RwaRouter() {
         <Route
           path="whatsapp"
           element={
-            <RoleGuard allow={['super_admin', 'president']}>
+            <RoleGuard allow={['president']}>
               <TierGuard requiredTier="tier2">
                 <WhatsAppAutomation />
               </TierGuard>
@@ -149,7 +149,7 @@ export default function RwaRouter() {
         <Route
           path="rewards"
           element={
-            <RoleGuard allow={['super_admin', 'president', 'secretary']}>
+            <RoleGuard allow={['president', 'secretary']}>
               <TierGuard requiredTier="tier2">
                 <RewardsGovernance />
               </TierGuard>

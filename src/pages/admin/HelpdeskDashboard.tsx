@@ -17,7 +17,7 @@ export default function AdminHelpdeskDashboard() {
   }
 
   if (isGlobalSuperAdmin(user)) {
-    return <Navigate to="/super-admin" replace />
+    return <Navigate to="/super-admin/dashboard" replace />
   }
 
   if (!isModuleEnabled('helpdesk', currentSocietyId)) {

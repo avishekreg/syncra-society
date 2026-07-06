@@ -237,9 +237,8 @@ export default function SuperAdminSocieties() {
         <section className={ui.card}>
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className={ui.eyebrow}>Society operations</p>
-              <h2 className={`mt-3 ${ui.headingLg}`}>Manage registered societies</h2>
-              <p className={`mt-3 ${ui.body}`}>
+              <p className={ui.eyebrow}>Registry</p>
+              <p className={`mt-3 max-w-2xl ${ui.body}`}>
                 Society IDs are loaded from <code className="font-mono text-xs">public.societies.id</code> (PostgreSQL
                 UUID). Use Copy ID for WhatsApp gateway and helpdesk integrations.
               </p>

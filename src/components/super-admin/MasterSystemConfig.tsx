@@ -171,8 +171,7 @@ export default function MasterSystemConfig() {
   return (
     <div className="space-y-6">
       <header className={ui.card}>
-        <p className={ui.eyebrow}>Global Platform Settings</p>
-        <h1 className={`mt-2 ${ui.headingLg}`}>Infrastructure & integration control plane</h1>
+        <p className={ui.eyebrow}>Infrastructure control plane</p>
         <p className={`mt-3 max-w-3xl ${ui.body}`}>
           Configure payment gateway secrets, platform webhook endpoints, AI engines, and default automation
           gateways from one surface — no manual env edits required. Per-society module toggles live in

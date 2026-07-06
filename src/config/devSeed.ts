@@ -86,7 +86,7 @@ export function isDemoEmail(email: string | null | undefined) {
 }
 
 export function getPostLoginPath(roles: string[], societyId: string | null, role?: string) {
-  if (roles.includes('super_admin') || role === 'super_admin') return '/super-admin'
+  if (roles.includes('super_admin') || role === 'super_admin') return '/super-admin/dashboard'
   if (!societyId && (roles.includes('rwa_owner') || role === 'rwa_owner')) return '/onboarding'
   if (roles.includes('rwa_secretary') || role === 'rwa_secretary') return '/admin/helpdesk'
   if (roles.includes('rwa_accountant') || role === 'rwa_accountant') return '/finance/ledger'
@@ -105,7 +105,7 @@ export function resolvePostLoginPath(
   societyId: string | null,
   role?: string
 ) {
-  if (isSuperAdminEmail(email) || roles.includes('super_admin')) return '/super-admin'
+  if (isSuperAdminEmail(email) || roles.includes('super_admin')) return '/super-admin/dashboard'
   return getPostLoginPath(roles, societyId, role)
 }
 

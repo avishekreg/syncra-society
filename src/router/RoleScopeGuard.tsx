@@ -4,14 +4,15 @@ import { useAuth } from '../providers/AuthProvider'
 import { resolvePostLoginPath } from '../config/devSeed'
 import { isGlobalSuperAdmin } from '../lib/roles'
 import { defaultPathForRole, resolveWorkspaceRole } from '../lib/workspaceAccess'
+import { SUPER_ADMIN_HOME } from '../lib/superAdminNav'
 
 type RoleScope = 'platform' | 'society' | 'resident'
 
 /**
  * Enforces institutional role separation:
- * - platform: global super admin only
- * - society: staff roles (president, secretary, accountant); blocks residents
- * - resident: residents, presidents, and super admins
+ * - platform: global super admin only (handled by SuperAdminGuard)
+ * - society: staff roles; blocks residents and super admins
+ * - resident: residents and presidents; blocks staff-only roles and super admins
  */
 export default function RoleScopeGuard({
   scope,
@@ -36,6 +37,10 @@ export default function RoleScopeGuard({
     role
   )
 
+  if (superAdmin && scope !== 'platform') {
+    return <Navigate to={SUPER_ADMIN_HOME} replace />
+  }
+
   if (scope === 'platform') {
     if (!superAdmin) {
       return <Navigate to={homePath} replace />
@@ -44,9 +49,6 @@ export default function RoleScopeGuard({
   }
 
   if (scope === 'society') {
-    if (superAdmin) {
-      return <Navigate to="/super-admin" replace />
-    }
     if (workspaceRole === 'resident') {
       return <Navigate to="/resident" replace />
     }
@@ -54,9 +56,6 @@ export default function RoleScopeGuard({
   }
 
   if (scope === 'resident') {
-    if (superAdmin) {
-      return children
-    }
     if (workspaceRole === 'secretary' || workspaceRole === 'accountant') {
       return <Navigate to={defaultPathForRole(workspaceRole)} replace />
     }
