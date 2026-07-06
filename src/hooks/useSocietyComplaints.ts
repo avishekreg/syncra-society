@@ -37,7 +37,15 @@ export function useSocietyComplaints(
     setLoading(true)
     setError(null)
     try {
-      const rows = await listComplaintsForSociety(queryId)
+      let rows: Complaint[] = []
+      for (const id of ids) {
+        try {
+          rows = await listComplaintsForSociety(id)
+          if (rows.length) break
+        } catch {
+          continue
+        }
+      }
       setComplaints(rows ?? [])
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to load complaints')

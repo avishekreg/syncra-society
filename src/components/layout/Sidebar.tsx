@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import SyncraBrandLogo from '../brand/SyncraBrandLogo'
@@ -35,6 +35,10 @@ const subNavLinkClass = ({ isActive }: { isActive: boolean }) =>
       : 'text-slate-600 hover:bg-syncra-surface-alt hover:text-syncra-primary'
   ].join(' ')
 
+function SidebarNavLink(props: React.ComponentProps<typeof NavLink>) {
+  return <NavLink preventScrollReset {...props} />
+}
+
 type NavGroupProps = {
   label: string
   paths: string[]
@@ -51,11 +55,17 @@ function NavGroup({ label, paths, defaultOpen = false, children }: NavGroupProps
     if (childActive) setOpen(true)
   }, [childActive])
 
+  const toggleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+    setOpen((value) => !value)
+  }
+
   return (
     <div className="space-y-0.5">
       <button
         type="button"
-        onClick={() => setOpen((value) => !value)}
+        onClick={toggleOpen}
         aria-expanded={open}
         className={`${ui.navLink} w-full justify-between text-slate-600 hover:bg-syncra-surface-alt hover:text-syncra-primary`}
       >
@@ -89,6 +99,8 @@ export default function Sidebar({ children, title }: SidebarProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const navScrollRef = useRef<HTMLElement>(null)
+  const navScrollTopRef = useRef(0)
 
   const societyScope = currentSocietyId
   const moduleEnabled = (key: Parameters<typeof isModuleEnabled>[0]) =>
@@ -96,6 +108,13 @@ export default function Sidebar({ children, title }: SidebarProps) {
 
   useEffect(() => {
     setMobileOpen(false)
+  }, [location.pathname])
+
+  useEffect(() => {
+    const nav = navScrollRef.current
+    if (nav) {
+      nav.scrollTop = navScrollTopRef.current
+    }
   }, [location.pathname])
 
   useEffect(() => {
@@ -198,54 +217,62 @@ export default function Sidebar({ children, title }: SidebarProps) {
         </p>
       </div>
 
-      <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-3 py-4 sm:py-5">
+      <nav
+        ref={navScrollRef}
+        onScroll={() => {
+          if (navScrollRef.current) {
+            navScrollTopRef.current = navScrollRef.current.scrollTop
+          }
+        }}
+        className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-3 py-4 sm:py-5"
+      >
         {showResidentNav && (
           <>
             <p className="mb-2 px-3.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
               Workspace
             </p>
-            <NavLink to="/resident" end className={navLinkClass}>
+            <SidebarNavLink to="/resident" end className={navLinkClass}>
               Resident Dashboard
-            </NavLink>
+            </SidebarNavLink>
             {moduleEnabled('helpdesk') && (
-              <NavLink to="/resident/helpdesk" className={navLinkClass}>
+              <SidebarNavLink to="/resident/helpdesk" className={navLinkClass}>
                 Smart Helpdesk
-              </NavLink>
+              </SidebarNavLink>
             )}
             {moduleEnabled('visitorLogs') && (
-              <NavLink to="/resident/visitor-logs" className={navLinkClass}>
+              <SidebarNavLink to="/resident/visitor-logs" className={navLinkClass}>
                 Visitor Logs
-              </NavLink>
+              </SidebarNavLink>
             )}
             {moduleEnabled('notices') && (
-              <NavLink to="/resident/notices" className={navLinkClass}>
+              <SidebarNavLink to="/resident/notices" className={navLinkClass}>
                 Notices
-              </NavLink>
+              </SidebarNavLink>
             )}
-            <NavLink to="/resident/activity" className={navLinkClass}>
+            <SidebarNavLink to="/resident/activity" className={navLinkClass}>
               Activity
-            </NavLink>
+            </SidebarNavLink>
             {showResidentCommunity && (
               <NavGroup label="Community & Governance" paths={residentCommunityPaths}>
                 {moduleEnabled('surveys') && (
-                  <NavLink to="/resident/surveys" className={subNavLinkClass}>
+                  <SidebarNavLink to="/resident/surveys" className={subNavLinkClass}>
                     Surveys
-                  </NavLink>
+                  </SidebarNavLink>
                 )}
                 {moduleEnabled('gallery') && (
-                  <NavLink to="/resident/gallery" className={subNavLinkClass}>
+                  <SidebarNavLink to="/resident/gallery" className={subNavLinkClass}>
                     Photo Gallery
-                  </NavLink>
+                  </SidebarNavLink>
                 )}
                 {moduleEnabled('elections') && (
-                  <NavLink to="/resident/elections" className={subNavLinkClass}>
+                  <SidebarNavLink to="/resident/elections" className={subNavLinkClass}>
                     Elections
-                  </NavLink>
+                  </SidebarNavLink>
                 )}
                 {moduleEnabled('rewards') && (
-                  <NavLink to="/resident/rewards" className={subNavLinkClass}>
+                  <SidebarNavLink to="/resident/rewards" className={subNavLinkClass}>
                     Rewards & Recognition
-                  </NavLink>
+                  </SidebarNavLink>
                 )}
               </NavGroup>
             )}
@@ -260,40 +287,40 @@ export default function Sidebar({ children, title }: SidebarProps) {
 
             {showFinancialConsole && (
               <NavGroup label="Financial Console" paths={financePaths} defaultOpen={workspaceRole === 'accountant'}>
-                <NavLink to="/finance/ledger" className={subNavLinkClass}>
+                <SidebarNavLink to="/finance/ledger" className={subNavLinkClass}>
                   Financial Ledger
-                </NavLink>
-                <NavLink to="/finance/downloads" className={subNavLinkClass}>
+                </SidebarNavLink>
+                <SidebarNavLink to="/finance/downloads" className={subNavLinkClass}>
                   Download Center
-                </NavLink>
-                <NavLink to="/finance/bank-upload" className={subNavLinkClass}>
+                </SidebarNavLink>
+                <SidebarNavLink to="/finance/bank-upload" className={subNavLinkClass}>
                   Bank Statement Upload
-                </NavLink>
-                <NavLink to="/finance/cashflow" className={subNavLinkClass}>
+                </SidebarNavLink>
+                <SidebarNavLink to="/finance/cashflow" className={subNavLinkClass}>
                   Cashflow Transparency
-                </NavLink>
+                </SidebarNavLink>
               </NavGroup>
             )}
 
             {showPresidentConsole && (
               <NavGroup label="President Console" paths={presidentConsolePaths} defaultOpen>
-                <NavLink to="/admin/dashboard" className={subNavLinkClass}>
+                <SidebarNavLink to="/admin/dashboard" className={subNavLinkClass}>
                   Analytics Overview
-                </NavLink>
+                </SidebarNavLink>
                 {moduleEnabled('notices') && canAccessNoticesManagement(user) && (
-                  <NavLink to="/admin/notices" className={subNavLinkClass}>
+                  <SidebarNavLink to="/admin/notices" className={subNavLinkClass}>
                     Notices Management
-                  </NavLink>
+                  </SidebarNavLink>
                 )}
                 {moduleEnabled('helpdesk') && canAccessHelpdeskDashboard(user) && (
-                  <NavLink to="/admin/helpdesk" className={subNavLinkClass}>
+                  <SidebarNavLink to="/admin/helpdesk" className={subNavLinkClass}>
                     Complaints Dashboard
-                  </NavLink>
+                  </SidebarNavLink>
                 )}
                 {canAccessSocietyConfiguration(user) && (
-                  <NavLink to="/admin/configuration" className={subNavLinkClass}>
+                  <SidebarNavLink to="/admin/configuration" className={subNavLinkClass}>
                     Society Configuration
-                  </NavLink>
+                  </SidebarNavLink>
                 )}
               </NavGroup>
             )}
@@ -301,19 +328,19 @@ export default function Sidebar({ children, title }: SidebarProps) {
             {showPresidentConsole && showWorkspaceGroup && (
               <NavGroup label="Society Operations" paths={workspacePaths}>
                 {canAccessWorkspaceCashflow(user) && (
-                  <NavLink to="/rwa/workspace/cashflow" className={subNavLinkClass}>
+                  <SidebarNavLink to="/rwa/workspace/cashflow" className={subNavLinkClass}>
                     Cashflow Forecast
-                  </NavLink>
+                  </SidebarNavLink>
                 )}
                 {canAccessWorkspaceComplaints(user) && (
-                  <NavLink to="/rwa/workspace/complaints" className={subNavLinkClass}>
+                  <SidebarNavLink to="/rwa/workspace/complaints" className={subNavLinkClass}>
                     Incident Stream
-                  </NavLink>
+                  </SidebarNavLink>
                 )}
                 {canAccessWorkspaceFlats(user) && (
-                  <NavLink to="/rwa/workspace/flats" className={subNavLinkClass}>
+                  <SidebarNavLink to="/rwa/workspace/flats" className={subNavLinkClass}>
                     Flat Owner Showcase
-                  </NavLink>
+                  </SidebarNavLink>
                 )}
               </NavGroup>
             )}
@@ -321,78 +348,78 @@ export default function Sidebar({ children, title }: SidebarProps) {
             {!showPresidentConsole && canAccessHelpdeskDashboard(user) && (
               <>
                 {moduleEnabled('helpdesk') && (
-                  <NavLink to="/admin/helpdesk" className={navLinkClass}>
+                  <SidebarNavLink to="/admin/helpdesk" className={navLinkClass}>
                     Complaints Dashboard
-                  </NavLink>
+                  </SidebarNavLink>
                 )}
                 {canAccessWorkspaceComplaints(user) && (
-                  <NavLink to="/rwa/workspace/complaints" className={navLinkClass}>
+                  <SidebarNavLink to="/rwa/workspace/complaints" className={navLinkClass}>
                     Helpdesk & Incident Stream
-                  </NavLink>
+                  </SidebarNavLink>
                 )}
               </>
             )}
 
             {!showPresidentConsole && canAccessNoticesManagement(user) && moduleEnabled('notices') && (
-              <NavLink to="/admin/notices" className={navLinkClass}>
+              <SidebarNavLink to="/admin/notices" className={navLinkClass}>
                 Notices Management
-              </NavLink>
+              </SidebarNavLink>
             )}
 
             {showRwaControls && (
               <NavGroup label="Community & Governance" paths={rwaControlPaths}>
                 {moduleEnabled('surveys') && (
-                  <NavLink to="/rwa/surveys" className={subNavLinkClass}>
+                  <SidebarNavLink to="/rwa/surveys" className={subNavLinkClass}>
                     Surveys
-                  </NavLink>
+                  </SidebarNavLink>
                 )}
                 {moduleEnabled('gallery') && (
-                  <NavLink to="/rwa/gallery" className={subNavLinkClass}>
+                  <SidebarNavLink to="/rwa/gallery" className={subNavLinkClass}>
                     Gallery Management
-                  </NavLink>
+                  </SidebarNavLink>
                 )}
                 {moduleEnabled('elections') && (
-                  <NavLink to="/rwa/elections" className={subNavLinkClass}>
+                  <SidebarNavLink to="/rwa/elections" className={subNavLinkClass}>
                     Elections
-                  </NavLink>
+                  </SidebarNavLink>
                 )}
                 {moduleEnabled('rewards') && (
-                  <NavLink to="/rwa/rewards" className={subNavLinkClass}>
+                  <SidebarNavLink to="/rwa/rewards" className={subNavLinkClass}>
                     Rewards & Governance
-                  </NavLink>
+                  </SidebarNavLink>
                 )}
               </NavGroup>
             )}
 
             {canAccessGuardConsole(user) && moduleEnabled('gatekeeper') && (
-              <NavLink to="/rwa/gatekeeper" className={navLinkClass}>
+              <SidebarNavLink to="/rwa/gatekeeper" className={navLinkClass}>
                 Guard Console
-              </NavLink>
+              </SidebarNavLink>
             )}
 
             {canAccessWhatsappAutomation(user) && moduleEnabled('whatsappAutomation') && (
-              <NavLink to="/rwa/whatsapp" className={navLinkClass}>
+              <SidebarNavLink to="/rwa/whatsapp" className={navLinkClass}>
                 WhatsApp Automation
-              </NavLink>
+              </SidebarNavLink>
             )}
 
             {canAccessRwaSettings(user) && (
-              <NavLink to="/rwa/settings" className={navLinkClass}>
+              <SidebarNavLink to="/rwa/settings" className={navLinkClass}>
                 RWA Settings
-              </NavLink>
+              </SidebarNavLink>
             )}
 
             {isSuperAdmin && (
               <NavGroup label="Super Admin" paths={superAdminPaths} defaultOpen>
-                <NavLink to="/super-admin/societies" className={subNavLinkClass}>
+                <SidebarNavLink to="/super-admin/societies" className={subNavLinkClass}>
                   Societies Manager
-                </NavLink>
-                <NavLink to="/super-admin/pricing" className={subNavLinkClass}>
+                </SidebarNavLink>
+                <SidebarNavLink to="/super-admin/pricing" className={subNavLinkClass}>
                   Pricing & Subscriptions
-                </NavLink>
-                <NavLink to="/super-admin/master-config" className={subNavLinkClass}>
+                </SidebarNavLink>
+                <SidebarNavLink to="/super-admin/master-config" className={subNavLinkClass}>
                   Global Platform Settings
-                </NavLink>
+                </SidebarNavLink>
               </NavGroup>
             )}
           </>

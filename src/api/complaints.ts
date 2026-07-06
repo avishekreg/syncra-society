@@ -62,16 +62,18 @@ export async function listComplaintsForUser(societyId: string, userId: string): 
 }
 
 export async function listComplaintsForSociety(societyId: string): Promise<Complaint[]> {
-  const fromApi = await listComplaintsViaApi(societyId)
-  if (fromApi) return fromApi
-
   try {
+    const fromApi = await listComplaintsViaApi(societyId)
+    if (fromApi) return fromApi
+
     return await restGet<Complaint[]>(
       `complaints_and_suggestions?society_id=eq.${societyId}&order=created_at.desc`
     )
   } catch (err) {
     if (shouldFallback(err)) {
-      return readLocal().filter((c) => c.society_id === societyId)
+      const local = readLocal().filter((c) => c.society_id === societyId)
+      if (local.length) return local
+      return []
     }
     throw err
   }

@@ -61,6 +61,8 @@ async function fetchSocietyFlatNumbers(societyId) {
   return Array.from(unique).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
 }
 
+const VISIT_PURPOSES = ['Gate entry', 'Delivery', 'Guest', 'Service', 'Cab / Ride', 'Other']
+
 const GatekeeperConsole = ({ societyId }) => {
   const [flatNumbers, setFlatNumbers] = useState([])
   const [flatQuery, setFlatQuery] = useState('')
@@ -75,7 +77,8 @@ const GatekeeperConsole = ({ societyId }) => {
   const [loadingFlats, setLoadingFlats] = useState(true)
   const [loadingLogs, setLoadingLogs] = useState(true)
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState(null)
+  const [submitError, setSubmitError] = useState(null)
+  const [flatRegistryWarning, setFlatRegistryWarning] = useState(null)
   const [success, setSuccess] = useState(null)
 
   const filteredFlats = useMemo(() => {
@@ -100,7 +103,7 @@ const GatekeeperConsole = ({ societyId }) => {
       .limit(5)
 
     if (logsError) {
-      setError(logsError.message)
+      setSubmitError(logsError.message)
       setRecentLogs([])
     } else {
       setRecentLogs(data ?? [])
@@ -117,16 +120,27 @@ const GatekeeperConsole = ({ societyId }) => {
 
     let active = true
     setLoadingFlats(true)
-    setError(null)
+    setFlatRegistryWarning(null)
 
-    void fetchSocietyFlatNumbers(societyId).then((flats) => {
-      if (!active) return
-      setFlatNumbers(flats)
-      setLoadingFlats(false)
-      if (flats.length === 0) {
-        setError('No registered flats found for this society. Import residents before logging visitors.')
-      }
-    })
+    void fetchSocietyFlatNumbers(societyId)
+      .then((flats) => {
+        if (!active) return
+        setFlatNumbers(flats)
+        setLoadingFlats(false)
+        if (flats.length === 0) {
+          setFlatRegistryWarning(
+            'No registered flats found for this society. Import residents before logging visitors.'
+          )
+        }
+      })
+      .catch(() => {
+        if (!active) return
+        setFlatNumbers([])
+        setLoadingFlats(false)
+        setFlatRegistryWarning(
+          'Unable to load the flat registry right now. Purpose and visitor details can still be prepared.'
+        )
+      })
 
     return () => {
       active = false
@@ -169,27 +183,27 @@ const GatekeeperConsole = ({ societyId }) => {
 
   async function handleSubmit(event) {
     event.preventDefault()
-    setError(null)
+    setSubmitError(null)
     setSuccess(null)
 
     if (!societyId) {
-      setError('Society context is missing.')
+      setSubmitError('Society context is missing.')
       return
     }
 
     const flatNo = selectedFlat.trim()
     if (!flatNo || !flatNumbers.includes(flatNo)) {
-      setError('Select a valid flat number from the registered list — manual entry is not allowed.')
+      setSubmitError('Select a valid flat number from the registered list — manual entry is not allowed.')
       return
     }
 
     if (!visitorName.trim()) {
-      setError('Visitor name is required.')
+      setSubmitError('Visitor name is required.')
       return
     }
 
     if (!phoneNumber.trim()) {
-      setError('Visitor phone number is required.')
+      setSubmitError('Visitor phone number is required.')
       return
     }
 
@@ -223,7 +237,7 @@ const GatekeeperConsole = ({ societyId }) => {
       setSuccess(`Entry logged for Flat ${flatNo}. Resident alert dispatched via Realtime.`)
       void loadRecentLogs()
     } catch (err) {
-      setError(err?.message ?? 'Unable to log visitor entry.')
+      setSubmitError(err?.message ?? 'Unable to log visitor entry.')
     } finally {
       setSubmitting(false)
     }
@@ -332,13 +346,18 @@ const GatekeeperConsole = ({ societyId }) => {
 
           <label className="space-y-2 sm:col-span-2">
             <span className={ui.label}>Purpose of visit</span>
-            <input
-              type="text"
+            <select
               value={purpose}
               onChange={(event) => setPurpose(event.target.value)}
               className={ui.input}
-              placeholder="Delivery, guest, service, etc."
-            />
+              aria-label="Purpose of visit"
+            >
+              {VISIT_PURPOSES.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
           </label>
 
           <button
@@ -350,9 +369,14 @@ const GatekeeperConsole = ({ societyId }) => {
           </button>
         </form>
 
-        {error && (
+        {flatRegistryWarning && (
+          <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="status">
+            {flatRegistryWarning}
+          </p>
+        )}
+        {submitError && (
           <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
-            {error}
+            {submitError}
           </p>
         )}
         {success && (

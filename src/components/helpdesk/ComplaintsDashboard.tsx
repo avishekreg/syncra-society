@@ -1,26 +1,13 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import type { RealtimeChannel } from '@supabase/supabase-js'
-import supabase from '../../api/supabaseSdk'
+import React from 'react'
 import type { Complaint } from '../../types/db'
+import { useSocietyComplaints } from '../../hooks/useSocietyComplaints'
 import { ui } from '../../lib/ui'
 
-const TABLE = 'complaints_and_suggestions'
-
 type ComplaintsDashboardProps = {
+  /** Primary PostgreSQL UUID used for queries and realtime. */
   societyId: string
-}
-
-function normalizeRow(row: Record<string, unknown>): Complaint {
-  return {
-    id: String(row.id),
-    society_id: String(row.society_id),
-    raised_by_user_id: String(row.raised_by_user_id),
-    subject: String(row.subject),
-    description: row.description != null ? String(row.description) : null,
-    status: (row.status as Complaint['status']) ?? 'open',
-    created_at: row.created_at != null ? String(row.created_at) : undefined,
-    updated_at: row.updated_at != null ? String(row.updated_at) : undefined
-  }
+  /** Legacy slug or alternate ids (e.g. syncra-windsor-castle) for fallback lookups. */
+  alternateSocietyIds?: string[]
 }
 
 function statusLabel(status: Complaint['status']) {
@@ -70,81 +57,14 @@ function formatTimestamp(iso?: string) {
   })
 }
 
-function prependComplaint(prev: Complaint[], incoming: Complaint) {
-  if (prev.some((item) => item.id === incoming.id)) return prev
-  return [incoming, ...prev]
-}
-
-export default function ComplaintsDashboard({ societyId }: ComplaintsDashboardProps) {
-  const [complaints, setComplaints] = useState<Complaint[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [live, setLive] = useState(false)
-
-  const fetchComplaints = useCallback(async () => {
-    if (!societyId) {
-      setComplaints([])
-      setLoading(false)
-      return
-    }
-
-    setLoading(true)
-    setError(null)
-
-    const { data, error: fetchError } = await supabase
-      .from(TABLE)
-      .select('*')
-      .eq('society_id', societyId)
-      .order('created_at', { ascending: false })
-
-    if (fetchError) {
-      setError(fetchError.message)
-      setComplaints([])
-    } else {
-      setComplaints((data ?? []).map((row) => normalizeRow(row as Record<string, unknown>)))
-    }
-
-    setLoading(false)
-  }, [societyId])
-
-  useEffect(() => {
-    void fetchComplaints()
-  }, [fetchComplaints])
-
-  useEffect(() => {
-    if (!societyId) {
-      setLive(false)
-      return
-    }
-
-    let channel: RealtimeChannel | null = null
-
-    channel = supabase
-      .channel(`complaints-insert-${societyId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: TABLE,
-          filter: `society_id=eq.${societyId}`
-        },
-        (payload) => {
-          const row = payload.new as Record<string, unknown>
-          setComplaints((prev) => prependComplaint(prev, normalizeRow(row)))
-        }
-      )
-      .subscribe((status) => {
-        setLive(status === 'SUBSCRIBED')
-      })
-
-    return () => {
-      setLive(false)
-      if (channel) {
-        void supabase.removeChannel(channel)
-      }
-    }
-  }, [societyId])
+export default function ComplaintsDashboard({
+  societyId,
+  alternateSocietyIds = []
+}: ComplaintsDashboardProps) {
+  const { complaints, loading, error, live, refresh } = useSocietyComplaints(
+    societyId,
+    alternateSocietyIds
+  )
 
   if (!societyId) {
     return (
@@ -172,15 +92,18 @@ export default function ComplaintsDashboard({ societyId }: ComplaintsDashboardPr
               Live
             </span>
           )}
-          <button type="button" onClick={() => void fetchComplaints()} className={ui.btnGhost}>
+          <button type="button" onClick={() => void refresh()} className={ui.btnGhost}>
             Refresh
           </button>
         </div>
       </header>
 
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
-          {error}
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="alert">
+          <p className="font-medium">Unable to reach the live complaints service.</p>
+          <p className="mt-1 text-amber-800/90">
+            {error}. Showing cached or demo tickets where available — the dashboard remains usable.
+          </p>
         </div>
       )}
 
@@ -193,7 +116,7 @@ export default function ComplaintsDashboard({ societyId }: ComplaintsDashboardPr
         </div>
       )}
 
-      {!loading && !error && complaints.length === 0 && (
+      {!loading && complaints.length === 0 && (
         <div className={ui.card}>
           <p className={ui.body}>No complaints logged yet for this society.</p>
         </div>

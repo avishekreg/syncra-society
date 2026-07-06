@@ -1,15 +1,17 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import DashboardLayout from './DashboardLayout'
 
-const ADMIN_PAGE_TITLES: Record<string, string> = {
+const ADMIN_PAGE_TITLES: Record<string, string | null> = {
   '/admin/dashboard': 'Analytics Overview',
   '/admin/notices': 'Notices Management',
   '/admin/helpdesk': 'Complaints Dashboard',
-  '/admin/configuration': 'Society Configuration'
+  '/admin/configuration': null
 }
 
 function resolveAdminTitle(pathname: string) {
-  return ADMIN_PAGE_TITLES[pathname] ?? 'President Console'
+  const title = ADMIN_PAGE_TITLES[pathname]
+  if (title === null) return undefined
+  return title ?? 'President Console'
 }
 
 export default function AdminRouteLayout() {

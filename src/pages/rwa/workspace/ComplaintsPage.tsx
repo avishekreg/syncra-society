@@ -94,7 +94,10 @@ export default function WorkspaceComplaintsPage() {
             <p className={ui.eyebrow}>Complaints dashboard</p>
             <h2 className={`mt-1 ${ui.heading}`}>Helpdesk & incident stream</h2>
           </header>
-          <ComplaintsDashboard societyId={uuid} />
+          <ComplaintsDashboard
+            societyId={uuid}
+            alternateSocietyIds={currentSocietyId ? [currentSocietyId] : []}
+          />
         </section>
       ) : null}
     </div>

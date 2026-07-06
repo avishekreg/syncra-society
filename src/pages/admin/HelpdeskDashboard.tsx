@@ -51,5 +51,5 @@ export default function AdminHelpdeskDashboard() {
     )
   }
 
-  return <ComplaintsDashboard societyId={uuid} />
+  return <ComplaintsDashboard societyId={uuid} alternateSocietyIds={currentSocietyId ? [currentSocietyId] : []} />
 }
