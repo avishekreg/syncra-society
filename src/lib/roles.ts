@@ -36,8 +36,15 @@ export function rolesFromStaffRole(role: string | undefined): string[] {
   if (role === 'rwa_owner') return ['rwa_owner']
   if (role === 'rwa_secretary') return ['rwa_secretary']
   if (role === 'rwa_accountant') return ['rwa_accountant']
+  if (role === 'gatekeeper') return ['gatekeeper']
   if (role === 'resident') return ['resident']
   return []
+}
+
+export function isGatekeeper(user: AuthUser | null | undefined): boolean {
+  if (!user) return false
+  const role = user.user_metadata?.role ?? user.role
+  return role === 'gatekeeper' || Boolean(user.roles?.includes('gatekeeper'))
 }
 
 /** Resident portal access — residents and presidents only. */

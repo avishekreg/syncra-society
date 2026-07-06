@@ -22,7 +22,14 @@ export type DemoLoginConfig = {
   role: string
   tier: 'tier1' | 'tier2' | 'tier3'
   flatNumber?: string | null
+  username?: string | null
+  requiresPasswordChange?: boolean
   label: string
+}
+
+/** Username → email for demo / gatekeeper sign-in without @ in the field. */
+export const DEMO_USERNAME_ALIASES: Record<string, string> = {
+  gatekeeper_demo: 'gatekeeper@syncrademo.com'
 }
 
 /** Pre-seeded demo accounts for local development and sales demos. */
@@ -32,6 +39,7 @@ export const DEMO_LOGINS: Record<string, DemoLoginConfig> = {
     roles: ['rwa_owner'],
     role: 'rwa_owner',
     tier: 'tier2',
+    flatNumber: '501',
     label: 'Society President (RWA Owner)'
   },
   'secretary@syncrademo.com': {
@@ -55,6 +63,15 @@ export const DEMO_LOGINS: Record<string, DemoLoginConfig> = {
     tier: 'tier2',
     flatNumber: '402',
     label: 'Resident (Flat 402)'
+  },
+  'gatekeeper@syncrademo.com': {
+    password: 'TemporaryPassword123',
+    roles: ['gatekeeper'],
+    role: 'gatekeeper',
+    tier: 'tier1',
+    username: 'gatekeeper_demo',
+    requiresPasswordChange: true,
+    label: 'Demo Gatekeeper'
   }
 }
 
@@ -72,7 +89,11 @@ export function isSuperAdminEmail(email: string) {
 }
 
 export function isDemoSocietyId(societyId: string | null | undefined) {
-  return societyId === DEMO_SOCIETY_ID || societyId?.startsWith('society-') === true
+  return (
+    societyId === DEMO_SOCIETY_ID ||
+    societyId === DEMO_SOCIETY_UUID ||
+    societyId?.startsWith('society-') === true
+  )
 }
 
 export function isDemoAuthActive() {
@@ -87,6 +108,7 @@ export function isDemoEmail(email: string | null | undefined) {
 
 export function getPostLoginPath(roles: string[], societyId: string | null, role?: string) {
   if (roles.includes('super_admin') || role === 'super_admin') return '/super-admin/dashboard'
+  if (roles.includes('gatekeeper') || role === 'gatekeeper') return '/gatekeeper'
   if (!societyId && (roles.includes('rwa_owner') || role === 'rwa_owner')) return '/onboarding'
   if (roles.includes('rwa_secretary') || role === 'rwa_secretary') return '/admin/helpdesk'
   if (roles.includes('rwa_accountant') || role === 'rwa_accountant') return '/finance/ledger'

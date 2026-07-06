@@ -49,8 +49,8 @@ export default function RoleScopeGuard({
   }
 
   if (scope === 'society') {
-    if (workspaceRole === 'resident') {
-      return <Navigate to="/resident" replace />
+    if (workspaceRole === 'resident' || workspaceRole === 'gatekeeper') {
+      return <Navigate to={defaultPathForRole(workspaceRole)} replace />
     }
     return children
   }

@@ -41,10 +41,16 @@ export interface UserAndFlat {
   society_id: string
   flat_number: string
   name: string
+  username?: string | null
   phone?: string | null
+  whatsapp_number?: string | null
   email?: string | null
+  avatar_url?: string | null
   role?: string | null
+  requires_password_change?: boolean | null
   opening_outstanding_balance?: number | null
+  created_at?: string | null
+  updated_at?: string | null
 }
 
 export interface SocietyLedgerEntry {

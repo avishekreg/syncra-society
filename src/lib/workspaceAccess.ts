@@ -1,6 +1,6 @@
 import { isGlobalSuperAdmin, type AuthUser } from './roles'
 
-export type WorkspaceRole = 'super_admin' | 'president' | 'secretary' | 'accountant' | 'resident'
+export type WorkspaceRole = 'super_admin' | 'president' | 'secretary' | 'accountant' | 'resident' | 'gatekeeper'
 
 export function resolveWorkspaceRole(user: AuthUser | null | undefined): WorkspaceRole {
   if (!user) return 'resident'
@@ -9,6 +9,7 @@ export function resolveWorkspaceRole(user: AuthUser | null | undefined): Workspa
   const role = user.user_metadata?.role ?? user.role ?? 'resident'
   const roles = user.roles ?? []
 
+  if (role === 'gatekeeper' || roles.includes('gatekeeper')) return 'gatekeeper'
   if (role === 'rwa_owner' || roles.includes('rwa_owner')) return 'president'
   if (role === 'rwa_secretary' || roles.includes('rwa_secretary')) return 'secretary'
   if (role === 'rwa_accountant' || roles.includes('rwa_accountant')) return 'accountant'
@@ -25,6 +26,8 @@ export function workspaceRoleLabel(role: WorkspaceRole): string {
       return 'Society Secretary'
     case 'accountant':
       return 'Society Accountant'
+    case 'gatekeeper':
+      return 'Gatekeeper'
     default:
       return 'Resident'
   }
@@ -40,6 +43,8 @@ export function defaultPathForRole(role: WorkspaceRole): string {
       return '/admin/helpdesk'
     case 'accountant':
       return '/finance/ledger'
+    case 'gatekeeper':
+      return '/gatekeeper'
     default:
       return '/resident'
   }

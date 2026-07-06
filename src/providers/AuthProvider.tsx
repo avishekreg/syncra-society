@@ -3,6 +3,7 @@ import supabase from '../api/supabaseSdk'
 import { restGet } from '../api/supabaseClient'
 import type { Society, UserAndFlat } from '../types/db'
 import { resolveResidentProfile, getLocalResidentProfile } from '../api/residentMapping'
+import { resolveLoginIdentifier } from '../lib/usernameAuth'
 import { rolesFromStaffRole } from '../lib/roles'
 import { DEV_SUPER_ADMIN, DEMO_AUTH_KEY, DEMO_LOGINS, DEMO_SOCIETY_ID, isSuperAdminEmail, seedDemoBillingStatus } from '../config/devSeed'
 import {
@@ -35,6 +36,12 @@ type User = {
   email: string
   roles: string[]
   flatNumber?: string | null
+  username?: string | null
+  displayName?: string | null
+  avatarUrl?: string | null
+  phone?: string | null
+  whatsappNumber?: string | null
+  requiresPasswordChange?: boolean
   tier: SubscriptionTier
   role: string
   user_metadata?: {
@@ -93,15 +100,16 @@ const AuthContext = createContext<
   | {
       user: User | null
       initializing: boolean
-      setUser: (u: User | null) => void
+      setUser: React.Dispatch<React.SetStateAction<User | null>>
       currentSocietyId: string | null
       setCurrentSocietyId: (s: string | null) => void
       showcaseData: ShowcaseData | null
       setShowcaseData: (data: ShowcaseData | null) => void
       signUp: (email: string, password: string, options?: { fullName?: string; role?: string }) => Promise<any>
-      signIn: (email: string, password: string) => Promise<any>
+      signIn: (identifier: string, password: string) => Promise<any>
       signOut: () => Promise<void>
       refreshSocietyProfile: () => Promise<void>
+      societyName: string | null
       resendVerificationEmail: (email: string) => Promise<void>
       verifyEmailOtp: (email: string, token: string) => Promise<{ user: { id: string; email?: string | null; email_confirmed_at?: string | null } | null }>
     }
@@ -119,12 +127,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       tier: snapshot.tier,
       role: snapshot.role,
       flatNumber: snapshot.flatNumber ?? null,
+      username: snapshot.username ?? null,
+      displayName: snapshot.displayName ?? null,
+      avatarUrl: snapshot.avatarUrl ?? null,
+      phone: snapshot.phone ?? null,
+      whatsappNumber: snapshot.whatsappNumber ?? null,
+      requiresPasswordChange: snapshot.requiresPasswordChange ?? false,
       user_metadata: { role: snapshot.role, tier: snapshot.tier },
       app_metadata: { provider: snapshot.kind === 'supabase' ? 'email' : 'local' }
     }
   })
   const [initializing, setInitializing] = useState(true)
   const [currentSocietyId, setCurrentSocietyId] = useState<string | null>(() => readPersistedSocietyId())
+  const [societyName, setSocietyName] = useState<string | null>(null)
   const [showcaseData, setShowcaseData] = useState<ShowcaseData | null>(null)
 
   const demoShowcaseData: ShowcaseData = {
@@ -258,10 +273,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       tier: snapshot.tier,
       role: snapshot.role,
       flatNumber: snapshot.flatNumber ?? null,
+      username: snapshot.username ?? null,
+      displayName: snapshot.displayName ?? null,
+      avatarUrl: snapshot.avatarUrl ?? null,
+      phone: snapshot.phone ?? null,
+      whatsappNumber: snapshot.whatsappNumber ?? null,
+      requiresPasswordChange: snapshot.requiresPasswordChange ?? false,
       user_metadata: { role: snapshot.role, tier: snapshot.tier },
       app_metadata: {
         provider: snapshot.kind === 'supabase' ? 'email' : snapshot.kind === 'demo' ? 'local' : 'local'
       }
+    }
+  }
+
+  function isStaffRoleList(roles: string[]) {
+    return roles.some((entry) =>
+      ['rwa_owner', 'rwa_secretary', 'rwa_accountant', 'gatekeeper'].includes(entry)
+    )
+  }
+
+  function applyProfileToUser(user: User, profile?: UserAndFlat | null): User {
+    if (!profile) return user
+    const staff = isStaffRoleList(user.roles)
+    const profileRoles = rolesFromStaffRole(profile.role ?? undefined)
+    return {
+      ...user,
+      flatNumber: profile.flat_number ?? user.flatNumber,
+      username: profile.username ?? user.username,
+      displayName: profile.name ?? user.displayName,
+      phone: profile.phone ?? user.phone,
+      whatsappNumber: profile.whatsapp_number ?? user.whatsappNumber,
+      avatarUrl: profile.avatar_url ?? user.avatarUrl,
+      requiresPasswordChange: profile.requires_password_change ?? user.requiresPasswordChange ?? false,
+      role: staff ? user.role : profile.role ?? user.role,
+      roles: staff ? user.roles : profileRoles.length ? profileRoles : user.roles,
+      user_metadata: {
+        role: staff ? user.user_metadata?.role ?? user.role : profile.role ?? user.role,
+        tier: user.user_metadata?.tier ?? user.tier
+      }
+    }
+  }
+
+  async function loadSocietyName(societyId: string | null) {
+    if (!societyId) {
+      setSocietyName(null)
+      return
+    }
+    if (societyId === DEMO_SOCIETY_ID) {
+      setSocietyName(demoShowcaseData.society.name)
+      return
+    }
+    try {
+      const [society] = await restGet<Society[]>(`societies?id=eq.${societyId}&select=name&limit=1`)
+      setSocietyName(society?.name ?? null)
+    } catch {
+      setSocietyName(null)
     }
   }
 
@@ -336,6 +402,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         tier: nextUser.tier,
         role: nextUser.role,
         flatNumber: nextUser.flatNumber,
+        username: nextUser.username,
+        displayName: nextUser.displayName,
+        avatarUrl: nextUser.avatarUrl,
+        phone: nextUser.phone,
+        whatsappNumber: nextUser.whatsappNumber,
+        requiresPasswordChange: nextUser.requiresPasswordChange,
         kind: kind ?? (nextUser.id.startsWith('demo-') ? 'demo' : 'supabase')
       },
       societyId
@@ -368,6 +440,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         currentSocietyId: string | null
         flatNumber?: string | null
       }
+      const demoConfig = DEMO_LOGINS[parsed.email.toLowerCase()]
       const nextUser = buildUser(
         {
           id: `demo-${parsed.email}`,
@@ -379,10 +452,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         parsed.tier,
         parsed.flatNumber ?? null
       )
-      setUser(nextUser)
+      const enrichedUser = {
+        ...nextUser,
+        username: demoConfig?.username ?? null,
+        requiresPasswordChange: demoConfig?.requiresPasswordChange ?? false
+      }
+      setUser(enrichedUser)
       setCurrentSocietyId(parsed.currentSocietyId)
       setShowcaseData(demoShowcaseData)
-      persistAuthSession(nextUser, parsed.currentSocietyId, 'demo')
+      setSocietyName(demoShowcaseData.society.name)
+      persistAuthSession(enrichedUser, parsed.currentSocietyId, 'demo')
       if (parsed.currentSocietyId) {
         seedDemoBillingStatus(parsed.currentSocietyId, demoShowcaseData.society.name)
       }
@@ -404,19 +483,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const residentProfile = await resolveResidentProfile(userId, userEmail)
       if (residentProfile) {
         setCurrentSocietyId(residentProfile.societyId)
-        setUser((prev) =>
-          prev
-            ? {
-                ...prev,
-                flatNumber: residentProfile.flatNumber,
-                role: 'resident',
-                roles: ['resident'],
-                user_metadata: { role: 'resident', tier: prev.user_metadata?.tier ?? 'tier1' }
-              }
-            : prev
-        )
+        setUser((prev) => {
+          if (!prev) return prev
+          if (isStaffRoleList(prev.roles)) {
+            return { ...prev, flatNumber: residentProfile.flatNumber }
+          }
+          return {
+            ...prev,
+            flatNumber: residentProfile.flatNumber,
+            role: 'resident',
+            roles: ['resident'],
+            user_metadata: { role: 'resident', tier: prev.user_metadata?.tier ?? 'tier1' }
+          }
+        })
         seedDemoActivities(residentProfile.societyId, residentProfile.flatNumber)
         await resolveSocietySubscriptionTier(residentProfile.societyId)
+        await loadSocietyName(residentProfile.societyId)
         return
       }
 
@@ -424,24 +506,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const profile = rows?.[0]
       setCurrentSocietyId(profile?.society_id ?? null)
       if (profile) {
-        setUser((prev) =>
-          prev
-            ? {
-                ...prev,
-                flatNumber: profile.flat_number,
-                role: profile.role ?? prev.role,
-                roles: rolesFromStaffRole(profile.role).length
-                  ? rolesFromStaffRole(profile.role)
-                  : prev.roles,
-                user_metadata: {
-                  role: profile.role ?? prev.user_metadata?.role ?? 'resident',
-                  tier: prev.user_metadata?.tier ?? 'tier1'
-                }
-              }
-            : prev
-        )
+        setUser((prev) => (prev ? applyProfileToUser(prev, profile) : prev))
         seedDemoActivities(profile.society_id, profile.flat_number)
         await resolveSocietySubscriptionTier(profile.society_id)
+        await loadSocietyName(profile.society_id)
+      } else {
+        await loadSocietyName(null)
       }
     } catch {
       const local = getLocalResidentProfile(userId)
@@ -751,8 +821,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  async function signIn(email: string, password: string) {
-    const normalizedEmail = email.trim().toLowerCase()
+  async function signIn(identifier: string, password: string) {
+    const { email: normalizedEmail, profile: resolvedProfile } = await resolveLoginIdentifier(identifier)
     const isSeedAdmin =
       normalizedEmail === DEV_SUPER_ADMIN.email && password === DEV_SUPER_ADMIN.password
 
@@ -790,6 +860,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         demoLogin.tier,
         demoLogin.flatNumber ?? null
       )
+      const enrichedUser = {
+        ...nextUser,
+        username: demoLogin.username ?? null,
+        requiresPasswordChange: demoLogin.requiresPasswordChange ?? false
+      }
       const sessionPayload = {
         session: {
           user: {
@@ -806,9 +881,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         }
       }
-      setUser(nextUser)
+      setUser(enrichedUser)
       setCurrentSocietyId(DEMO_SOCIETY_ID)
       setShowcaseData(demoShowcaseData)
+      setSocietyName(demoShowcaseData.society.name)
       seedDemoBillingStatus(DEMO_SOCIETY_ID, demoShowcaseData.society.name)
       localStorage.setItem(
         DEMO_AUTH_KEY,
@@ -821,12 +897,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         })
       )
       markSuperAdminSession(false)
-      persistAuthSession(nextUser, DEMO_SOCIETY_ID, 'demo')
+      persistAuthSession(enrichedUser, DEMO_SOCIETY_ID, 'demo')
       return {
         session: sessionPayload.session,
-        data: { user: nextUser },
-        user: nextUser,
-        societyId: DEMO_SOCIETY_ID
+        data: { user: enrichedUser },
+        user: enrichedUser,
+        societyId: DEMO_SOCIETY_ID,
+        requiresPasswordChange: enrichedUser.requiresPasswordChange
       }
     }
 
@@ -846,70 +923,72 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const metadataRole = res.data.user?.user_metadata?.role as string | undefined
       const roles = rolesFromStaffRole(metadataRole)
-      const nextUser = buildUser(res.data.user!, roles, 'tier1', null)
-      setUser(nextUser)
+      let nextUser = buildUser(res.data.user!, roles, 'tier1', null)
+      if (resolvedProfile) {
+        nextUser = applyProfileToUser(nextUser, resolvedProfile)
+      }
 
-      let societyId: string | null = null
+      let societyId: string | null = resolvedProfile?.society_id ?? null
       try {
         const residentProfile = await resolveResidentProfile(res.data.user!.id, normalizedEmail)
         if (residentProfile) {
           societyId = residentProfile.societyId
-          setCurrentSocietyId(societyId)
-          setUser((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  flatNumber: residentProfile.flatNumber,
-                  role: 'resident',
-                  roles: ['resident'],
-                  user_metadata: { role: 'resident', tier: prev.user_metadata?.tier ?? 'tier1' }
-                }
-              : prev
-          )
+          if (isStaffRoleList(nextUser.roles)) {
+            nextUser = { ...nextUser, flatNumber: residentProfile.flatNumber }
+          } else {
+            nextUser = {
+              ...nextUser,
+              flatNumber: residentProfile.flatNumber,
+              role: 'resident',
+              roles: ['resident'],
+              user_metadata: { role: 'resident', tier: nextUser.user_metadata?.tier ?? 'tier1' }
+            }
+          }
           seedDemoActivities(residentProfile.societyId, residentProfile.flatNumber)
           if (societyId) await resolveSocietySubscriptionTier(societyId)
-        } else {
+        } else if (!resolvedProfile) {
           const rows = await restGet<UserAndFlat[]>(`user_and_flats?user_id=eq.${res.data.user!.id}&limit=1`)
           const profile = rows?.[0]
           societyId = profile?.society_id ?? null
-          setCurrentSocietyId(societyId)
           if (profile) {
-            setUser((prev) =>
-              prev
-                ? {
-                    ...prev,
-                    flatNumber: profile.flat_number,
-                    role: profile.role ?? metadataRole ?? prev.role,
-                    roles: rolesFromStaffRole(profile.role ?? metadataRole).length
-                      ? rolesFromStaffRole(profile.role ?? metadataRole)
-                      : prev.roles,
-                    user_metadata: {
-                      role: profile.role ?? metadataRole ?? 'resident',
-                      tier: prev.user_metadata?.tier ?? 'tier1'
-                    }
-                  }
-                : prev
-            )
+            nextUser = applyProfileToUser(nextUser, profile)
             seedDemoActivities(profile.society_id, profile.flat_number)
             if (societyId) await resolveSocietySubscriptionTier(societyId)
           }
+        } else {
+          seedDemoActivities(resolvedProfile.society_id, resolvedProfile.flat_number)
+          if (societyId) await resolveSocietySubscriptionTier(societyId)
         }
       } catch {
         const local = getLocalResidentProfile(res.data.user!.id)
         if (local) {
           societyId = local.societyId
-          setCurrentSocietyId(societyId)
-          setUser((prev) => (prev ? { ...prev, flatNumber: local.flatNumber, role: 'resident', roles: ['resident'] } : prev))
-        } else {
-          setCurrentSocietyId(null)
+          if (isStaffRoleList(nextUser.roles)) {
+            nextUser = { ...nextUser, flatNumber: local.flatNumber }
+          } else {
+            nextUser = {
+              ...nextUser,
+              flatNumber: local.flatNumber,
+              role: 'resident',
+              roles: ['resident']
+            }
+          }
         }
       }
 
+      setUser(nextUser)
+      setCurrentSocietyId(societyId)
+      await loadSocietyName(societyId)
       setShowcaseData(null)
       localStorage.removeItem(DEMO_AUTH_KEY)
       markSuperAdminSession(false)
       persistAuthSession(nextUser, societyId, 'supabase')
-      return { ...res, user: nextUser, societyId }
+      return {
+        ...res,
+        user: nextUser,
+        societyId,
+        requiresPasswordChange: nextUser.requiresPasswordChange ?? false
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       throw new Error(`Authentication failed: ${message}`)
@@ -920,6 +999,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut()
     setUser(null)
     setCurrentSocietyId(null)
+    setSocietyName(null)
     setShowcaseData(null)
     localStorage.removeItem(DEMO_AUTH_KEY)
     clearAuthPersistence()
@@ -935,6 +1015,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setCurrentSocietyId,
         showcaseData,
         setShowcaseData,
+        societyName,
         signUp,
         signIn,
         signOut,

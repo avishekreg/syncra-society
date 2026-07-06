@@ -11,6 +11,12 @@ export type AuthSnapshot = {
   tier: 'tier1' | 'tier2' | 'tier3'
   role: string
   flatNumber?: string | null
+  username?: string | null
+  displayName?: string | null
+  avatarUrl?: string | null
+  phone?: string | null
+  whatsappNumber?: string | null
+  requiresPasswordChange?: boolean
   kind: 'demo' | 'super_admin' | 'supabase'
 }
 

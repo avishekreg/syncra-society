@@ -5,6 +5,7 @@ import RoleScopeGuard from './RoleScopeGuard'
 import SocietySetupGuard from './SocietySetupGuard'
 import SubscriptionActivationGuard from './SubscriptionActivationGuard'
 import SuperAdminRouteShell from './SuperAdminRouteShell'
+import PasswordChangeGuard from './PasswordChangeGuard'
 import NativeShellBootstrap from '../components/mobile/NativeShellBootstrap'
 import { ui } from '../lib/ui'
 
@@ -19,6 +20,8 @@ const RwaRouter = lazy(() => import('./RwaRouter'))
 const AdminRouter = lazy(() => import('./AdminRouter'))
 const FinanceRouter = lazy(() => import('./FinanceRouter'))
 const ResidentRouter = lazy(() => import('./ResidentRouter'))
+const GatekeeperRouter = lazy(() => import('./GatekeeperRouter'))
+const ProfileRouteLayout = lazy(() => import('../layouts/ProfileRouteLayout'))
 
 export default function AppRouter() {
   return (
@@ -36,9 +39,11 @@ export default function AppRouter() {
             path="/onboarding/*"
             element={
               <ProtectedRoute>
-                <RoleScopeGuard scope="society">
-                  <OnboardingRouter />
-                </RoleScopeGuard>
+                <PasswordChangeGuard>
+                  <RoleScopeGuard scope="society">
+                    <OnboardingRouter />
+                  </RoleScopeGuard>
+                </PasswordChangeGuard>
               </ProtectedRoute>
             }
           />
@@ -46,16 +51,40 @@ export default function AppRouter() {
           <Route path="/super-admin/*" element={<SuperAdminRouteShell />} />
 
           <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <PasswordChangeGuard>
+                  <ProfileRouteLayout />
+                </PasswordChangeGuard>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/gatekeeper/*"
+            element={
+              <ProtectedRoute>
+                <PasswordChangeGuard>
+                  <GatekeeperRouter />
+                </PasswordChangeGuard>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="/admin/*"
             element={
               <ProtectedRoute>
-                <RoleScopeGuard scope="society">
-                  <SocietySetupGuard>
-                    <SubscriptionActivationGuard>
-                      <AdminRouter />
-                    </SubscriptionActivationGuard>
-                  </SocietySetupGuard>
-                </RoleScopeGuard>
+                <PasswordChangeGuard>
+                  <RoleScopeGuard scope="society">
+                    <SocietySetupGuard>
+                      <SubscriptionActivationGuard>
+                        <AdminRouter />
+                      </SubscriptionActivationGuard>
+                    </SocietySetupGuard>
+                  </RoleScopeGuard>
+                </PasswordChangeGuard>
               </ProtectedRoute>
             }
           />
@@ -64,13 +93,15 @@ export default function AppRouter() {
             path="/rwa/*"
             element={
               <ProtectedRoute>
-                <RoleScopeGuard scope="society">
-                  <SocietySetupGuard>
-                    <SubscriptionActivationGuard>
-                      <RwaRouter />
-                    </SubscriptionActivationGuard>
-                  </SocietySetupGuard>
-                </RoleScopeGuard>
+                <PasswordChangeGuard>
+                  <RoleScopeGuard scope="society">
+                    <SocietySetupGuard>
+                      <SubscriptionActivationGuard>
+                        <RwaRouter />
+                      </SubscriptionActivationGuard>
+                    </SocietySetupGuard>
+                  </RoleScopeGuard>
+                </PasswordChangeGuard>
               </ProtectedRoute>
             }
           />
@@ -78,13 +109,15 @@ export default function AppRouter() {
             path="/finance/*"
             element={
               <ProtectedRoute>
-                <RoleScopeGuard scope="society">
-                  <SocietySetupGuard>
-                    <SubscriptionActivationGuard>
-                      <FinanceRouter />
-                    </SubscriptionActivationGuard>
-                  </SocietySetupGuard>
-                </RoleScopeGuard>
+                <PasswordChangeGuard>
+                  <RoleScopeGuard scope="society">
+                    <SocietySetupGuard>
+                      <SubscriptionActivationGuard>
+                        <FinanceRouter />
+                      </SubscriptionActivationGuard>
+                    </SocietySetupGuard>
+                  </RoleScopeGuard>
+                </PasswordChangeGuard>
               </ProtectedRoute>
             }
           />
@@ -93,11 +126,13 @@ export default function AppRouter() {
             path="/resident/*"
             element={
               <ProtectedRoute>
-                <RoleScopeGuard scope="resident">
-                  <SocietySetupGuard>
-                    <ResidentRouter />
-                  </SocietySetupGuard>
-                </RoleScopeGuard>
+                <PasswordChangeGuard>
+                  <RoleScopeGuard scope="resident">
+                    <SocietySetupGuard>
+                      <ResidentRouter />
+                    </SocietySetupGuard>
+                  </RoleScopeGuard>
+                </PasswordChangeGuard>
               </ProtectedRoute>
             }
           />

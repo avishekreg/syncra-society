@@ -4,6 +4,8 @@ import { NavLink, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import SyncraBrandLogo from '../brand/SyncraBrandLogo'
 import { useAuth } from '../../providers/AuthProvider'
 import { usePlatformConfig } from '../../providers/PlatformConfigProvider'
+import { useSocietyBranding } from '../../hooks/useSocietyBranding'
+import { NavAccordionProvider, useNavAccordion } from './NavAccordionContext'
 import { isGlobalSuperAdmin, isRwaStaff } from '../../lib/roles'
 import {
   canAccessFinancialConsole,
@@ -41,33 +43,42 @@ function SidebarNavLink(props: React.ComponentProps<typeof NavLink>) {
 }
 
 type NavGroupProps = {
+  groupId: string
   label: string
   paths: string[]
   defaultOpen?: boolean
   children: React.ReactNode
 }
 
-function NavGroup({ label, paths, defaultOpen = false, children }: NavGroupProps) {
+function NavGroup({ groupId, label, paths, defaultOpen = false, children }: NavGroupProps) {
   const location = useLocation()
+  const { openGroupId, toggleGroup, openGroup } = useNavAccordion()
   const childActive = paths.some((path) => location.pathname.startsWith(path))
-  const [open, setOpen] = useState(defaultOpen || childActive)
+  const open = openGroupId === groupId
 
   useEffect(() => {
-    if (childActive) setOpen(true)
-  }, [childActive])
+    if (defaultOpen && !childActive && openGroupId === null) {
+      openGroup(groupId)
+    }
+  }, [defaultOpen, childActive, groupId, openGroup, openGroupId])
+
+  useEffect(() => {
+    if (childActive) openGroup(groupId)
+  }, [childActive, groupId, openGroup])
 
   const toggleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault()
     event.stopPropagation()
-    setOpen((value) => !value)
+    toggleGroup(groupId)
   }
 
   return (
-    <div className="space-y-0.5">
+    <div className="space-y-0.5" data-nav-group={groupId}>
       <button
         type="button"
         onClick={toggleOpen}
         aria-expanded={open}
+        aria-controls={`nav-group-${groupId}`}
         className={`${ui.navLink} w-full justify-between text-slate-600 hover:bg-syncra-surface-alt hover:text-syncra-primary`}
       >
         <span>{label}</span>
@@ -84,7 +95,16 @@ function NavGroup({ label, paths, defaultOpen = false, children }: NavGroupProps
           />
         </svg>
       </button>
-      {open && <div className="space-y-0.5 pb-1">{children}</div>}
+      {open && (
+        <div
+          id={`nav-group-${groupId}`}
+          className="space-y-0.5 pb-1 pl-1"
+          onClick={(event) => event.stopPropagation()}
+          onMouseDown={(event) => event.stopPropagation()}
+        >
+          {children}
+        </div>
+      )}
     </div>
   )
 }
@@ -96,6 +116,7 @@ type SidebarProps = {
 
 export default function Sidebar({ children, title }: SidebarProps) {
   const { user, signOut, currentSocietyId } = useAuth()
+  const { societyName } = useSocietyBranding()
   const { isModuleEnabled } = usePlatformConfig()
   const navigate = useNavigate()
   const location = useLocation()
@@ -142,6 +163,8 @@ export default function Sidebar({ children, title }: SidebarProps) {
   const workspaceRole = resolveWorkspaceRole(user)
   const showResidentNav = canAccessResidentPortal(user)
   const showStaffNav = isRwaStaff(user)
+  const embedResidentInStaffNav = showStaffNav && showResidentNav && workspaceRole === 'president'
+  const showStandaloneResidentNav = showResidentNav && !embedResidentInStaffNav
 
   async function handleSignOut() {
     setMobileOpen(false)
@@ -176,6 +199,14 @@ export default function Sidebar({ children, title }: SidebarProps) {
     '/finance/cashflow'
   ]
 
+  const embeddedResidentPaths = [
+    '/resident',
+    '/resident/helpdesk',
+    '/resident/visitor-logs',
+    '/resident/notices',
+    '/resident/activity',
+    ...residentCommunityPaths
+  ]
   const presidentConsolePaths = [
     '/admin/dashboard',
     '/admin/notices',
@@ -209,7 +240,10 @@ export default function Sidebar({ children, title }: SidebarProps) {
             <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
-        {user && <p className="mt-3 truncate text-xs text-slate-500">{user.email}</p>}
+        {user && (
+          <p className="mt-3 truncate text-xs text-slate-500">{user.username ? `@${user.username}` : user.email}</p>
+        )}
+        <p className="mt-1 truncate text-xs font-medium text-syncra-primary">{societyName}</p>
         <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-syncra-blue">
           {workspaceRoleLabel(workspaceRole)}
         </p>
@@ -224,7 +258,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
         }}
         className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-3 py-4 sm:py-5"
       >
-        {showResidentNav && (
+        {showStandaloneResidentNav && (
           <>
             <p className="mb-2 px-3.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
               Workspace
@@ -251,7 +285,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
               Activity
             </SidebarNavLink>
             {showResidentCommunity && (
-              <NavGroup label="Community & Governance" paths={residentCommunityPaths}>
+              <NavGroup groupId="resident-community" label="Community & Governance" paths={residentCommunityPaths}>
                 {moduleEnabled('surveys') && (
                   <SidebarNavLink to="/resident/surveys" className={subNavLinkClass}>
                     Surveys
@@ -274,6 +308,9 @@ export default function Sidebar({ children, title }: SidebarProps) {
                 )}
               </NavGroup>
             )}
+            <SidebarNavLink to="/profile" className={navLinkClass}>
+              Profile & Settings
+            </SidebarNavLink>
           </>
         )}
 
@@ -284,7 +321,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
             </p>
 
             {showFinancialConsole && (
-              <NavGroup label="Financial Console" paths={financePaths} defaultOpen={workspaceRole === 'accountant'}>
+              <NavGroup groupId="financial-console" label="Financial Console" paths={financePaths} defaultOpen={workspaceRole === 'accountant'}>
                 <SidebarNavLink to="/finance/ledger" className={subNavLinkClass}>
                   Financial Ledger
                 </SidebarNavLink>
@@ -301,7 +338,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
             )}
 
             {showPresidentConsole && (
-              <NavGroup label="President Console" paths={presidentConsolePaths} defaultOpen>
+              <NavGroup groupId="president-console" label="President Console" paths={presidentConsolePaths} defaultOpen>
                 <SidebarNavLink to="/admin/dashboard" className={subNavLinkClass}>
                   Analytics Overview
                 </SidebarNavLink>
@@ -323,8 +360,54 @@ export default function Sidebar({ children, title }: SidebarProps) {
               </NavGroup>
             )}
 
+            {embedResidentInStaffNav && (
+              <NavGroup groupId="my-flat-community" label="My Flat & Community" paths={embeddedResidentPaths}>
+                <SidebarNavLink to="/resident" end className={subNavLinkClass}>
+                  Resident Dashboard
+                </SidebarNavLink>
+                {moduleEnabled('helpdesk') && (
+                  <SidebarNavLink to="/resident/helpdesk" className={subNavLinkClass}>
+                    Smart Helpdesk
+                  </SidebarNavLink>
+                )}
+                {moduleEnabled('visitorLogs') && (
+                  <SidebarNavLink to="/resident/visitor-logs" className={subNavLinkClass}>
+                    Visitor Logs
+                  </SidebarNavLink>
+                )}
+                {moduleEnabled('notices') && (
+                  <SidebarNavLink to="/resident/notices" className={subNavLinkClass}>
+                    Notices
+                  </SidebarNavLink>
+                )}
+                <SidebarNavLink to="/resident/activity" className={subNavLinkClass}>
+                  Activity
+                </SidebarNavLink>
+                {moduleEnabled('surveys') && (
+                  <SidebarNavLink to="/resident/surveys" className={subNavLinkClass}>
+                    Surveys
+                  </SidebarNavLink>
+                )}
+                {moduleEnabled('gallery') && (
+                  <SidebarNavLink to="/resident/gallery" className={subNavLinkClass}>
+                    Photo Gallery
+                  </SidebarNavLink>
+                )}
+                {moduleEnabled('elections') && (
+                  <SidebarNavLink to="/resident/elections" className={subNavLinkClass}>
+                    Elections
+                  </SidebarNavLink>
+                )}
+                {moduleEnabled('rewards') && (
+                  <SidebarNavLink to="/resident/rewards" className={subNavLinkClass}>
+                    Rewards & Recognition
+                  </SidebarNavLink>
+                )}
+              </NavGroup>
+            )}
+
             {showPresidentConsole && showWorkspaceGroup && (
-              <NavGroup label="Society Operations" paths={workspacePaths}>
+              <NavGroup groupId="society-operations" label="Society Operations" paths={workspacePaths}>
                 {canAccessWorkspaceCashflow(user) && (
                   <SidebarNavLink to="/rwa/workspace/cashflow" className={subNavLinkClass}>
                     Cashflow Forecast
@@ -365,7 +448,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
             )}
 
             {showRwaControls && (
-              <NavGroup label="Community & Governance" paths={rwaControlPaths}>
+              <NavGroup groupId="rwa-community" label="Community & Governance" paths={rwaControlPaths}>
                 {moduleEnabled('surveys') && (
                   <SidebarNavLink to="/rwa/surveys" className={subNavLinkClass}>
                     Surveys
@@ -406,6 +489,10 @@ export default function Sidebar({ children, title }: SidebarProps) {
                 RWA Settings
               </SidebarNavLink>
             )}
+
+            <SidebarNavLink to="/profile" className={navLinkClass}>
+              Profile & Settings
+            </SidebarNavLink>
           </>
         )}
       </nav>
@@ -419,7 +506,8 @@ export default function Sidebar({ children, title }: SidebarProps) {
   )
 
   return (
-    <div className="flex min-h-screen flex-col bg-syncra-surface lg:h-screen lg:min-h-0 lg:flex-row lg:overflow-hidden">
+    <NavAccordionProvider>
+      <div className="flex min-h-screen flex-col bg-syncra-surface lg:h-screen lg:min-h-0 lg:flex-row lg:overflow-hidden">
       <header className="sticky top-0 z-40 flex min-h-14 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 lg:hidden">
         <button
           type="button"
@@ -431,6 +519,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
           <Menu className="h-5 w-5" aria-hidden="true" />
         </button>
         <div className="min-w-0 flex-1 text-center">
+          <p className="truncate text-xs font-semibold uppercase tracking-wide text-syncra-blue">{societyName}</p>
           <p className="truncate text-sm font-semibold text-syncra-primary">{title ?? 'Syncra Society'}</p>
         </div>
         <div className="w-11" aria-hidden="true" />
@@ -457,6 +546,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
       <main className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-syncra-surface text-slate-900 lg:h-full">
         {children}
       </main>
-    </div>
+      </div>
+    </NavAccordionProvider>
   )
 }

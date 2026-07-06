@@ -9,7 +9,7 @@ import { resolvePostLoginPath } from '../config/devSeed'
 import { ui } from '../lib/ui'
 
 const schema = z.object({
-  email: z.string().email('Please enter a valid email'),
+  email: z.string().min(3, 'Enter your email or username'),
   password: z.string().min(6, 'Password must be at least 6 characters')
 })
 
@@ -22,11 +22,17 @@ export default function AuthPage() {
 
   async function onSubmit(values: Form) {
     try {
-      const normalizedEmail = values.email.trim().toLowerCase()
-      const res: any = await signIn(normalizedEmail, values.password)
+      const identifier = values.email.trim()
+      const res: any = await signIn(identifier, values.password)
       const roles = res?.user?.roles ?? []
       const role = res?.user?.role ?? res?.user?.user_metadata?.role
-      const nextPath = resolvePostLoginPath(normalizedEmail, roles, res?.societyId ?? null, role)
+
+      if (res?.requiresPasswordChange || res?.user?.requiresPasswordChange) {
+        navigate('/auth/change-password')
+        return
+      }
+
+      const nextPath = resolvePostLoginPath(res?.user?.email ?? identifier, roles, res?.societyId ?? null, role)
       navigate(nextPath)
     } catch (err: any) {
       alert(err.message || 'Sign in failed')
@@ -38,12 +44,12 @@ export default function AuthPage() {
       <div className="mx-auto max-w-md">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-3">
-            <label className={ui.label}>Email</label>
+            <label className={ui.label}>Email or username</label>
             <input
               {...register('email')}
-              autoComplete="email"
+              autoComplete="username"
               className={ui.input}
-              placeholder="you@company.com"
+              placeholder="you@company.com or username"
             />
             {errors.email && <div className="text-sm text-syncra-action-alt">{errors.email.message}</div>}
           </div>
