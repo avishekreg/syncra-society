@@ -5,6 +5,7 @@ import LegalPageLayout, {
   LEGAL_CONTACT_EMAIL,
   LEGAL_ENTITY,
   LEGAL_PLATFORM,
+  LEGAL_REGISTERED_JURISDICTION,
   LegalList,
   LegalParagraph,
   LegalSection
@@ -19,7 +20,7 @@ export default function RefundPolicy() {
           add-on module charges, and related payments made by housing societies, residents&apos; welfare associations,
           and authorized management bodies (&quot;Society&quot;, &quot;Customer&quot;, or &quot;you&quot;) to{' '}
           <strong>{LEGAL_ENTITY}</strong> (&quot;Syncra&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) for
-          access to the <strong>{LEGAL_PLATFORM}</strong> platform (&quot;Platform&quot;).
+          access to <strong>{LEGAL_PLATFORM}</strong> (&quot;Platform&quot;).
         </LegalParagraph>
         <LegalParagraph>
           {LEGAL_PLATFORM} is sold on a business-to-business (B2B) SaaS basis to Societies and their authorized
@@ -197,6 +198,9 @@ export default function RefundPolicy() {
         <LegalParagraph>
           Please include your Society name, registered billing email, invoice number, and a detailed description of your
           request. We aim to acknowledge billing enquiries within two (2) business days.
+        </LegalParagraph>
+        <LegalParagraph>
+          {LEGAL_ENTITY} · Principal place of business: {LEGAL_REGISTERED_JURISDICTION}
         </LegalParagraph>
       </LegalSection>
     </LegalPageLayout>

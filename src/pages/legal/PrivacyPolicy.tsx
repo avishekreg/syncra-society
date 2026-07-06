@@ -4,6 +4,7 @@ import LegalPageLayout, {
   LEGAL_ENTITY,
   LEGAL_PLATFORM,
   LEGAL_PRIVACY_EMAIL,
+  LEGAL_REGISTERED_JURISDICTION,
   LegalList,
   LegalParagraph,
   LegalSection
@@ -16,7 +17,8 @@ export default function PrivacyPolicy() {
         <LegalParagraph>
           This Privacy Policy explains how <strong>{LEGAL_ENTITY}</strong> (&quot;Syncra&quot;, &quot;we&quot;,
           &quot;us&quot;, or &quot;our&quot;) collects, uses, stores, shares, and protects personal data when you access
-          or use the <strong>{LEGAL_PLATFORM}</strong> platform (&quot;Platform&quot;).
+          or use <strong>{LEGAL_PLATFORM}</strong> (&quot;Platform&quot;), including through our website, mobile web
+          experience, and native Android application distributed by {LEGAL_ENTITY}.
         </LegalParagraph>
         <LegalParagraph>
           Syncra acts as a <strong>Data Fiduciary</strong> under the Digital Personal Data Protection Act, 2023
@@ -44,7 +46,7 @@ export default function PrivacyPolicy() {
             'Residents, flat owners, occupants, and authorized users whose profiles are created on the Platform.',
             'Gatekeepers, security personnel, and vendors whose data is entered by Societies.',
             'Visitors to our public website and persons who contact us for sales or support.',
-            'Personal data processed through dashboard features, APIs, mobile-responsive web interfaces, and integrated messaging channels.'
+            'Personal data processed through dashboard features, APIs, mobile-responsive web interfaces, native mobile application shells, and integrated messaging channels.'
           ]}
         />
         <LegalParagraph>
@@ -95,8 +97,9 @@ export default function PrivacyPolicy() {
               infrastructure.
             </>,
             <>
-              <strong>Technical and usage data:</strong> IP address, browser type, device identifiers, pages viewed,
-              feature usage, error logs, and security event data.
+              <strong>Technical and usage data:</strong> IP address, browser type, device identifiers, operating system
+              version, app build or over-the-air (OTA) update metadata, pages viewed, feature usage, error logs, and
+              security event data.
             </>,
             <>
               <strong>Billing data:</strong> invoicing contact details, GST information, payment transaction IDs, and
@@ -311,7 +314,16 @@ export default function PrivacyPolicy() {
         />
       </LegalSection>
 
-      <LegalSection title="15. Cookies and Similar Technologies">
+      <LegalSection title="15. Mobile Application and OTA Updates">
+        <LegalParagraph>
+          Where you install the Syncra Society native Android application, we may collect device and app version
+          information to deliver security updates, over-the-air content refreshes, and compatibility fixes. The mobile
+          application loads the same authenticated {LEGAL_PLATFORM} experience as the web portal; session, helpdesk,
+          notice, and messaging data are processed under the same rules described in this Policy.
+        </LegalParagraph>
+      </LegalSection>
+
+      <LegalSection title="16. Cookies and Similar Technologies">
         <LegalParagraph>
           We use essential cookies and local storage to maintain sessions, remember preferences, and secure the
           Platform. We do not use advertising cookies or sell personal data to data brokers. You may control non-essential
@@ -319,7 +331,7 @@ export default function PrivacyPolicy() {
         </LegalParagraph>
       </LegalSection>
 
-      <LegalSection title="16. Changes to This Policy">
+      <LegalSection title="17. Changes to This Policy">
         <LegalParagraph>
           We may update this Privacy Policy to reflect changes in law, technology, or our practices. Material updates
           will be posted on this page with a revised effective date and, where appropriate, notified to Society
@@ -327,7 +339,7 @@ export default function PrivacyPolicy() {
         </LegalParagraph>
       </LegalSection>
 
-      <LegalSection title="17. Contact">
+      <LegalSection title="18. Contact">
         <LegalParagraph>
           Privacy enquiries:{' '}
           <a href={`mailto:${LEGAL_PRIVACY_EMAIL}`} className="font-medium text-syncra-blue hover:underline">
@@ -338,6 +350,8 @@ export default function PrivacyPolicy() {
           <a href={`mailto:${LEGAL_BILLING_EMAIL}`} className="font-medium text-syncra-blue hover:underline">
             {LEGAL_BILLING_EMAIL}
           </a>
+          <br />
+          {LEGAL_ENTITY} · Principal place of business: {LEGAL_REGISTERED_JURISDICTION}
         </LegalParagraph>
       </LegalSection>
     </LegalPageLayout>

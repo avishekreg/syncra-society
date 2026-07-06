@@ -4,14 +4,23 @@ import SyncraBrandLogo from '../brand/SyncraBrandLogo'
 import SyncraFooter from '../layout/SyncraFooter'
 import { ui } from '../../lib/ui'
 
-import { SYNCRA_LEGAL_ENTITY, SYNCRA_CONTACT_EMAIL } from '../../lib/brandConstants'
+import {
+  SYNCRA_BILLING_EMAIL,
+  SYNCRA_CONTACT_EMAIL,
+  SYNCRA_LEGAL_EFFECTIVE_DATE,
+  SYNCRA_LEGAL_ENTITY,
+  SYNCRA_PLATFORM_NAME,
+  SYNCRA_PRIVACY_EMAIL,
+  SYNCRA_REGISTERED_JURISDICTION
+} from '../../lib/brandConstants'
 
-export const LEGAL_EFFECTIVE_DATE = '5 July 2026'
+export const LEGAL_EFFECTIVE_DATE = SYNCRA_LEGAL_EFFECTIVE_DATE
 export const LEGAL_ENTITY = SYNCRA_LEGAL_ENTITY
-export const LEGAL_PLATFORM = 'Syncra Society'
+export const LEGAL_PLATFORM = SYNCRA_PLATFORM_NAME
 export const LEGAL_CONTACT_EMAIL = SYNCRA_CONTACT_EMAIL
-export const LEGAL_PRIVACY_EMAIL = 'privacy@syncrasystems.com'
-export const LEGAL_BILLING_EMAIL = 'billing@syncrasystems.com'
+export const LEGAL_PRIVACY_EMAIL = SYNCRA_PRIVACY_EMAIL
+export const LEGAL_BILLING_EMAIL = SYNCRA_BILLING_EMAIL
+export const LEGAL_REGISTERED_JURISDICTION = SYNCRA_REGISTERED_JURISDICTION
 
 const legalLinks = [
   { to: '/legal/terms', label: 'Terms & Conditions' },
@@ -73,7 +82,8 @@ export default function LegalPageLayout({ title, children }: LegalPageLayoutProp
         <p className={ui.eyebrow}>Legal</p>
         <h1 className={`mt-3 ${ui.headingLg}`}>{title}</h1>
         <p className={`mt-3 ${ui.body}`}>
-          Operated by {LEGAL_ENTITY} · Effective from {LEGAL_EFFECTIVE_DATE} · Last updated {LEGAL_EFFECTIVE_DATE}
+          Operated by {LEGAL_ENTITY} · Principal place of business: {LEGAL_REGISTERED_JURISDICTION} · Effective from{' '}
+          {LEGAL_EFFECTIVE_DATE} · Last updated {LEGAL_EFFECTIVE_DATE}
         </p>
 
         <nav

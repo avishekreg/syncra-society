@@ -1,8 +1,9 @@
 import React from 'react'
 import LegalPageLayout, {
+  LEGAL_CONTACT_EMAIL,
   LEGAL_ENTITY,
   LEGAL_PLATFORM,
-  LEGAL_CONTACT_EMAIL,
+  LEGAL_REGISTERED_JURISDICTION,
   LegalList,
   LegalParagraph,
   LegalSection
@@ -17,8 +18,8 @@ export default function TermsAndConditions() {
           <strong>{LEGAL_ENTITY}</strong> (&quot;Syncra&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) and
           the housing society, residents&apos; welfare association, management committee, authorized office-bearer, or
           individual user (&quot;you&quot;, &quot;Customer&quot;, &quot;Society&quot;, or &quot;User&quot;) who accesses
-          or uses the <strong>{LEGAL_PLATFORM}</strong> software-as-a-service platform (&quot;Platform&quot;,
-          &quot;Service&quot;).
+          or uses <strong>{LEGAL_PLATFORM}</strong> (&quot;Platform&quot; or &quot;Service&quot;), a cloud-hosted
+          software-as-a-service product operated by Syncra.
         </LegalParagraph>
         <LegalParagraph>
           By creating an account, completing society onboarding, subscribing to a paid plan, or otherwise using the
@@ -60,7 +61,7 @@ export default function TermsAndConditions() {
 
       <LegalSection title="3. Description of Service">
         <LegalParagraph>
-          {LEGAL_PLATFORM} is a cloud-hosted B2B SaaS platform that enables housing societies and apartment complexes to
+          {LEGAL_PLATFORM} is a cloud-hosted B2B SaaS product that enables housing societies and apartment complexes to
           manage community administration, including but not limited to: complaint and suggestion ticketing (Smart
           Helpdesk), notice boards, ledgers and financial transparency modules, contract tracking, visitor and gatekeeper
           logs, surveys, gallery management, elections, rewards and governance scoring, and optional automated messaging
@@ -255,7 +256,36 @@ export default function TermsAndConditions() {
         </LegalParagraph>
       </LegalSection>
 
-      <LegalSection title="15. Changes to Terms">
+      <LegalSection title="15. Force Majeure">
+        <LegalParagraph>
+          Syncra shall not be liable for any delay or failure to perform obligations under these Terms (other than
+          payment obligations already accrued) where such delay or failure results from events beyond Syncra&apos;s
+          reasonable control, including natural disasters, war, terrorism, civil unrest, government orders, internet or
+          telecommunications failures, power outages, strikes, pandemics, or failures of third-party hosting or messaging
+          providers.
+        </LegalParagraph>
+      </LegalSection>
+
+      <LegalSection title="16. Assignment and Subcontracting">
+        <LegalParagraph>
+          You may not assign or transfer your rights or obligations under these Terms without Syncra&apos;s prior
+          written consent. Syncra may assign these Terms in connection with a merger, acquisition, corporate
+          reorganization, or sale of substantially all assets, or to an affiliate, provided the assignee agrees to
+          honour these Terms. Syncra may use subcontractors and subprocessors to deliver the Service, subject to
+          appropriate contractual safeguards.
+        </LegalParagraph>
+      </LegalSection>
+
+      <LegalSection title="17. Severability and Entire Agreement">
+        <LegalParagraph>
+          If any provision of these Terms is held invalid or unenforceable, the remaining provisions remain in full
+          force. These Terms, together with the Privacy Policy, Refund & Cancellation Policy, and any order form or
+          invoice expressly incorporated by reference, constitute the entire agreement between the parties regarding the
+          Service and supersede prior oral or written understandings on the same subject matter.
+        </LegalParagraph>
+      </LegalSection>
+
+      <LegalSection title="18. Changes to Terms">
         <LegalParagraph>
           Syncra may update these Terms from time to time. Material changes will be notified through the Platform, by
           email to registered Society Administrators, or by updating the effective date on this page. Continued use of
@@ -263,13 +293,14 @@ export default function TermsAndConditions() {
         </LegalParagraph>
       </LegalSection>
 
-      <LegalSection title="16. Contact">
+      <LegalSection title="19. Contact">
         <LegalParagraph>
           For questions regarding these Terms, contact {LEGAL_ENTITY} at{' '}
           <a href={`mailto:${LEGAL_CONTACT_EMAIL}`} className="font-medium text-syncra-blue hover:underline">
             {LEGAL_CONTACT_EMAIL}
           </a>
-          .
+          . {LEGAL_ENTITY} is a limited liability partnership registered in India with its principal place of business
+          in {LEGAL_REGISTERED_JURISDICTION}.
         </LegalParagraph>
       </LegalSection>
     </LegalPageLayout>
