@@ -33,13 +33,16 @@
 
 ```
 Portal activity → POST n8n webhook
-               → Normalize Portal Event (single merged item)
-               → Route by Event Type
-               → Twilio WhatsApp Send (or Mock for local dev)
+               → Normalize Portal Event (Code — builds whatsappMessage once)
+               → Mock WhatsApp Send (local) OR Twilio WhatsApp Send (production)
                → Respond to Syncra
 ```
 
-**Important:** Do not use mixed `=` and `{{ }}` syntax in Set/Twilio message fields — n8n will send raw `=` characters. Always use pure expressions such as `={{ $json.whatsappMessage }}`. The **Normalize Portal Event** node builds `whatsappMessage` once per webhook call.
+**Removed:** legacy **Format WhatsApp Message** Set node and **Route by Event Type** switch (both caused multi-path loops and `=` spam).
+
+**Re-import required:** Workflows → Import from File → `n8n/workflows/syncra-society-whatsapp.json` → deactivate/delete the old workflow copy in n8n.
+
+**Important:** Do not use mixed `=` and `{{ }}` syntax in Set/Twilio message fields — n8n sends raw `=` characters. Twilio **Message** must be exactly `={{ $json.whatsappMessage }}`. Message text is built only inside **Normalize Portal Event** (Code node).
 
 ## Connecting a real WhatsApp provider
 
