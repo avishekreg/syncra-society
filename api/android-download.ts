@@ -1,5 +1,3 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node'
-
 const DEFAULT_APK_PATH = '/downloads/syncra-society-latest.apk'
 
 function resolveApkPath() {
@@ -15,7 +13,10 @@ function resolveApkPath() {
 }
 
 /** Redirect to the static APK asset (attachment headers applied in vercel.json). */
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+module.exports = async function handler(
+  req: import('@vercel/node').VercelRequest,
+  res: import('@vercel/node').VercelResponse
+) {
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*')
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')

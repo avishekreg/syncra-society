@@ -62,10 +62,5 @@
       "source": "/((?!api(?:/|$)|downloads(?:/|$)).*)",
       "destination": "/index.html"
     }
-  ],
-  "functions": {
-    "api/**/*.ts": {
-      "includeFiles": "api/package.json"
-    }
-  }
+  ]
 }

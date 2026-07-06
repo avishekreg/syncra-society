@@ -1,5 +1,3 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node'
-
 const COMPLAINTS_TABLE = 'complaints_and_suggestions'
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -41,7 +39,7 @@ function adminHeaders(serviceKey: string) {
   }
 }
 
-function setCors(res: VercelResponse) {
+function setCors(res: import('@vercel/node').VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-syncra-automation-secret')
@@ -118,7 +116,7 @@ function normalizeMessageType(value: unknown): MessageType {
   return 'ticket'
 }
 
-function parseInboundBody(req: VercelRequest): { ok: true; body: NormalizedInbound } | { ok: false; error: string } {
+function parseInboundBody(req: import('@vercel/node').VercelRequest): { ok: true; body: NormalizedInbound } | { ok: false; error: string } {
   const merged = unwrapRecord(req.body)
 
   const societyId = safeString(merged.societyId ?? merged.society_id ?? merged.societyID)
@@ -219,7 +217,10 @@ async function insertComplaint(input: {
   }
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+module.exports = async function handler(
+  req: import('@vercel/node').VercelRequest,
+  res: import('@vercel/node').VercelResponse
+) {
   try {
     setCors(res)
 

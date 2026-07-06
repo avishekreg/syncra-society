@@ -1,5 +1,3 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node'
-
 function supabaseConfig() {
   const url = (process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL ?? '')
     .replace(/\/rest\/v1\/?$/i, '')
@@ -17,13 +15,16 @@ function adminHeaders(serviceKey: string) {
   }
 }
 
-function setCors(res: VercelResponse) {
+function setCors(res: import('@vercel/node').VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, apikey, x-super-admin-key')
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+module.exports = async function handler(
+  req: import('@vercel/node').VercelRequest,
+  res: import('@vercel/node').VercelResponse
+) {
   setCors(res)
   if (req.method === 'OPTIONS') {
     return res.status(204).end()
