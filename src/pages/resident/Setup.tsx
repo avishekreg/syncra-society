@@ -1,23 +1,46 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../providers/AuthProvider'
 import { linkResidentAccount } from '../../api/residentMapping'
-import { listRegisteredSocieties } from '../../lib/societyRegistry'
+import { validateJoinCode, type JoinCodeValidationResult } from '../../lib/joinCodeValidation'
 import { ui } from '../../lib/ui'
 
 export default function ResidentSetup() {
   const { user, refreshSocietyProfile, setCurrentSocietyId } = useAuth()
   const navigate = useNavigate()
-  const societies = listRegisteredSocieties()
   const [joinCode, setJoinCode] = useState('')
   const [flatNumber, setFlatNumber] = useState('')
   const [building, setBuilding] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [joinValidation, setJoinValidation] = useState<JoinCodeValidationResult | null>(null)
+  const [joinValidating, setJoinValidating] = useState(false)
+
+  useEffect(() => {
+    const code = joinCode.trim()
+    if (code.length < 4) {
+      setJoinValidation(null)
+      return
+    }
+    const timer = window.setTimeout(() => {
+      setJoinValidating(true)
+      void validateJoinCode(code)
+        .then((result) => setJoinValidation(result))
+        .finally(() => setJoinValidating(false))
+    }, 400)
+    return () => window.clearTimeout(timer)
+  }, [joinCode])
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
     if (!user) return
+
+    const validation = joinValidation ?? (await validateJoinCode(joinCode))
+    if (!validation.valid) {
+      setError(validation.message)
+      return
+    }
+
     setSaving(true)
     setError(null)
 
@@ -33,8 +56,8 @@ export default function ResidentSetup() {
       setCurrentSocietyId(profile.societyId)
       await refreshSocietyProfile()
       navigate('/resident', { replace: true })
-    } catch (err: any) {
-      setError(err.message ?? 'Unable to link your account')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Unable to link your account')
     } finally {
       setSaving(false)
     }
@@ -46,24 +69,25 @@ export default function ResidentSetup() {
         <p className={ui.eyebrow}>Resident onboarding</p>
         <h1 className={`mt-2 ${ui.headingLg}`}>Link your flat to a society</h1>
         <p className={`mt-3 ${ui.body}`}>
-          Enter the join code from your society admin and your flat details to complete registration.
+          Enter the joining code from your society admin and your flat details to complete registration.
         </p>
-
-        <div className={`mt-6 ${ui.innerItem} text-sm`}>
-          <p className="font-semibold text-syncra-primary">Available societies (demo)</p>
-          <ul className="mt-2 space-y-1 text-slate-600">
-            {societies.map((s) => (
-              <li key={s.id}>
-                {s.name} — code: <strong>{s.joinCode}</strong>
-              </li>
-            ))}
-          </ul>
-        </div>
 
         <form onSubmit={(e) => void handleSubmit(e)} className="mt-6 space-y-4">
           <label className="block space-y-2">
-            <span className={ui.label}>Society Join Code</span>
-            <input value={joinCode} onChange={(e) => setJoinCode(e.target.value)} className={ui.input} placeholder="e.g. WINDSOR2026" required />
+            <span className={ui.label}>Society Joining Code</span>
+            <input
+              value={joinCode}
+              onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+              className={ui.input}
+              placeholder="Enter society joining code"
+              required
+            />
+            {joinValidating && <p className="text-xs text-slate-500">Validating join code…</p>}
+            {joinValidation && (
+              <p className={`text-sm ${joinValidation.valid ? 'text-emerald-600' : 'text-syncra-action-alt'}`}>
+                {joinValidation.message}
+              </p>
+            )}
           </label>
           <label className="block space-y-2">
             <span className={ui.label}>Flat Number</span>

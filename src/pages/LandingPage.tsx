@@ -2,8 +2,11 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import SyncraBrandLogo from '../components/brand/SyncraBrandLogo'
 import FooterAppStoreBadges from '../components/landing/FooterAppStoreBadges'
+import AntiDisputeHarmonySection from '../components/landing/AntiDisputeHarmonySection'
 import HeroDashboardMockup from '../components/landing/HeroDashboardMockup'
 import SyncraPromiseSection from '../components/landing/SyncraPromiseSection'
+import SyncraFooter from '../components/layout/SyncraFooter'
+import { SYNCRA_LEGAL_ENTITY } from '../lib/brandConstants'
 import { usePlatformPricing } from '../hooks/usePlatformPricing'
 import {
   formatElectionAddonPrice,
@@ -113,7 +116,7 @@ export default function LandingPage() {
                 Ultra-premium governance for modern communities.
               </h2>
               <p className={`text-lg leading-relaxed ${ui.body}`}>
-                syncra-society from Syncra Systems unifies Multi-Society RWA, Ledgers, Notice Board, Contract
+                syncra-society from {SYNCRA_LEGAL_ENTITY} unifies Multi-Society RWA, Ledgers, Notice Board, Contract
                 Tracking, and Syncra Gatekeeper into one elegant, privacy-first platform.
               </p>
             </div>
@@ -147,6 +150,8 @@ export default function LandingPage() {
 
           <HeroDashboardMockup />
         </section>
+
+        <AntiDisputeHarmonySection />
 
         <SyncraPromiseSection />
 
@@ -276,37 +281,20 @@ export default function LandingPage() {
           <p className="text-center text-xs text-slate-500">
             Need a custom township rollout?{' '}
             <a href="mailto:hello@syncrasystems.com" className="font-medium text-syncra-blue hover:underline">
-              Contact Syncra Systems
+              Contact {SYNCRA_LEGAL_ENTITY}
             </a>{' '}
             for enterprise onboarding.
           </p>
         </section>
       </main>
 
-      <footer className="border-t border-slate-200 bg-syncra-surface-alt py-10 text-slate-600">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-center lg:gap-10">
-          <div className="space-y-2 lg:justify-self-start">
-            <p className="text-sm font-semibold text-syncra-primary">Developed by Syncra Systems</p>
-            <p className="text-sm">Premium society management for modern communities.</p>
-          </div>
-
-          <div className="justify-self-start lg:justify-self-center">
-            <FooterAppStoreBadges />
-          </div>
-
-          <div className="flex flex-wrap gap-4 text-sm text-slate-600 lg:justify-self-end lg:justify-end">
-            <Link to="/legal/terms" className="hover:text-syncra-blue">
-              Terms & Conditions
-            </Link>
-            <Link to="/legal/privacy" className="hover:text-syncra-blue">
-              Privacy Policy
-            </Link>
-            <Link to="/legal/refund" className="hover:text-syncra-blue">
-              Refund & Cancellation
-            </Link>
-          </div>
+      <div className="relative z-10 border-t border-gray-200 bg-white py-8">
+        <div className="mx-auto flex max-w-7xl justify-center px-4 sm:px-6">
+          <FooterAppStoreBadges />
         </div>
-      </footer>
+      </div>
+
+      <SyncraFooter />
     </div>
   )
 }

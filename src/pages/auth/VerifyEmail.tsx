@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import AuthLayout from '../../layouts/AuthLayout'
+import SignupDownloadSuccess from '../../components/auth/SignupDownloadSuccess'
 import { useAuth } from '../../providers/AuthProvider'
 import { clearPendingSignup, loadPendingSignup } from '../../lib/emailVerification'
 import { resolvePostLoginPath } from '../../config/devSeed'
@@ -12,12 +13,17 @@ export default function VerifyEmail() {
   const { verifyEmailOtp, resendVerificationEmail, refreshSocietyProfile } = useAuth()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const flow = searchParams.get('flow') ?? 'standard'
+  const isWebFirstFlow = flow === 'web-first'
   const [email, setEmail] = useState(searchParams.get('email') ?? loadPendingSignup()?.email ?? '')
   const [code, setCode] = useState('')
   const [status, setStatus] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [resending, setResending] = useState(false)
+  const [showDownloadSuccess, setShowDownloadSuccess] = useState(false)
+  const [verifiedName, setVerifiedName] = useState<string | undefined>()
+  const [dashboardPath, setDashboardPath] = useState('/auth/signin')
 
   useEffect(() => {
     void (async () => {
@@ -53,14 +59,21 @@ export default function VerifyEmail() {
       }
       clearPendingSignup()
       const role = pending.accountType === 'society_admin' ? 'rwa_owner' : 'resident'
-      navigate(
-        resolvePostLoginPath(
-          userEmail,
-          role === 'rwa_owner' ? ['rwa_owner'] : ['resident'],
-          null,
-          role
-        )
+      const nextPath = resolvePostLoginPath(
+        userEmail,
+        role === 'rwa_owner' ? ['rwa_owner'] : ['resident'],
+        null,
+        role
       )
+      setVerifiedName(pending.fullName)
+      setDashboardPath(nextPath)
+
+      if (isWebFirstFlow || pending.accountType === 'resident') {
+        setShowDownloadSuccess(true)
+        return
+      }
+
+      navigate(nextPath)
       return
     }
 
@@ -120,16 +133,25 @@ export default function VerifyEmail() {
     }
   }
 
+  if (showDownloadSuccess) {
+    return (
+      <AuthLayout title="You're All Set" compact>
+        <SignupDownloadSuccess fullName={verifiedName} dashboardPath={dashboardPath} />
+      </AuthLayout>
+    )
+  }
+
   return (
-    <AuthLayout title="Verify Your Email">
+    <AuthLayout title="Verify Your Email" compact={isWebFirstFlow}>
       <div className="mx-auto max-w-xl">
         <div className={`space-y-6 ${ui.card}`}>
           <div>
             <p className={ui.eyebrow}>Account security</p>
             <h2 className={`mt-2 ${ui.heading}`}>Confirm your email to finish signup</h2>
             <p className={`mt-3 ${ui.body}`}>
-              We sent a verification link and one-time code to your inbox. Click the link or enter the code below to
-              activate your account. Super Admin accounts are exempt from this step.
+              {isWebFirstFlow
+                ? 'Enter the one-time code we sent to your inbox. Once verified, you can download the Syncra Society app and access your dashboard.'
+                : 'We sent a verification link and one-time code to your inbox. Click the link or enter the code below to activate your account.'}
             </p>
           </div>
 
@@ -163,7 +185,12 @@ export default function VerifyEmail() {
           </form>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <button type="button" onClick={() => void handleResend()} disabled={resending} className={`${ui.btnSecondary} flex-1`}>
+            <button
+              type="button"
+              onClick={() => void handleResend()}
+              disabled={resending}
+              className={`${ui.btnSecondary} flex-1`}
+            >
               {resending ? 'Sending…' : 'Resend verification email'}
             </button>
             <Link to="/auth/signin" className={`${ui.btnGhost} flex-1 text-center`}>

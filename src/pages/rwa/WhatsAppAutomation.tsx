@@ -198,7 +198,7 @@ export default function WhatsAppAutomation() {
       <section className={`${ui.innerItem} text-sm ${ui.body}`}>
         <p className="font-semibold text-syncra-primary">Enterprise activation</p>
         <p className="mt-2">
-          WhatsApp automation is provisioned through Syncra Core. Contact your Syncra Systems administrator
+          WhatsApp automation is provisioned through Syncra Core. Contact your Syncra Systems LLP administrator
           to connect your society&apos;s approved messaging channel and resident opt-in registry.
         </p>
       </section>

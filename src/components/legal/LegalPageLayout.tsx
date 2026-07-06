@@ -1,12 +1,15 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import SyncraBrandLogo from '../brand/SyncraBrandLogo'
+import SyncraFooter from '../layout/SyncraFooter'
 import { ui } from '../../lib/ui'
 
+import { SYNCRA_LEGAL_ENTITY, SYNCRA_CONTACT_EMAIL } from '../../lib/brandConstants'
+
 export const LEGAL_EFFECTIVE_DATE = '5 July 2026'
-export const LEGAL_ENTITY = 'Syncra Systems'
+export const LEGAL_ENTITY = SYNCRA_LEGAL_ENTITY
 export const LEGAL_PLATFORM = 'Syncra Society'
-export const LEGAL_CONTACT_EMAIL = 'hello@syncrasystems.com'
+export const LEGAL_CONTACT_EMAIL = SYNCRA_CONTACT_EMAIL
 export const LEGAL_PRIVACY_EMAIL = 'privacy@syncrasystems.com'
 export const LEGAL_BILLING_EMAIL = 'billing@syncrasystems.com'
 
@@ -106,18 +109,7 @@ export default function LegalPageLayout({ title, children }: LegalPageLayoutProp
         </div>
       </main>
 
-      <footer className="relative z-10 border-t border-slate-200 bg-syncra-surface-alt py-8 text-slate-600">
-        <div className="mx-auto flex max-w-5xl flex-col gap-4 px-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <p className="text-sm">© {new Date().getFullYear()} {LEGAL_ENTITY}. All rights reserved.</p>
-          <div className="flex flex-wrap gap-4 text-sm">
-            {legalLinks.map((link) => (
-              <Link key={link.to} to={link.to} className="hover:text-syncra-blue">
-                {link.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </footer>
+      <SyncraFooter compact />
     </div>
   )
 }
