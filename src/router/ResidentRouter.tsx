@@ -1,6 +1,7 @@
 import React from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Navigate, Routes, Route } from 'react-router-dom'
 import DashboardRouteLayout from '../layouts/DashboardRouteLayout'
+import ResidentRouteLayout from '../layouts/ResidentRouteLayout'
 import ResidentDashboard from '../pages/resident/Dashboard'
 import ResidentHelpdesk from '../pages/resident/Helpdesk'
 import ResidentVisitorLogs from '../components/ResidentVisitorLogs'
@@ -39,7 +40,7 @@ export default function ResidentRouter() {
       <Route path="setup" element={<DashboardRouteLayout title="Complete Registration" />}>
         <Route index element={<ResidentSetup />} />
       </Route>
-      <Route element={<DashboardRouteLayout title="Resident Dashboard" />}>
+      <Route element={<ResidentRouteLayout />}>
         <Route index element={<ResidentDashboard />} />
         <Route path="helpdesk" element={<ResidentHelpdesk />} />
         <Route path="visitor-logs" element={<VisitorLogsPage />} />
@@ -49,6 +50,7 @@ export default function ResidentRouter() {
         <Route path="gallery" element={<ResidentGalleryPage />} />
         <Route path="elections" element={<ResidentElectionsPage />} />
         <Route path="rewards" element={<ResidentRewardsPage />} />
+        <Route path="*" element={<Navigate to="/resident" replace />} />
       </Route>
     </Routes>
   )

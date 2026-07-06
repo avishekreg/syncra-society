@@ -82,6 +82,7 @@ export default function AppRouter() {
               </ProtectedRoute>
             }
           />
+          <Route path="/dashboard/*" element={<Navigate to="/resident" replace />} />
           <Route
             path="/resident/*"
             element={

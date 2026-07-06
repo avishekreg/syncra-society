@@ -179,6 +179,14 @@ export default function Sidebar({ children, title }: SidebarProps) {
                 Visitor Logs
               </NavLink>
             )}
+            {moduleEnabled('notices') && (
+              <NavLink to="/resident/notices" className={navLinkClass}>
+                Notices
+              </NavLink>
+            )}
+            <NavLink to="/resident/activity" className={navLinkClass}>
+              Activity
+            </NavLink>
             {showResidentCommunity && (
               <NavGroup label="Community & Governance" paths={residentCommunityPaths}>
                 {moduleEnabled('surveys') && (
