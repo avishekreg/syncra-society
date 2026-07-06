@@ -1,6 +1,6 @@
 {
-  "appVersion": "v1.0.0+build.0",
-  "apkUrl": "https://syncra-society.vercel.app/downloads/syncra-society-latest.apk",
-  "buildSha": "",
-  "builtAt": ""
+  "appVersion": "v1.0.0+build.2",
+  "apkUrl": "https://syncra-society.vercel.app/downloads/syncra-society-android-2.apk",
+  "buildSha": "2aeedcb48f8db4e3422922a2c423bc1081df610a",
+  "builtAt": "2026-07-06T08:11:57Z"
 }
