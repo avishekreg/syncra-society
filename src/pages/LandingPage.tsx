@@ -284,15 +284,17 @@ export default function LandingPage() {
       </main>
 
       <footer className="border-t border-slate-200 bg-syncra-surface-alt py-10 text-slate-600">
-        <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-2">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-center lg:gap-10">
+          <div className="space-y-2 lg:justify-self-start">
             <p className="text-sm font-semibold text-syncra-primary">Developed by Syncra Systems</p>
             <p className="text-sm">Premium society management for modern communities.</p>
           </div>
 
-          <FooterAppStoreBadges />
+          <div className="justify-self-start lg:justify-self-center">
+            <FooterAppStoreBadges />
+          </div>
 
-          <div className="flex flex-wrap gap-4 text-sm text-slate-600 lg:justify-end">
+          <div className="flex flex-wrap gap-4 text-sm text-slate-600 lg:justify-self-end lg:justify-end">
             <Link to="/legal/terms" className="hover:text-syncra-blue">
               Terms & Conditions
             </Link>
