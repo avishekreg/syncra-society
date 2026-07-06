@@ -33,26 +33,85 @@ type HandlerError = Error & {
   supabase?: SupabaseErrorDetails
 }
 
-function supabaseConfig() {
-  const url = (
-    process.env.SUPABASE_URL ??
-    process.env.VITE_SUPABASE_URL ??
-    process.env.NEXT_PUBLIC_SUPABASE_URL ??
-    ''
-  )
-    .trim()
-    .replace(/\/rest\/v1\/?$/i, '')
-    .replace(/\/+$/, '')
-
-  const serviceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY ?? '').trim()
-  return { url, serviceKey }
+type SupabaseRuntimeConfig = {
+  url: string
+  apiKey: string
+  keySource: 'service_role' | 'anon' | 'none'
 }
 
-function adminHeaders(serviceKey: string) {
+const SUPABASE_URL_KEYS = [
+  'SUPABASE_URL',
+  'NEXT_PUBLIC_SUPABASE_URL',
+  'VITE_SUPABASE_URL',
+  'SUPABASE_PROJECT_URL'
+] as const
+
+const SUPABASE_SERVICE_KEYS = [
+  'SUPABASE_SERVICE_ROLE_KEY',
+  'SUPABASE_SERVICE_KEY',
+  'SUPABASE_SECRET_KEY',
+  'SERVICE_ROLE_KEY'
+] as const
+
+const SUPABASE_ANON_KEYS = [
+  'SUPABASE_ANON_KEY',
+  'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+  'VITE_SUPABASE_ANON_KEY'
+] as const
+
+function readEnvVar(...keys: readonly string[]): string {
+  for (const key of keys) {
+    const raw = process.env[key]
+    if (typeof raw !== 'string') continue
+    const trimmed = raw.trim()
+    if (trimmed) return trimmed
+  }
+  return ''
+}
+
+function normalizeSupabaseUrl(raw: string): string {
+  if (!raw) return ''
+  return raw.replace(/\/rest\/v1\/?$/i, '').replace(/\/+$/, '')
+}
+
+function supabaseConfig(): SupabaseRuntimeConfig {
+  const url = normalizeSupabaseUrl(readEnvVar(...SUPABASE_URL_KEYS))
+  const serviceKey = readEnvVar(...SUPABASE_SERVICE_KEYS)
+  const anonKey = readEnvVar(...SUPABASE_ANON_KEYS)
+  const apiKey = serviceKey || anonKey
+
+  return {
+    url,
+    apiKey,
+    keySource: serviceKey ? 'service_role' : anonKey ? 'anon' : 'none'
+  }
+}
+
+function supabaseEnvDiagnostics() {
+  const flag = (keys: readonly string[]) =>
+    Object.fromEntries(keys.map((key) => [key, Boolean(readEnvVar(key))]))
+
+  return {
+    url: flag(SUPABASE_URL_KEYS),
+    service: flag(SUPABASE_SERVICE_KEYS),
+    anon: flag(SUPABASE_ANON_KEYS)
+  }
+}
+
+function logMissingSupabaseConfig(config: SupabaseRuntimeConfig) {
+  console.error('[automation/inbound] Missing Supabase configuration', {
+    resolvedUrl: Boolean(config.url),
+    resolvedApiKey: Boolean(config.apiKey),
+    keySource: config.keySource,
+    env: supabaseEnvDiagnostics()
+  })
+}
+
+function adminHeaders(apiKey: string) {
   return {
     'Content-Type': 'application/json',
-    apikey: serviceKey,
-    Authorization: `Bearer ${serviceKey}`,
+    apikey: apiKey,
+    Authorization: `Bearer ${apiKey}`,
     Prefer: 'return=representation'
   }
 }
@@ -206,14 +265,14 @@ function logSupabaseError(context: string, error: SupabaseErrorDetails, extra?: 
 
 async function supabaseRequest(
   url: string,
-  serviceKey: string,
+  apiKey: string,
   path: string,
   init?: RequestInit
 ): Promise<{ ok: boolean; status: number; text: string; json: unknown }> {
   const response = await fetch(`${url}/rest/v1/${path}`, {
     ...init,
     headers: {
-      ...adminHeaders(serviceKey),
+      ...adminHeaders(apiKey),
       ...(init?.headers ?? {})
     }
   })
@@ -229,10 +288,10 @@ async function supabaseRequest(
   return { ok: response.ok, status: response.status, text, json }
 }
 
-async function fetchFirstSocietyId(url: string, serviceKey: string): Promise<string | null> {
+async function fetchFirstSocietyId(url: string, apiKey: string): Promise<string | null> {
   const result = await supabaseRequest(
     url,
-    serviceKey,
+    apiKey,
     `${SOCIETIES_TABLE}?select=id&order=created_at.asc&limit=1`
   )
   if (!result.ok) {
@@ -244,10 +303,10 @@ async function fetchFirstSocietyId(url: string, serviceKey: string): Promise<str
   return first?.id ?? null
 }
 
-async function societyExists(url: string, serviceKey: string, societyId: string): Promise<boolean> {
+async function societyExists(url: string, apiKey: string, societyId: string): Promise<boolean> {
   const result = await supabaseRequest(
     url,
-    serviceKey,
+    apiKey,
     `${SOCIETIES_TABLE}?select=id&id=eq.${encodeURIComponent(societyId)}&limit=1`
   )
   if (!result.ok) {
@@ -260,10 +319,10 @@ async function societyExists(url: string, serviceKey: string, societyId: string)
 
 async function resolveSocietyId(
   url: string,
-  serviceKey: string,
+  apiKey: string,
   candidate: string | null
 ): Promise<{ societyId: string; source: string }> {
-  if (candidate && UUID_RE.test(candidate) && (await societyExists(url, serviceKey, candidate))) {
+  if (candidate && UUID_RE.test(candidate) && (await societyExists(url, apiKey, candidate))) {
     return { societyId: candidate, source: 'payload' }
   }
 
@@ -275,7 +334,7 @@ async function resolveSocietyId(
     console.warn('[automation/inbound] societyId missing — using fallback society')
   }
 
-  const fallback = await fetchFirstSocietyId(url, serviceKey)
+  const fallback = await fetchFirstSocietyId(url, apiKey)
   if (!fallback) {
     throw new Error('No society available for inbound WhatsApp routing')
   }
@@ -285,11 +344,11 @@ async function resolveSocietyId(
 
 async function lookupUserAndFlat(
   url: string,
-  serviceKey: string,
+  apiKey: string,
   societyId: string,
   query: string
 ): Promise<{ user_id?: string; flat_number?: string; phone?: string } | null> {
-  const result = await supabaseRequest(url, serviceKey, query)
+  const result = await supabaseRequest(url, apiKey, query)
   if (!result.ok) {
     logSupabaseError('Profile lookup failed', parseSupabaseError(result.status, result.text), { query })
     return null
@@ -300,7 +359,7 @@ async function lookupUserAndFlat(
 
 async function resolveRaisedByUserId(
   url: string,
-  serviceKey: string,
+  apiKey: string,
   input: { societyId: string; phone: string; flatNumber: string | null }
 ): Promise<{ userId: string; source: string }> {
   const suffix = phoneSearchSuffix(input.phone)
@@ -308,7 +367,7 @@ async function resolveRaisedByUserId(
   if (input.flatNumber) {
     const byFlat = await lookupUserAndFlat(
       url,
-      serviceKey,
+      apiKey,
       input.societyId,
       `${USER_AND_FLATS_TABLE}?society_id=eq.${encodeURIComponent(input.societyId)}&flat_number=eq.${encodeURIComponent(input.flatNumber)}&select=user_id,flat_number,phone&limit=1`
     )
@@ -320,7 +379,7 @@ async function resolveRaisedByUserId(
   if (suffix) {
     const byPhone = await lookupUserAndFlat(
       url,
-      serviceKey,
+      apiKey,
       input.societyId,
       `${USER_AND_FLATS_TABLE}?society_id=eq.${encodeURIComponent(input.societyId)}&phone=ilike.*${encodeURIComponent(suffix)}&select=user_id,flat_number,phone&limit=1`
     )
@@ -330,7 +389,7 @@ async function resolveRaisedByUserId(
 
     const flatResult = await supabaseRequest(
       url,
-      serviceKey,
+      apiKey,
       `${FLATS_TABLE}?society_id=eq.${encodeURIComponent(input.societyId)}&owner_phone=ilike.*${encodeURIComponent(suffix)}&select=id,flat_number,owner_phone&limit=1`
     )
     if (flatResult.ok) {
@@ -339,7 +398,7 @@ async function resolveRaisedByUserId(
       if (flat?.flat_number) {
         const byFlatPhone = await lookupUserAndFlat(
           url,
-          serviceKey,
+          apiKey,
           input.societyId,
           `${USER_AND_FLATS_TABLE}?society_id=eq.${encodeURIComponent(input.societyId)}&flat_number=eq.${encodeURIComponent(flat.flat_number)}&select=user_id,flat_number,phone&limit=1`
         )
@@ -382,6 +441,8 @@ function mapInsertError(status: number, rawText: string): { status: number; mess
 }
 
 async function insertComplaint(input: {
+  url: string
+  apiKey: string
   societyId: string
   raisedByUserId: string
   phone: string
@@ -389,11 +450,6 @@ async function insertComplaint(input: {
   subject: string
   description: string | null
 }) {
-  const { url, serviceKey } = supabaseConfig()
-  if (!url || !serviceKey) {
-    throw new Error('SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not configured')
-  }
-
   const now = new Date().toISOString()
   const flatHint = input.flatNumber ? `Flat ${input.flatNumber}` : 'Unknown flat'
   const payload = {
@@ -406,9 +462,9 @@ async function insertComplaint(input: {
     updated_at: now
   }
 
-  const response = await fetch(`${url}/rest/v1/${COMPLAINTS_TABLE}`, {
+  const response = await fetch(`${input.url}/rest/v1/${COMPLAINTS_TABLE}`, {
     method: 'POST',
-    headers: adminHeaders(serviceKey),
+    headers: adminHeaders(input.apiKey),
     body: JSON.stringify(payload)
   })
 
@@ -445,22 +501,29 @@ module.exports = async function handler(
       return res.status(405).json({ error: 'Method not allowed' })
     }
 
-    const secret = (process.env.SYNCRA_AUTOMATION_SECRET ?? 'syncra-local-dev-secret').trim()
+    const secret = readEnvVar('SYNCRA_AUTOMATION_SECRET') || 'syncra-local-dev-secret'
     const providedSecret = safeString(req.headers['x-syncra-automation-secret'])
     if (!providedSecret || providedSecret !== secret) {
       return res.status(401).json({ error: 'Invalid automation secret' })
     }
 
     const body = parseInboundBody(req)
-    const { url, serviceKey } = supabaseConfig()
-    if (!url || !serviceKey) {
-      console.error('[automation/inbound] Missing Supabase configuration')
-      return res.status(503).json({ error: 'SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not configured' })
+    const supabase = supabaseConfig()
+
+    if (!supabase.url || !supabase.apiKey) {
+      logMissingSupabaseConfig(supabase)
+      return res.status(500).json({
+        error: 'Supabase is not fully configured for inbound automation',
+        hint: !supabase.url
+          ? 'Set SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL in Vercel Production environment variables.'
+          : 'Set SUPABASE_SERVICE_ROLE_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel Production environment variables.',
+        keySource: supabase.keySource
+      })
     }
 
     let societyResolution: { societyId: string; source: string }
     try {
-      societyResolution = await resolveSocietyId(url, serviceKey, body.societyId)
+      societyResolution = await resolveSocietyId(supabase.url, supabase.apiKey, body.societyId)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unable to resolve society'
       console.error('[automation/inbound] Society resolution failed:', message, {
@@ -488,7 +551,7 @@ module.exports = async function handler(
       body.subject ||
       (body.flatNumber ? `WhatsApp helpdesk — Flat ${body.flatNumber}` : 'WhatsApp helpdesk ticket')
 
-    const userResolution = await resolveRaisedByUserId(url, serviceKey, {
+    const userResolution = await resolveRaisedByUserId(supabase.url, supabase.apiKey, {
       societyId: societyResolution.societyId,
       phone: body.phone,
       flatNumber: body.flatNumber
@@ -496,6 +559,8 @@ module.exports = async function handler(
 
     try {
       const ticket = await insertComplaint({
+        url: supabase.url,
+        apiKey: supabase.apiKey,
         societyId: societyResolution.societyId,
         raisedByUserId: userResolution.userId,
         phone: body.phone,
@@ -516,6 +581,7 @@ module.exports = async function handler(
         societySource: societyResolution.source,
         raisedByUserId: userResolution.userId,
         raisedBySource: userResolution.source,
+        supabaseKeySource: supabase.keySource,
         message: 'Ticket stored in complaints_and_suggestions'
       })
     } catch (err) {
