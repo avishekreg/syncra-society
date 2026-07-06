@@ -1,15 +1,20 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
-const DEFAULT_APK_URL = 'https://syncra-society.vercel.app/downloads/syncra-society-latest.apk'
+const DEFAULT_APK_PATH = '/downloads/syncra-society-latest.apk'
 
-function resolveApkUrl() {
-  return (
-    process.env.SYNCRA_ANDROID_APK_URL ||
-    process.env.VITE_SYNCRA_ANDROID_APK_URL ||
-    DEFAULT_APK_URL
-  )
+function resolveApkPath() {
+  const fromEnv = process.env.SYNCRA_ANDROID_APK_URL || process.env.VITE_SYNCRA_ANDROID_APK_URL
+  if (fromEnv) {
+    try {
+      return new URL(fromEnv).pathname
+    } catch {
+      if (fromEnv.startsWith('/')) return fromEnv
+    }
+  }
+  return DEFAULT_APK_PATH
 }
 
+/** Redirect to the static APK asset (attachment headers applied in vercel.json). */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*')
@@ -22,7 +27,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
+  const apkPath = resolveApkPath()
+
   res.setHeader('Cache-Control', 'no-store')
-  res.setHeader('Location', resolveApkUrl())
-  return res.status(302).end()
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Location', apkPath)
+  return res.status(307).end()
 }

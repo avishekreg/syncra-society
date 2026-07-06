@@ -250,7 +250,7 @@ jobs:
           cp "$APK_PATH" "public/downloads/syncra-society-latest.apk"
           APP_VERSION="${VITE_APP_VERSION}+build.${GITHUB_RUN_NUMBER}"
           NOW_UTC=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          APK_PUBLIC_URL="https://syncra-society.vercel.app/downloads/${VERSIONED_APK}"
+          APK_PUBLIC_URL="/downloads/syncra-society-latest.apk"
           cat > public/downloads/android-update.json <<EOF
           {
             "appVersion": "${APP_VERSION}",

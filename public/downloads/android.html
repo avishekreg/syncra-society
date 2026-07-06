@@ -158,9 +158,8 @@
           <a
             id="apk-download"
             class="btn btn-primary"
-            href="/api/android-download"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/downloads/syncra-society-latest.apk"
+            download="syncra-society-latest.apk"
           >
             Download APK
           </a>
@@ -181,19 +180,34 @@
 
     <script>
       ;(function () {
-        var SITE_ORIGIN = window.location.origin || 'https://syncra-society.vercel.app'
-        var apkPath = SITE_ORIGIN + '/api/android-download?t=' + Date.now()
+        var LATEST_APK = '/downloads/syncra-society-latest.apk'
+        var API_APK = '/api/android-download'
         var apkDownload = document.getElementById('apk-download')
         var apkChrome = document.getElementById('apk-chrome')
         var status = document.getElementById('apk-status')
 
+        function normalizeApkUrl(url) {
+          if (!url || typeof url !== 'string') return LATEST_APK
+          if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
+            try {
+              return new URL(url).pathname || LATEST_APK
+            } catch (e) {
+              return LATEST_APK
+            }
+          }
+          return url.indexOf('/') === 0 ? url : LATEST_APK
+        }
+
         function applyApkUrl(url) {
-          if (!url) return
-          apkPath = url
-          if (apkDownload) apkDownload.setAttribute('href', apkPath)
+          var apkPath = normalizeApkUrl(url)
+          if (apkDownload) {
+            apkDownload.setAttribute('href', apkPath)
+            apkDownload.setAttribute('download', 'syncra-society-latest.apk')
+          }
           if (apkChrome) {
-            var fallbackUrl = encodeURIComponent(apkPath)
-            var hostPath = apkPath.replace(/^https?:\/\//, '')
+            var absoluteUrl = window.location.origin + apkPath
+            var fallbackUrl = encodeURIComponent(absoluteUrl)
+            var hostPath = absoluteUrl.replace(/^https?:\/\//, '')
             var intentUrl =
               'intent://' +
               hostPath +
@@ -204,7 +218,7 @@
           }
         }
 
-        applyApkUrl(apkPath)
+        applyApkUrl(LATEST_APK)
 
         fetch('/downloads/android-update.json?t=' + Date.now())
           .then(function (res) {
@@ -218,7 +232,20 @@
               }
             }
           })
-          .catch(function () {})
+          .catch(function () {
+            applyApkUrl(LATEST_APK)
+          })
+
+        if (apkDownload) {
+          apkDownload.addEventListener('click', function (event) {
+            var href = apkDownload.getAttribute('href') || LATEST_APK
+            if (href.indexOf(LATEST_APK) === 0 || href.indexOf('/downloads/') === 0) {
+              return
+            }
+            event.preventDefault()
+            window.location.href = API_APK + '?t=' + Date.now()
+          })
+        }
 
         var params = new URLSearchParams(window.location.search)
         if (params.get('autostart') === '1') {

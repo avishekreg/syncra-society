@@ -13,7 +13,13 @@ export const SYNCRA_ANDROID_LANDING_PATH = '/downloads/android.html'
 
 export const SYNCRA_ANDROID_DOWNLOAD_API = '/api/android-download'
 
-export const SYNCRA_ANDROID_UPDATE_PATH = '/downloads/android-update.json'
+export const SYNCRA_ANDROID_DOWNLOAD_PATH = SYNCRA_ANDROID_APK_PATH
+
+/** Prefer direct static APK path (attachment headers in vercel.json); API streams as fallback. */
+export function resolveAndroidDownloadHref(origin?: string) {
+  const base = origin || (typeof window !== 'undefined' ? window.location.origin : SYNCRA_ANDROID_APP_ORIGIN)
+  return `${base}${SYNCRA_ANDROID_APK_PATH}`
+}
 
 export const SYNCRA_CAPACITOR_APP_ID = 'in.syncrasystems.society'
 

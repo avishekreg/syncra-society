@@ -46,6 +46,10 @@
       "destination": "/downloads/syncra-society-latest.apk"
     },
     {
+      "source": "/downloads/syncra-society-android-:build.apk",
+      "destination": "/downloads/syncra-society-latest.apk"
+    },
+    {
       "source": "/((?!api(?:/|$)|downloads(?:/|$)).*)",
       "destination": "/index.html"
     }

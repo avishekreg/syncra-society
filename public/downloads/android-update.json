@@ -1,6 +1,6 @@
 {
   "appVersion": "v1.0.0+build.15",
-  "apkUrl": "https://syncra-society.vercel.app/downloads/syncra-society-android-15.apk",
+  "apkUrl": "/downloads/syncra-society-latest.apk",
   "buildSha": "635ba7c7b1f00506cc5387c9ed965cf855fa9a40",
   "builtAt": "2026-07-06T11:50:02Z"
 }
