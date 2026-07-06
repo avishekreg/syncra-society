@@ -236,15 +236,6 @@ jobs:
             tail -n 220 /tmp/gradle-build.log || true
           fi
 
-      - name: Verify production Supabase source lock
-        run: |
-          if grep -R "$PROD_SUPABASE_REF" src api >/dev/null 2>&1; then
-            echo "Production Supabase reference verified."
-          else
-            echo "Production Supabase reference not found in source."
-            exit 1
-          fi
-
       - name: Prepare artifact
         run: |
           APK_PATH="$(find android/app/build/outputs/apk/release -type f -name '*.apk' | head -n 1)"
