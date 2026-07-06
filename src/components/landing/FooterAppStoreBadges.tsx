@@ -2,85 +2,12 @@ import React, { useEffect, useState } from 'react'
 import { SYNCRA_ANDROID_LANDING_PATH } from '../../lib/androidApp'
 import { ui } from '../../lib/ui'
 
-/** Shared pixel dimensions — both badges must match exactly. */
-export const BADGE_WIDTH_PX = 135
-export const BADGE_HEIGHT_PX = 40
+/** Canonical badge display size — Apple SVG native ratio (~120×40). */
+const BADGE_CLASS = 'block h-10 w-[120px] shrink-0 select-none'
 
-/** 10px radius @ 40px height — matches store badge curvature. */
-export const BADGE_RADIUS_CLASS = 'rounded-[10px]'
-
-/**
- * Tight clip frame: overflow-hidden + solid black fill so no PNG transparency
- * or checkerboard fringe can bleed through on light footer backgrounds.
- */
-export const badgeFrameClass = [
-  'relative inline-flex shrink-0 overflow-hidden bg-black shadow-sm',
-  'aspect-[135/40] h-10 w-[135px]',
-  BADGE_RADIUS_CLASS
-].join(' ')
-
-/** App Store — standard clip. */
-export const badgeImageClass =
-  'pointer-events-none absolute inset-0 block h-full w-full object-cover object-center select-none'
-
-/**
- * Google Play — aggressive horizontal crop: scale-x pushes ~7% of each side
- * outside the overflow-hidden frame, eliminating baked-in checkerboard strips.
- */
-export const googlePlayFrameClass = [
-  'relative inline-flex shrink-0 isolate overflow-hidden bg-black shadow-sm',
-  'aspect-[135/40] h-10 w-[135px]',
-  BADGE_RADIUS_CLASS
-].join(' ')
-
-export const googlePlayImageClass = [
-  'pointer-events-none absolute left-1/2 top-1/2 block max-w-none select-none',
-  'h-full w-[116%] -translate-x-1/2 -translate-y-1/2',
-  'origin-center scale-x-[1.12] scale-y-[1.05]',
-  'object-cover object-center'
-].join(' ')
-
-export const googlePlayTriggerClass = [
-  'inline-flex overflow-hidden bg-black p-0 outline-none transition hover:opacity-90',
-  'aspect-[135/40] h-10 w-[135px]',
-  BADGE_RADIUS_CLASS,
+const badgeTriggerClass =
+  'inline-flex rounded-xl outline-none transition hover:opacity-90 ' +
   'focus-visible:ring-2 focus-visible:ring-syncra-accent/40 focus-visible:ring-offset-2'
-].join(' ')
-
-export const badgeTriggerClass = [
-  'inline-flex overflow-hidden p-0 outline-none transition hover:opacity-90',
-  BADGE_RADIUS_CLASS,
-  'focus-visible:ring-2 focus-visible:ring-syncra-accent/40 focus-visible:ring-offset-2'
-].join(' ')
-
-type StoreBadgeFrameProps = {
-  src: string
-  alt: string
-  imageClassName?: string
-  frameClassName?: string
-}
-
-function StoreBadgeFrame({
-  src,
-  alt,
-  imageClassName = badgeImageClass,
-  frameClassName = badgeFrameClass
-}: StoreBadgeFrameProps) {
-  return (
-    <span className={frameClassName}>
-      <img
-        src={src}
-        alt={alt}
-        width={BADGE_WIDTH_PX}
-        height={BADGE_HEIGHT_PX}
-        className={imageClassName}
-        loading="lazy"
-        draggable={false}
-        decoding="async"
-      />
-    </span>
-  )
-}
 
 export default function FooterAppStoreBadges() {
   const [iosModalOpen, setIosModalOpen] = useState(false)
@@ -108,24 +35,37 @@ export default function FooterAppStoreBadges() {
         >
           <a
             href={SYNCRA_ANDROID_LANDING_PATH}
-            className={googlePlayTriggerClass}
+            className={badgeTriggerClass}
             aria-label="Download Syncra Society for Android"
           >
-            <StoreBadgeFrame
-              src="/badges/google-play-badge.png"
+            <img
+              src="/badges/google-play-official.png"
               alt="Get it on Google Play"
-              frameClassName={googlePlayFrameClass}
-              imageClassName={googlePlayImageClass}
+              width={120}
+              height={40}
+              className={BADGE_CLASS}
+              loading="lazy"
+              draggable={false}
+              decoding="async"
             />
           </a>
 
           <button
             type="button"
             onClick={() => setIosModalOpen(true)}
-            className={`${badgeTriggerClass} border-0 bg-transparent`}
+            className={`${badgeTriggerClass} border-0 bg-transparent p-0`}
             aria-label="Syncra Society on the App Store — coming soon"
           >
-            <StoreBadgeFrame src="/badges/app-store-badge.png" alt="Download on the App Store" />
+            <img
+              src="/badges/app-store.svg"
+              alt="Download on the App Store"
+              width={120}
+              height={40}
+              className={BADGE_CLASS}
+              loading="lazy"
+              draggable={false}
+              decoding="async"
+            />
           </button>
         </div>
       </div>
