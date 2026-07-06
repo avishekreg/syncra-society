@@ -9,9 +9,16 @@
     "build:next": "next build",
     "preview": "vite preview",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "cap:sync": "npm run build && npx cap sync android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.3.0",
+    "@capacitor/app": "^8.1.0",
+    "@capacitor/core": "^8.3.0",
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/push-notifications": "^8.0.3",
+    "@capawesome-team/capacitor-file-opener": "^8.0.1",
     "@hookform/resolvers": "^5.0.1",
     "@radix-ui/react-label": "^2.1.2",
     "@radix-ui/react-select": "^2.1.6",
@@ -32,6 +39,7 @@
     "razorpay": "^2.9.6"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.3.0",
     "@vitejs/plugin-react": "^4.4.1",
     "@types/node": "^22.13.10",
     "@types/react": "^19.0.12",

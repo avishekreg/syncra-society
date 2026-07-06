@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Download Syncra Society for Android</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #fafbfc;
+        --surface: #ffffff;
+        --ink: #1a365d;
+        --muted: #64748b;
+        --blue: #0052cc;
+        --accent: #00b4d8;
+        --action: #ff8c00;
+        --line: #e2e8f0;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(0, 180, 216, 0.1), transparent 28%),
+          radial-gradient(circle at bottom right, rgba(0, 82, 204, 0.08), transparent 32%),
+          var(--bg);
+        color: var(--ink);
+      }
+      .wrap {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 24px 16px 48px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .brand-mark {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #f8fafc, #eef2ff);
+        border: 1px solid rgba(0, 82, 204, 0.12);
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        color: var(--blue);
+      }
+      .brand-text strong {
+        display: block;
+        font-size: 18px;
+      }
+      .brand-text span {
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--blue);
+        font-weight: 600;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 24px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+      }
+      .eyebrow {
+        margin: 0 0 8px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+      h1 {
+        margin: 0 0 10px;
+        font-size: clamp(28px, 5vw, 36px);
+        line-height: 1.15;
+      }
+      p {
+        color: var(--muted);
+        line-height: 1.65;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 20px;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+        padding: 14px 18px;
+        border-radius: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+      }
+      .btn-primary {
+        background: var(--action);
+        color: #fff;
+      }
+      .btn-secondary {
+        background: rgba(0, 180, 216, 0.12);
+        color: var(--blue);
+        border: 1px solid rgba(0, 180, 216, 0.35);
+      }
+      ol {
+        line-height: 1.7;
+        color: #334155;
+        padding-left: 20px;
+      }
+      .back {
+        display: inline-block;
+        margin-top: 18px;
+        color: var(--blue);
+        font-weight: 600;
+        text-decoration: none;
+      }
+      #apk-status {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">S</div>
+        <div class="brand-text">
+          <strong>Syncra</strong>
+          <span>Society</span>
+        </div>
+      </div>
+
+      <section class="card">
+        <p class="eyebrow">Android app</p>
+        <h1>Download Syncra Society</h1>
+        <p>
+          Install the official Android app for gatekeeper alerts, resident helpdesk, notices, and society
+          management — powered by the same Syncra backend and Supabase Realtime as the web platform.
+        </p>
+
+        <div class="actions">
+          <a
+            id="apk-download"
+            class="btn btn-primary"
+            href="/api/android-download"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Download APK
+          </a>
+          <a id="apk-chrome" class="btn btn-secondary" href="#">Open in Chrome</a>
+        </div>
+
+        <h2 style="margin-top: 28px; font-size: 20px">If install is blocked</h2>
+        <ol>
+          <li>Open Android Settings → Security (or Apps → Special access).</li>
+          <li>Allow installs from your browser or Files app.</li>
+          <li>Open the downloaded APK and confirm installation.</li>
+        </ol>
+
+        <a class="back" href="/">← Back to Syncra Society</a>
+        <p id="apk-status">Android installer is ready.</p>
+      </section>
+    </main>
+
+    <script>
+      ;(function () {
+        var SITE_ORIGIN = window.location.origin || 'https://syncra-society.vercel.app'
+        var apkPath = SITE_ORIGIN + '/api/android-download?t=' + Date.now()
+        var apkDownload = document.getElementById('apk-download')
+        var apkChrome = document.getElementById('apk-chrome')
+        var status = document.getElementById('apk-status')
+
+        function applyApkUrl(url) {
+          if (!url) return
+          apkPath = url
+          if (apkDownload) apkDownload.setAttribute('href', apkPath)
+          if (apkChrome) {
+            var fallbackUrl = encodeURIComponent(apkPath)
+            var hostPath = apkPath.replace(/^https?:\/\//, '')
+            var intentUrl =
+              'intent://' +
+              hostPath +
+              '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' +
+              fallbackUrl +
+              ';end'
+            apkChrome.setAttribute('href', intentUrl)
+          }
+        }
+
+        applyApkUrl(apkPath)
+
+        fetch('/downloads/android-update.json?t=' + Date.now())
+          .then(function (res) {
+            return res.ok ? res.json() : null
+          })
+          .then(function (meta) {
+            if (meta && meta.apkUrl) {
+              applyApkUrl(meta.apkUrl)
+              if (status && meta.appVersion) {
+                status.textContent = 'Latest build: ' + meta.appVersion
+              }
+            }
+          })
+          .catch(function () {})
+
+        var params = new URLSearchParams(window.location.search)
+        if (params.get('autostart') === '1') {
+          setTimeout(function () {
+            if (apkDownload) apkDownload.click()
+            if (status) {
+              status.textContent =
+                'If download did not start, tap "Open in Chrome" and then "Download APK".'
+            }
+          }, 250)
+        }
+      })()
+    </script>
+  </body>
+</html>

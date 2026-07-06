@@ -1,0 +1,313 @@
+name: Build Syncra Society Android APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    if: github.actor != 'github-actions[bot]'
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+      VITE_SUPABASE_URL: https://bueejfndiiprdzraxtfc.supabase.co
+      VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      NEXT_PUBLIC_SUPABASE_URL: https://bueejfndiiprdzraxtfc.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      VITE_SYNCRA_APP_ORIGIN: https://syncra-society.vercel.app
+      VITE_APP_VERSION: v1.0.0
+      PROD_SUPABASE_REF: bueejfndiiprdzraxtfc
+      SYNCRA_UPLOAD_STORE_FILE: syncra-society-release.keystore
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Clean previous Android wrapper and APK artifacts
+        run: |
+          rm -rf android
+          rm -rf release
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK build dependencies
+        run: |
+          yes | sdkmanager --licenses || true
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web app
+        run: npm run build
+
+      - name: Generate Capacitor config
+        run: |
+          cat > capacitor.config.ts <<'EOF'
+          import type { CapacitorConfig } from '@capacitor/cli';
+
+          const config: CapacitorConfig = {
+            appId: 'in.syncrasystems.society',
+            appName: 'Syncra Society',
+            webDir: 'dist',
+            plugins: {
+              PushNotifications: {
+                presentationOptions: ['badge', 'sound', 'alert'],
+              },
+            },
+            server: {
+              url: 'https://syncra-society.vercel.app',
+              cleartext: false
+            }
+          };
+
+          export default config;
+          EOF
+
+      - name: Add Android platform
+        run: npx cap add android
+
+      - name: Sync Android platform
+        run: npx cap sync android
+
+      - name: Inject Android runtime permissions
+        run: |
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+          if [ ! -f "$MANIFEST" ]; then
+            echo "Android manifest not found at $MANIFEST"
+            exit 1
+          fi
+
+          for permission in \
+            "android.permission.CAMERA" \
+            "android.permission.RECORD_AUDIO" \
+            "android.permission.ACCESS_FINE_LOCATION" \
+            "android.permission.ACCESS_COARSE_LOCATION"
+          do
+            if ! grep -q "$permission" "$MANIFEST"; then
+              sed -i "/<application/i\\    <uses-permission android:name=\"$permission\" \\/>" "$MANIFEST"
+            fi
+          done
+
+      - name: Configure Firebase services for Android push
+        env:
+          ANDROID_GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.ANDROID_GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          if [ -z "$ANDROID_GOOGLE_SERVICES_JSON_BASE64" ]; then
+            echo "ANDROID_GOOGLE_SERVICES_JSON_BASE64 is not configured. Continuing without FCM."
+            exit 0
+          fi
+          echo "$ANDROID_GOOGLE_SERVICES_JSON_BASE64" | base64 --decode > android/app/google-services.json
+
+      - name: Prepare Android release keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$ANDROID_KEYSTORE_BASE64" ] || [ -z "$ANDROID_KEYSTORE_PASSWORD" ] || [ -z "$ANDROID_KEY_ALIAS" ] || [ -z "$ANDROID_KEY_PASSWORD" ]; then
+            echo "Missing Android signing secrets."
+            echo "Required repository secrets:"
+            echo "  - ANDROID_KEYSTORE_BASE64"
+            echo "  - ANDROID_KEYSTORE_PASSWORD"
+            echo "  - ANDROID_KEY_ALIAS"
+            echo "  - ANDROID_KEY_PASSWORD"
+            exit 1
+          fi
+
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "android/app/${SYNCRA_UPLOAD_STORE_FILE}"
+
+          cat >> android/gradle.properties <<EOF
+          SYNCRA_UPLOAD_STORE_FILE=${SYNCRA_UPLOAD_STORE_FILE}
+          SYNCRA_UPLOAD_STORE_PASSWORD=${ANDROID_KEYSTORE_PASSWORD}
+          SYNCRA_UPLOAD_KEY_ALIAS=${ANDROID_KEY_ALIAS}
+          SYNCRA_UPLOAD_KEY_PASSWORD=${ANDROID_KEY_PASSWORD}
+          EOF
+
+      - name: Apply Syncra launcher icon
+        run: |
+          ICON_SRC="public/logo.png"
+          if [ ! -f "$ICON_SRC" ]; then
+            cp -f public/apple-touch-icon.png public/logo.png
+            ICON_SRC="public/logo.png"
+          fi
+          sudo apt-get update
+          sudo apt-get install -y imagemagick
+          if command -v magick >/dev/null 2>&1; then
+            RESIZE_CMD="magick"
+          else
+            RESIZE_CMD="convert"
+          fi
+          rm -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+          rm -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+          mkdir -p android/app/src/main/res/mipmap-mdpi android/app/src/main/res/mipmap-hdpi android/app/src/main/res/mipmap-xhdpi android/app/src/main/res/mipmap-xxhdpi android/app/src/main/res/mipmap-xxxhdpi
+          $RESIZE_CMD "$ICON_SRC" -resize 48x48   android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+          $RESIZE_CMD "$ICON_SRC" -resize 72x72   android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+          $RESIZE_CMD "$ICON_SRC" -resize 96x96   android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+          $RESIZE_CMD "$ICON_SRC" -resize 144x144 android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+          $RESIZE_CMD "$ICON_SRC" -resize 192x192 android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+          cp android/app/src/main/res/mipmap-mdpi/ic_launcher.png android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png
+          cp android/app/src/main/res/mipmap-hdpi/ic_launcher.png android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png
+          cp android/app/src/main/res/mipmap-xhdpi/ic_launcher.png android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png
+          cp android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png
+          cp android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
+
+      - name: Patch Gradle Kotlin dependency conflicts
+        run: |
+          APP_VERSION_BASE="${VITE_APP_VERSION}"
+          APP_VERSION_NAME="${APP_VERSION_BASE}+build.${GITHUB_RUN_NUMBER}"
+
+          cat >> android/build.gradle <<'EOF'
+
+          allprojects {
+            configurations.all {
+              exclude group: "org.jetbrains.kotlin", module: "kotlin-stdlib-jdk7"
+              exclude group: "org.jetbrains.kotlin", module: "kotlin-stdlib-jdk8"
+              resolutionStrategy.force(
+                "org.jetbrains.kotlin:kotlin-stdlib:1.8.22",
+                "org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22"
+              )
+            }
+          }
+          EOF
+
+          cat >> android/app/build.gradle <<EOF
+
+          android {
+            defaultConfig {
+              versionCode ${GITHUB_RUN_NUMBER}
+              versionName "${APP_VERSION_NAME}"
+            }
+
+            signingConfigs {
+              release {
+                storeFile file(project.findProperty("SYNCRA_UPLOAD_STORE_FILE") ?: "syncra-society-release.keystore")
+                storePassword project.findProperty("SYNCRA_UPLOAD_STORE_PASSWORD")
+                keyAlias project.findProperty("SYNCRA_UPLOAD_KEY_ALIAS")
+                keyPassword project.findProperty("SYNCRA_UPLOAD_KEY_PASSWORD")
+              }
+            }
+
+            buildTypes {
+              release {
+                minifyEnabled false
+                shrinkResources false
+                signingConfig signingConfigs.release
+              }
+            }
+          }
+
+          dependencies {
+            implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.22")
+          }
+          EOF
+
+      - name: Build signed release APK
+        id: build_apk
+        run: |
+          set -o pipefail
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease --stacktrace --info 2>&1 | tee /tmp/gradle-build.log
+
+      - name: Print Gradle failure context
+        if: always()
+        run: |
+          if [ "${{ steps.build_apk.outcome }}" = "failure" ]; then
+            tail -n 220 /tmp/gradle-build.log || true
+          fi
+
+      - name: Verify production Supabase source lock
+        run: |
+          if grep -R "$PROD_SUPABASE_REF" src api >/dev/null 2>&1; then
+            echo "Production Supabase reference verified."
+          else
+            echo "Production Supabase reference not found in source."
+            exit 1
+          fi
+
+      - name: Prepare artifact
+        run: |
+          APK_PATH="$(find android/app/build/outputs/apk/release -type f -name '*.apk' | head -n 1)"
+          mkdir -p release public/downloads
+          if [ -z "$APK_PATH" ]; then
+            echo "No APK produced."
+            exit 1
+          fi
+          cp "$APK_PATH" release/syncra-society-latest.apk
+          VERSIONED_APK="syncra-society-android-${GITHUB_RUN_NUMBER}.apk"
+          cp "$APK_PATH" "public/downloads/${VERSIONED_APK}"
+          cp "$APK_PATH" "public/downloads/syncra-society-latest.apk"
+          APP_VERSION="${VITE_APP_VERSION}+build.${GITHUB_RUN_NUMBER}"
+          NOW_UTC=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          APK_PUBLIC_URL="https://syncra-society.vercel.app/downloads/${VERSIONED_APK}"
+          cat > public/downloads/android-update.json <<EOF
+          {
+            "appVersion": "${APP_VERSION}",
+            "apkUrl": "${APK_PUBLIC_URL}",
+            "buildSha": "${GITHUB_SHA}",
+            "builtAt": "${NOW_UTC}"
+          }
+          EOF
+
+      - name: Upload APK to Cloudflare R2
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ] || [ -z "$R2_BUCKET" ]; then
+            echo "Cloudflare R2 credentials not configured. Skipping CDN upload."
+            exit 0
+          fi
+          npx --yes wrangler@3 r2 object put "$R2_BUCKET/syncra-society-latest.apk" --file release/syncra-society-latest.apk --content-type application/vnd.android.package-archive
+          npx --yes wrangler@3 r2 object put "$R2_BUCKET/syncra-society-android-${GITHUB_RUN_NUMBER}.apk" --file release/syncra-society-latest.apk --content-type application/vnd.android.package-archive
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: syncra-society-android-apk
+          path: release/syncra-society-latest.apk
+
+      - name: Publish APK to GitHub Release (android-latest)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-latest
+          name: Syncra Society Android Latest
+          body: |
+            Auto-published APK from CI run #${{ github.run_number }}.
+          prerelease: true
+          make_latest: false
+          files: release/syncra-society-latest.apk
+          overwrite_files: true
+
+      - name: Commit APK metadata into repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f public/downloads/android-update.json public/downloads/syncra-society-latest.apk
+          if git diff --staged --quiet; then
+            echo "No release artifacts to commit."
+            exit 0
+          fi
+          git commit -m "chore: update Syncra Society android release [skip ci]"
+          git push origin HEAD:main

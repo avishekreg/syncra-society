@@ -1,12 +1,19 @@
 -- Gatekeeper console: flat_no + phone_number mapping for realtime resident alerts
+-- Safe for DBs that never had target_flat_number on visitor_logs.
 
 alter table if exists visitor_logs
   add column if not exists flat_no text,
-  add column if not exists phone_number text;
+  add column if not exists phone_number text,
+  add column if not exists target_flat_number text;
 
+-- Sync legacy flat columns in both directions (no-op when source is empty).
 update visitor_logs
 set flat_no = target_flat_number
 where flat_no is null and target_flat_number is not null;
+
+update visitor_logs
+set target_flat_number = flat_no
+where target_flat_number is null and flat_no is not null;
 
 alter table visitor_logs drop constraint if exists visitor_logs_status_check;
 
