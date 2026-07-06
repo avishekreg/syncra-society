@@ -15,16 +15,37 @@ export const BADGE_RADIUS_CLASS = 'rounded-[10px]'
  */
 export const badgeFrameClass = [
   'relative inline-flex shrink-0 overflow-hidden bg-black shadow-sm',
-  'h-10 w-[135px]',
+  'aspect-[135/40] h-10 w-[135px]',
   BADGE_RADIUS_CLASS
 ].join(' ')
 
-/** Default image fit inside the clip frame. */
+/** App Store — standard clip. */
 export const badgeImageClass =
   'pointer-events-none absolute inset-0 block h-full w-full object-cover object-center select-none'
 
-/** Google Play source has wider fringe — extra scale crops fake checkerboard corners. */
-export const googlePlayImageClass = `${badgeImageClass} scale-[1.12]`
+/**
+ * Google Play — aggressive horizontal crop: scale-x pushes ~7% of each side
+ * outside the overflow-hidden frame, eliminating baked-in checkerboard strips.
+ */
+export const googlePlayFrameClass = [
+  'relative inline-flex shrink-0 isolate overflow-hidden bg-black shadow-sm',
+  'aspect-[135/40] h-10 w-[135px]',
+  BADGE_RADIUS_CLASS
+].join(' ')
+
+export const googlePlayImageClass = [
+  'pointer-events-none absolute left-1/2 top-1/2 block max-w-none select-none',
+  'h-full w-[116%] -translate-x-1/2 -translate-y-1/2',
+  'origin-center scale-x-[1.12] scale-y-[1.05]',
+  'object-cover object-center'
+].join(' ')
+
+export const googlePlayTriggerClass = [
+  'inline-flex overflow-hidden bg-black p-0 outline-none transition hover:opacity-90',
+  'aspect-[135/40] h-10 w-[135px]',
+  BADGE_RADIUS_CLASS,
+  'focus-visible:ring-2 focus-visible:ring-syncra-accent/40 focus-visible:ring-offset-2'
+].join(' ')
 
 export const badgeTriggerClass = [
   'inline-flex overflow-hidden p-0 outline-none transition hover:opacity-90',
@@ -36,11 +57,17 @@ type StoreBadgeFrameProps = {
   src: string
   alt: string
   imageClassName?: string
+  frameClassName?: string
 }
 
-function StoreBadgeFrame({ src, alt, imageClassName = badgeImageClass }: StoreBadgeFrameProps) {
+function StoreBadgeFrame({
+  src,
+  alt,
+  imageClassName = badgeImageClass,
+  frameClassName = badgeFrameClass
+}: StoreBadgeFrameProps) {
   return (
-    <span className={badgeFrameClass}>
+    <span className={frameClassName}>
       <img
         src={src}
         alt={alt}
@@ -81,12 +108,13 @@ export default function FooterAppStoreBadges() {
         >
           <a
             href={SYNCRA_ANDROID_LANDING_PATH}
-            className={badgeTriggerClass}
+            className={googlePlayTriggerClass}
             aria-label="Download Syncra Society for Android"
           >
             <StoreBadgeFrame
               src="/badges/google-play-badge.png"
               alt="Get it on Google Play"
+              frameClassName={googlePlayFrameClass}
               imageClassName={googlePlayImageClass}
             />
           </a>
