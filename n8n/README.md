@@ -67,6 +67,15 @@ Inbound payloads are merged in **Normalize Inbound Message** (single item) befor
 Configure your BSP in n8n to POST inbound messages to:
 
 ```
+POST https://syncra-society.vercel.app/api/automation/inbound
+Header: x-syncra-automation-secret: <SYNCRA_AUTOMATION_SECRET>
+```
+
+This route writes tickets to Supabase table **`complaints_and_suggestions`** (not `/rest/v1/complaints`).
+
+Local Docker:
+
+```
 POST http://host.docker.internal:5173/api/automation/inbound
 Header: x-syncra-automation-secret: syncra-local-dev-secret
 ```

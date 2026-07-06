@@ -199,6 +199,17 @@
     },
     {
       "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const item = $input.first().json;\nconst phone = String(item.phone ?? item.From ?? 'whatsapp-unknown').trim();\nconst flatNumber = item.flatNumber ? String(item.flatNumber).trim() : null;\nconst messageType = item.messageType ?? 'ticket';\nconst description = String(item.description ?? '').trim();\n\nreturn [\n  {\n    json: {\n      ...item,\n      portalPayload: {\n        societyId: item.societyId,\n        flatNumber,\n        phone,\n        messageType,\n        subject:\n          item.subject?.trim() ||\n          (flatNumber ? `WhatsApp helpdesk — Flat ${flatNumber}` : 'WhatsApp helpdesk ticket'),\n        description,\n        amount: item.amount ?? null\n      }\n    }\n  }\n];"
+      },
+      "id": "prepare-portal-payload",
+      "name": "Prepare Portal Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1240, 720]
+    },
+    {
+      "parameters": {
         "method": "POST",
         "url": "https://syncra-society.vercel.app/api/automation/inbound",
         "sendHeaders": true,
@@ -216,14 +227,14 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { societyId: $json.societyId, flatNumber: $json.flatNumber, phone: $json.phone, messageType: $json.messageType, subject: $json.subject, description: $json.description, amount: $json.amount } }}",
+        "jsonBody": "={{ $json.portalPayload }}",
         "options": {}
       },
       "id": "forward-inbound",
       "name": "Forward to Syncra Portal",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1340, 720]
+      "position": [1460, 720]
     },
     {
       "parameters": {
@@ -342,18 +353,29 @@
       "main": [
         [
           {
-            "node": "Forward to Syncra Portal",
+            "node": "Prepare Portal Payload",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Forward to Syncra Portal",
+            "node": "Prepare Portal Payload",
             "type": "main",
             "index": 0
           }
         ],
+        [
+          {
+            "node": "Prepare Portal Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Portal Payload": {
+      "main": [
         [
           {
             "node": "Forward to Syncra Portal",
