@@ -71,12 +71,6 @@ function SyncraInsignia({ className }: { className?: string }) {
   )
 }
 
-type SyncraBrandLogoProps = {
-  to?: string
-  className?: string
-  variant?: 'light' | 'dark'
-}
-
 function SyncraWordmark({ variant = 'light' }: { variant?: 'light' | 'dark' }) {
   const isDark = variant === 'dark'
   return (
