@@ -43,7 +43,7 @@ export default function TermsAndConditions() {
               committee member, or other person granted administrative access by the Society.
             </>,
             <>
-              <strong>Resident</strong> means an owner, tenant, occupant, or authorized family member whose profile is
+              <strong>Resident</strong> means an owner, occupant, or authorized family member whose profile is
               created or managed through the Platform at the direction of the Society.
             </>,
             <>

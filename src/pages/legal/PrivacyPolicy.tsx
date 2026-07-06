@@ -41,7 +41,7 @@ export default function PrivacyPolicy() {
         <LegalList
           items={[
             'Society Administrators, committee members, and authorized staff who register or manage a Society account.',
-            'Residents, owners, tenants, and authorized users whose profiles are created on the Platform.',
+            'Residents, flat owners, occupants, and authorized users whose profiles are created on the Platform.',
             'Gatekeepers, security personnel, and vendors whose data is entered by Societies.',
             'Visitors to our public website and persons who contact us for sales or support.',
             'Personal data processed through dashboard features, APIs, mobile-responsive web interfaces, and integrated messaging channels.'

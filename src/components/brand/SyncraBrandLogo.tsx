@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 type SyncraBrandLogoProps = {
   to?: string
   className?: string
+  variant?: 'light' | 'dark'
 }
 
 function SyncraInsignia({ className }: { className?: string }) {
@@ -70,26 +71,47 @@ function SyncraInsignia({ className }: { className?: string }) {
   )
 }
 
-function SyncraWordmark() {
+type SyncraBrandLogoProps = {
+  to?: string
+  className?: string
+  variant?: 'light' | 'dark'
+}
+
+function SyncraWordmark({ variant = 'light' }: { variant?: 'light' | 'dark' }) {
+  const isDark = variant === 'dark'
   return (
     <div className="flex min-w-0 flex-col justify-center leading-none">
-      <span className="text-[14px] font-bold tracking-tight text-slate-900">Syncra</span>
+      <span
+        className={
+          isDark
+            ? 'bg-gradient-to-r from-white via-slate-100 to-cyan-100 bg-clip-text text-[14px] font-bold tracking-tight text-transparent'
+            : 'text-[14px] font-bold tracking-tight text-slate-900'
+        }
+      >
+        Syncra
+      </span>
       <span
         aria-hidden="true"
-        className="my-[3px] block h-px w-full bg-slate-200"
+        className={isDark ? 'my-[3px] block h-px w-full bg-white/15' : 'my-[3px] block h-px w-full bg-slate-200'}
       />
-      <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-syncra-blue">
+      <span
+        className={
+          isDark
+            ? 'text-[10px] font-semibold uppercase tracking-[0.14em] text-cyan-300/90'
+            : 'text-[10px] font-semibold uppercase tracking-[0.14em] text-syncra-blue'
+        }
+      >
         Society
       </span>
     </div>
   )
 }
 
-export default function SyncraBrandLogo({ to = '/', className = '' }: SyncraBrandLogoProps) {
+export default function SyncraBrandLogo({ to = '/', className = '', variant = 'light' }: SyncraBrandLogoProps) {
   const content = (
     <div className={`flex h-9 items-center gap-2.5 ${className}`}>
       <SyncraInsignia className="h-8 w-8 shrink-0" />
-      <SyncraWordmark />
+      <SyncraWordmark variant={variant} />
     </div>
   )
 
@@ -99,7 +121,9 @@ export default function SyncraBrandLogo({ to = '/', className = '' }: SyncraBran
     <Link
       to={to}
       aria-label="Syncra Society home"
-      className="inline-flex shrink-0 rounded-lg outline-none transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-syncra-accent/40 focus-visible:ring-offset-2"
+      className={`inline-flex shrink-0 rounded-lg outline-none transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-cyan-400/40 ${
+        variant === 'dark' ? 'focus-visible:ring-offset-[#0c1528]' : 'focus-visible:ring-offset-2'
+      }`}
     >
       {content}
     </Link>

@@ -15,7 +15,7 @@ import {
 import { ui } from '../lib/ui'
 
 const landingFeatures = [
-  { icon: '🏢', title: 'Multi-Tenant RWA', description: 'Smart workflows for societies, buildings, flats, and resident profiles.' },
+  { icon: '🏢', title: 'Multi-Society RWA', description: 'Smart workflows for societies, buildings, flats, and resident profiles.' },
   { icon: '📊', title: 'Ledgers', description: 'Transparent financial records, unified accounting, and audit-ready transaction histories.' },
   { icon: '📢', title: 'Notice Board', description: 'Publish announcements, approvals, and community reminders instantly.' },
   { icon: '📝', title: 'Contract Tracking', description: 'Monitor vendor agreements, renewals, and obligations from one control hub.' },
@@ -113,7 +113,7 @@ export default function LandingPage() {
                 Ultra-premium governance for modern communities.
               </h2>
               <p className={`text-lg leading-relaxed ${ui.body}`}>
-                syncra-society from Syncra Systems unifies Multi-Tenant RWA, Ledgers, Notice Board, Contract
+                syncra-society from Syncra Systems unifies Multi-Society RWA, Ledgers, Notice Board, Contract
                 Tracking, and Syncra Gatekeeper into one elegant, privacy-first platform.
               </p>
             </div>
