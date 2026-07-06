@@ -1,6 +1,6 @@
 import { isSuperAdminEmail } from '../config/devSeed'
 
-type AuthUser = {
+export type AuthUser = {
   email?: string | null
   roles?: string[]
   role?: string
@@ -17,19 +17,35 @@ export function isGlobalSuperAdmin(user: AuthUser | null | undefined): boolean {
   return false
 }
 
-/** RWA owner or accountant for a specific society (excludes global super admin). */
+/** RWA owner, secretary, or accountant for a specific society (excludes global super admin). */
 export function isRwaStaff(user: AuthUser | null | undefined): boolean {
   if (!user || isGlobalSuperAdmin(user)) return false
   const role = user.user_metadata?.role ?? user.role ?? 'resident'
   return (
     role === 'rwa_owner' ||
+    role === 'rwa_secretary' ||
     role === 'rwa_accountant' ||
     Boolean(user.roles?.includes('rwa_owner')) ||
+    Boolean(user.roles?.includes('rwa_secretary')) ||
     Boolean(user.roles?.includes('rwa_accountant'))
   )
 }
 
-/** Resident portal access — all authenticated society users except global super admin. */
+/** Map metadata role string to roles array for session hydration. */
+export function rolesFromStaffRole(role: string | undefined): string[] {
+  if (role === 'rwa_owner') return ['rwa_owner']
+  if (role === 'rwa_secretary') return ['rwa_secretary']
+  if (role === 'rwa_accountant') return ['rwa_accountant']
+  if (role === 'resident') return ['resident']
+  return []
+}
+
+/** Resident portal access — residents, presidents, and super admins only. */
 export function canAccessResidentPortal(user: AuthUser | null | undefined): boolean {
-  return Boolean(user) && !isGlobalSuperAdmin(user)
+  if (!user || isGlobalSuperAdmin(user)) return true
+  const role = user.user_metadata?.role ?? user.role ?? 'resident'
+  const roles = user.roles ?? []
+  if (role === 'rwa_secretary' || roles.includes('rwa_secretary')) return false
+  if (role === 'rwa_accountant' || roles.includes('rwa_accountant')) return false
+  return true
 }

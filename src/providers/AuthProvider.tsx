@@ -3,7 +3,7 @@ import supabase from '../api/supabaseSdk'
 import { restGet } from '../api/supabaseClient'
 import type { Society, UserAndFlat } from '../types/db'
 import { resolveResidentProfile, getLocalResidentProfile } from '../api/residentMapping'
-import { seedDemoActivities } from '../lib/activityLog'
+import { rolesFromStaffRole } from '../lib/roles'
 import { DEV_SUPER_ADMIN, DEMO_AUTH_KEY, DEMO_LOGINS, DEMO_SOCIETY_ID, isSuperAdminEmail, seedDemoBillingStatus } from '../config/devSeed'
 import {
   canAccessPortal,
@@ -46,7 +46,7 @@ type User = {
   }
 }
 
-export type ShowcaseUserRole = 'rwa_owner' | 'rwa_accountant' | 'resident'
+export type ShowcaseUserRole = 'rwa_owner' | 'rwa_secretary' | 'rwa_accountant' | 'resident'
 
 export interface ShowcaseData {
   society: {
@@ -300,13 +300,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const resolvedRoles =
       roles.length > 0
         ? roles
-        : metadataRole === 'rwa_owner'
-          ? ['rwa_owner']
-          : metadataRole === 'rwa_accountant'
-            ? ['rwa_accountant']
-            : metadataRole === 'resident'
-              ? ['resident']
-              : readAuthSnapshot()?.roles ?? []
+        : rolesFromStaffRole(metadataRole).length
+          ? rolesFromStaffRole(metadataRole)
+          : readAuthSnapshot()?.roles ?? []
 
     const nextUser = buildUser(
       {
@@ -434,12 +430,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 ...prev,
                 flatNumber: profile.flat_number,
                 role: profile.role ?? prev.role,
-                roles:
-                  profile.role === 'rwa_owner'
-                    ? ['rwa_owner']
-                    : profile.role === 'rwa_accountant'
-                      ? ['rwa_accountant']
-                      : prev.roles,
+                roles: rolesFromStaffRole(profile.role).length
+                  ? rolesFromStaffRole(profile.role)
+                  : prev.roles,
                 user_metadata: {
                   role: profile.role ?? prev.user_metadata?.role ?? 'resident',
                   tier: prev.user_metadata?.tier ?? 'tier1'
@@ -721,12 +714,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           markAppEmailVerified(normalizedEmail)
           verifiedViaApp = true
           if (isSupabaseEmailVerified(data.user)) {
-            const roles =
-              data.user.user_metadata?.role === 'rwa_owner'
-                ? ['rwa_owner']
-                : data.user.user_metadata?.role === 'rwa_accountant'
-                  ? ['rwa_accountant']
-                  : ['resident']
+            const metaRole = data.user.user_metadata?.role as string | undefined
+            const roles = rolesFromStaffRole(metaRole).length ? rolesFromStaffRole(metaRole) : ['resident']
             setUser(buildUser(data.user, roles, 'tier1', null))
             await resolveSocietyId(data.user.id, data.user.email ?? normalizedEmail)
             return { user: data.user }
@@ -746,12 +735,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data } = await supabase.auth.getSession()
     const sessionUser = data.session?.user
     if (sessionUser && sessionUser.email?.toLowerCase() === normalizedEmail && isEmailVerified(sessionUser)) {
-      const roles =
-        sessionUser.user_metadata?.role === 'rwa_owner'
-          ? ['rwa_owner']
-          : sessionUser.user_metadata?.role === 'rwa_accountant'
-            ? ['rwa_accountant']
-            : ['resident']
+      const metaRole = sessionUser.user_metadata?.role as string | undefined
+      const roles = rolesFromStaffRole(metaRole).length ? rolesFromStaffRole(metaRole) : ['resident']
       setUser(buildUser(sessionUser, roles, 'tier1', null))
       await resolveSocietyId(sessionUser.id, sessionUser.email ?? normalizedEmail)
       return { user: sessionUser }
@@ -860,7 +845,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const metadataRole = res.data.user?.user_metadata?.role as string | undefined
-      const roles = metadataRole === 'rwa_owner' ? ['rwa_owner'] : metadataRole === 'rwa_accountant' ? ['rwa_accountant'] : []
+      const roles = rolesFromStaffRole(metadataRole)
       const nextUser = buildUser(res.data.user!, roles, 'tier1', null)
       setUser(nextUser)
 
@@ -895,7 +880,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     ...prev,
                     flatNumber: profile.flat_number,
                     role: profile.role ?? metadataRole ?? prev.role,
-                    roles: profile.role === 'rwa_owner' ? ['rwa_owner'] : prev.roles,
+                    roles: rolesFromStaffRole(profile.role ?? metadataRole).length
+                      ? rolesFromStaffRole(profile.role ?? metadataRole)
+                      : prev.roles,
                     user_metadata: {
                       role: profile.role ?? metadataRole ?? 'resident',
                       tier: prev.user_metadata?.tier ?? 'tier1'

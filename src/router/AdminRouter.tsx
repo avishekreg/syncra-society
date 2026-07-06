@@ -1,21 +1,58 @@
 import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import DashboardRouteLayout from '../layouts/DashboardRouteLayout'
+import AdminRouteLayout from '../layouts/AdminRouteLayout'
 import AdminDashboard from '../pages/admin/Dashboard'
 import AdminNotices from '../pages/admin/Notices'
 import AdminHelpdeskDashboard from '../pages/admin/HelpdeskDashboard'
 import SocietyConfiguration from '../pages/admin/SocietyConfiguration'
 import TierGuard from './TierGuard'
+import RoleGuard from './RoleGuard'
 
 export default function AdminRouter() {
   return (
     <Routes>
-      <Route element={<DashboardRouteLayout title="President Console" />}>
+      <Route element={<AdminRouteLayout />}>
         <Route index element={<Navigate to="/admin/dashboard" replace />} />
-        <Route path="dashboard" element={<TierGuard requiredTier="tier2"><AdminDashboard /></TierGuard>} />
-        <Route path="notices" element={<TierGuard requiredTier="tier2"><AdminNotices /></TierGuard>} />
-        <Route path="helpdesk" element={<TierGuard requiredTier="tier2"><AdminHelpdeskDashboard /></TierGuard>} />
-        <Route path="configuration" element={<TierGuard requiredTier="tier2"><SocietyConfiguration /></TierGuard>} />
+        <Route
+          path="dashboard"
+          element={
+            <RoleGuard allow={['super_admin', 'president']}>
+              <TierGuard requiredTier="tier2">
+                <AdminDashboard />
+              </TierGuard>
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="notices"
+          element={
+            <RoleGuard allow={['super_admin', 'president', 'secretary']}>
+              <TierGuard requiredTier="tier2">
+                <AdminNotices />
+              </TierGuard>
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="helpdesk"
+          element={
+            <RoleGuard allow={['super_admin', 'president', 'secretary']}>
+              <TierGuard requiredTier="tier2">
+                <AdminHelpdeskDashboard />
+              </TierGuard>
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="configuration"
+          element={
+            <RoleGuard allow={['super_admin', 'president']}>
+              <TierGuard requiredTier="tier2">
+                <SocietyConfiguration />
+              </TierGuard>
+            </RoleGuard>
+          }
+        />
         <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
       </Route>
     </Routes>

@@ -20,6 +20,7 @@ const SignUp = lazy(() => import('../pages/auth/SignUp'))
 const OnboardingRouter = lazy(() => import('./OnboardingRouter'))
 const RwaRouter = lazy(() => import('./RwaRouter'))
 const AdminRouter = lazy(() => import('./AdminRouter'))
+const FinanceRouter = lazy(() => import('./FinanceRouter'))
 const ResidentRouter = lazy(() => import('./ResidentRouter'))
 
 export default function AppRouter() {
@@ -76,6 +77,20 @@ export default function AppRouter() {
                   <SocietySetupGuard>
                     <SubscriptionActivationGuard>
                       <RwaRouter />
+                    </SubscriptionActivationGuard>
+                  </SocietySetupGuard>
+                </RoleScopeGuard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/finance/*"
+            element={
+              <ProtectedRoute>
+                <RoleScopeGuard scope="society">
+                  <SocietySetupGuard>
+                    <SubscriptionActivationGuard>
+                      <FinanceRouter />
                     </SubscriptionActivationGuard>
                   </SocietySetupGuard>
                 </RoleScopeGuard>

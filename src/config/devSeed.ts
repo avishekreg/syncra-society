@@ -36,10 +36,10 @@ export const DEMO_LOGINS: Record<string, DemoLoginConfig> = {
   },
   'secretary@syncrademo.com': {
     password: 'DemoSec@2026',
-    roles: ['rwa_accountant'],
-    role: 'rwa_accountant',
+    roles: ['rwa_secretary'],
+    role: 'rwa_secretary',
     tier: 'tier2',
-    label: 'Society Secretary (RWA Finance)'
+    label: 'Society Secretary'
   },
   'accountant@syncrademo.com': {
     password: 'DemoBook@2026',
@@ -88,11 +88,11 @@ export function isDemoEmail(email: string | null | undefined) {
 export function getPostLoginPath(roles: string[], societyId: string | null, role?: string) {
   if (roles.includes('super_admin') || role === 'super_admin') return '/super-admin'
   if (!societyId && (roles.includes('rwa_owner') || role === 'rwa_owner')) return '/onboarding'
+  if (roles.includes('rwa_secretary') || role === 'rwa_secretary') return '/admin/helpdesk'
+  if (roles.includes('rwa_accountant') || role === 'rwa_accountant') return '/finance/ledger'
   if (
     roles.includes('rwa_owner') ||
-    roles.includes('rwa_accountant') ||
-    role === 'rwa_owner' ||
-    role === 'rwa_accountant'
+    role === 'rwa_owner'
   ) {
     return '/admin/dashboard'
   }
