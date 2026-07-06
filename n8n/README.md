@@ -32,12 +32,34 @@
 ## Event flow
 
 ```
-Portal activity → POST /api/automation/events → n8n webhook
-                                              → Format message
-                                              → WhatsApp BSP (Twilio/Gupshup/Wati)
+Portal activity → POST n8n webhook
+               → Normalize Portal Event (single merged item)
+               → Route by Event Type
+               → Twilio WhatsApp Send (or Mock for local dev)
+               → Respond to Syncra
 ```
 
+**Important:** Do not use mixed `=` and `{{ }}` syntax in Set/Twilio message fields — n8n will send raw `=` characters. Always use pure expressions such as `={{ $json.whatsappMessage }}`. The **Normalize Portal Event** node builds `whatsappMessage` once per webhook call.
+
+## Connecting a real WhatsApp provider
+
+1. Add Twilio credentials in n8n (**Credentials → Twilio**).
+2. Open **Twilio WhatsApp Send**, attach credentials, and **enable** the node.
+3. **Disable Mock WhatsApp Send** so only one send path runs.
+4. Message mapping:
+   - **Message body:** `={{ $json.whatsappMessage }}`
+   - **To:** `={{ $json.toPhone }}` (prefixed with `whatsapp:` inside the node expression)
+   - **From:** society sender from `$json.sender_whatsapp` or your Twilio sandbox number
+
+For local testing, keep **Mock WhatsApp Send** enabled and **Twilio WhatsApp Send** disabled.
+
+Other BSP options:
+- **HTTP Request** to Gupshup / Wati / Interakt API
+- **WhatsApp Business Cloud** node (Meta)
+
 ## Inbound (WhatsApp → Portal)
+
+Inbound payloads are merged in **Normalize Inbound Message** (single item) before forwarding.
 
 Configure your BSP in n8n to POST inbound messages to:
 
@@ -69,14 +91,7 @@ Example body (payment receipt):
 }
 ```
 
-## Connecting a real WhatsApp provider
-
-In the n8n workflow, replace the **Mock WhatsApp** node with:
-- **Twilio** node (WhatsApp Business)
-- **HTTP Request** to Gupshup / Wati / Interakt API
-- **WhatsApp Business Cloud** node (Meta)
-
-Use approved templates for outbound messages outside the 24-hour window.
+Use approved WhatsApp templates for outbound messages outside the 24-hour window.
 
 ## Cloud deployment
 

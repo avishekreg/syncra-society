@@ -17,6 +17,17 @@
     },
     {
       "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Merge webhook wrapper + POST body into ONE item (prevents multi-item loops).\nconst wrapped = $input.first().json;\nconst body =\n  wrapped.body && typeof wrapped.body === 'object' && !Array.isArray(wrapped.body)\n    ? wrapped.body\n    : wrapped;\n\nconst event = {\n  ...wrapped,\n  ...body,\n  type: body.type ?? wrapped.type ?? 'unknown',\n  societyId: body.societyId ?? wrapped.societyId ?? null,\n  societyName: body.societyName ?? wrapped.societyName ?? 'Society',\n  summary: body.summary ?? wrapped.summary ?? '',\n  message_body:\n    body.message_body ??\n    body.messageBody ??\n    body.message ??\n    wrapped.message_body ??\n    wrapped.message ??\n    '',\n  sender_whatsapp:\n    body.sender_whatsapp ?? body.senderWhatsapp ?? wrapped.sender_whatsapp ?? null,\n  receiver_whatsapp:\n    body.receiver_whatsapp ??\n    body.receiverWhatsapp ??\n    body.to ??\n    wrapped.receiver_whatsapp ??\n    null,\n  recipients: Array.isArray(body.recipients)\n    ? body.recipients.filter(Boolean)\n    : Array.isArray(wrapped.recipients)\n      ? wrapped.recipients.filter(Boolean)\n      : []\n};\n\nfunction buildWhatsAppMessage(evt) {\n  const prebuilt = String(evt.message_body ?? '').trim();\n  if (prebuilt) return prebuilt;\n\n  const societyName = evt.societyName ?? 'Society';\n  const type = String(evt.type ?? '');\n\n  if (type === 'notice.published') {\n    const title = evt.title ?? evt.metadata?.title ?? evt.summary ?? 'New notice';\n    const noticeBody = evt.body ?? evt.metadata?.body ?? '';\n    return `📢 *${societyName}*\\n\\n${title}\\n\\n${noticeBody}\\n\\n_View in syncra-society portal_`;\n  }\n\n  if (type.startsWith('visitor.')) {\n    return `🚪 *${societyName}*\\n\\n${evt.summary ?? 'Visitor update'}\\n\\n_View in syncra-society portal_`;\n  }\n\n  if (type.startsWith('payment.')) {\n    return `💳 *${societyName}*\\n\\n${evt.summary ?? 'Payment update'}\\n\\n_View in syncra-society portal_`;\n  }\n\n  return `*${societyName}*\\n\\n${evt.summary ?? 'Portal update'}\\n\\n_View in syncra-society portal_`;\n}\n\nconst whatsappMessage = buildWhatsAppMessage(event);\nconst toPhone = event.receiver_whatsapp ?? event.recipients?.[0] ?? null;\n\nreturn [\n  {\n    json: {\n      ...event,\n      whatsappMessage,\n      toPhone,\n      sendCount: 1\n    }\n  }\n];"
+      },
+      "id": "normalize-outbound",
+      "name": "Normalize Portal Event",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
         "rules": {
           "values": [
             {
@@ -24,7 +35,7 @@
                 "options": { "caseSensitive": false },
                 "conditions": [
                   {
-                    "leftValue": "={{ $json.body.type }}",
+                    "leftValue": "={{ $json.type }}",
                     "rightValue": "notice.published",
                     "operator": { "type": "string", "operation": "equals" }
                   }
@@ -38,7 +49,7 @@
                 "options": { "caseSensitive": false },
                 "conditions": [
                   {
-                    "leftValue": "={{ $json.body.type }}",
+                    "leftValue": "={{ $json.type }}",
                     "rightValue": "visitor.approved",
                     "operator": { "type": "string", "operation": "equals" }
                   }
@@ -52,7 +63,7 @@
                 "options": { "caseSensitive": false },
                 "conditions": [
                   {
-                    "leftValue": "={{ $json.body.type }}",
+                    "leftValue": "={{ $json.type }}",
                     "rightValue": "payment.reminder",
                     "operator": { "type": "string", "operation": "equals" }
                   }
@@ -69,55 +80,52 @@
       "name": "Route by Event Type",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3,
-      "position": [480, 300]
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "msg",
-              "name": "whatsappMessage",
-              "value": "=📢 *{{ $json.body.societyName }}*\n\n{{ $json.body.summary }}\n\n_View in syncra-society portal_",
-              "type": "string"
-            },
-            {
-              "id": "recipients",
-              "name": "recipients",
-              "value": "={{ $json.body.recipients }}",
-              "type": "array"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "format-message",
-      "name": "Format WhatsApp Message",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
       "position": [720, 300]
     },
     {
       "parameters": {
-        "content": "## Replace this node with your WhatsApp BSP\n\nOptions:\n- Twilio WhatsApp node\n- HTTP Request → Gupshup / Wati / Interakt\n- Meta WhatsApp Business Cloud\n\nFor local testing, this logs the message. Check n8n execution output.",
-        "height": 200,
-        "width": 340
+        "content": "## Twilio WhatsApp Send\n\nReplace credentials in the Twilio node.\n\n- **Message body** uses `$json.whatsappMessage` from Normalize Portal Event (never mix `=` with `{{ }}`).\n- **To** uses a single merged `$json.toPhone` per webhook execution.\n- For local testing, disable Twilio and enable Mock WhatsApp Send.",
+        "height": 220,
+        "width": 360
       },
       "id": "note-bsp",
       "name": "WhatsApp BSP Note",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [880, 120]
+      "position": [900, 80]
     },
     {
       "parameters": {
-        "jsCode": "// Mock WhatsApp send — replace with real BSP node in production\nconst item = $input.first().json;\nconsole.log('WhatsApp mock send:', item.whatsappMessage);\nconsole.log('Recipients:', item.recipients);\nreturn [{ json: { sent: true, mock: true, message: item.whatsappMessage, recipients: item.recipients } }];"
+        "resource": "message",
+        "operation": "create",
+        "from": "={{ $json.sender_whatsapp ? ($json.sender_whatsapp.startsWith('whatsapp:') ? $json.sender_whatsapp : 'whatsapp:' + $json.sender_whatsapp) : 'whatsapp:+14155238886' }}",
+        "to": "={{ $json.toPhone ? ($json.toPhone.startsWith('whatsapp:') ? $json.toPhone : 'whatsapp:' + String($json.toPhone).replace(/^\\+?/, '+')) : '' }}",
+        "message": "={{ $json.whatsappMessage }}",
+        "options": {}
+      },
+      "id": "twilio-whatsapp",
+      "name": "Twilio WhatsApp Send",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [960, 300],
+      "credentials": {
+        "twilioApi": {
+          "id": "REPLACE_WITH_TWILIO_CREDENTIAL_ID",
+          "name": "Twilio account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Mock WhatsApp send — single item only (no recipient array fan-out).\nconst item = $input.first().json;\nconst message = item.whatsappMessage ?? item.message_body ?? item.summary ?? '';\nconst toPhone = item.toPhone ?? item.receiver_whatsapp ?? null;\n\nconsole.log('WhatsApp mock send:', { toPhone, message });\n\nreturn [\n  {\n    json: {\n      sent: true,\n      mock: true,\n      toPhone,\n      message,\n      type: item.type ?? null\n    }\n  }\n];"
       },
       "id": "mock-whatsapp",
       "name": "Mock WhatsApp Send",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [960, 300]
+      "position": [960, 480]
     },
     {
       "parameters": {
@@ -146,6 +154,17 @@
     },
     {
       "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Merge inbound Twilio/WhatsApp payload into a single item.\nconst wrapped = $input.first().json;\nconst body =\n  wrapped.body && typeof wrapped.body === 'object' && !Array.isArray(wrapped.body)\n    ? wrapped.body\n    : wrapped;\n\nconst merged = { ...wrapped, ...body };\n\nreturn [\n  {\n    json: {\n      societyId: merged.societyId ?? merged.society_id ?? null,\n      flatNumber: merged.flatNumber ?? merged.flat_number ?? null,\n      phone: merged.phone ?? merged.From ?? merged.from ?? null,\n      messageType: merged.messageType ?? merged.message_type ?? 'ticket',\n      subject: merged.subject ?? merged.Subject ?? null,\n      description:\n        merged.description ??\n        merged.text ??\n        merged.Body ??\n        merged.body?.text ??\n        null,\n      amount: merged.amount ?? null\n    }\n  }\n];"
+      },
+      "id": "normalize-inbound",
+      "name": "Normalize Inbound Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 560]
+    },
+    {
+      "parameters": {
         "method": "POST",
         "url": "http://host.docker.internal:5173/api/automation/inbound",
         "sendHeaders": true,
@@ -163,35 +182,41 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { societyId: $json.body.societyId, flatNumber: $json.body.flatNumber, phone: $json.body.phone, messageType: $json.body.messageType || 'ticket', subject: $json.body.subject, description: $json.body.text || $json.body.description, amount: $json.body.amount } }}",
+        "jsonBody": "={{ { societyId: $json.societyId, flatNumber: $json.flatNumber, phone: $json.phone, messageType: $json.messageType, subject: $json.subject, description: $json.description, amount: $json.amount } }}",
         "options": {}
       },
       "id": "forward-inbound",
       "name": "Forward to Syncra Portal",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [520, 560]
+      "position": [720, 560]
     }
   ],
   "connections": {
     "Syncra Event Webhook": {
+      "main": [[{ "node": "Normalize Portal Event", "type": "main", "index": 0 }]]
+    },
+    "Normalize Portal Event": {
       "main": [[{ "node": "Route by Event Type", "type": "main", "index": 0 }]]
     },
     "Route by Event Type": {
       "main": [
-        [{ "node": "Format WhatsApp Message", "type": "main", "index": 0 }],
-        [{ "node": "Format WhatsApp Message", "type": "main", "index": 0 }],
-        [{ "node": "Format WhatsApp Message", "type": "main", "index": 0 }],
-        [{ "node": "Format WhatsApp Message", "type": "main", "index": 0 }]
+        [{ "node": "Mock WhatsApp Send", "type": "main", "index": 0 }],
+        [{ "node": "Mock WhatsApp Send", "type": "main", "index": 0 }],
+        [{ "node": "Mock WhatsApp Send", "type": "main", "index": 0 }],
+        [{ "node": "Mock WhatsApp Send", "type": "main", "index": 0 }]
       ]
-    },
-    "Format WhatsApp Message": {
-      "main": [[{ "node": "Mock WhatsApp Send", "type": "main", "index": 0 }]]
     },
     "Mock WhatsApp Send": {
       "main": [[{ "node": "Respond to Syncra", "type": "main", "index": 0 }]]
     },
+    "Twilio WhatsApp Send": {
+      "main": [[{ "node": "Respond to Syncra", "type": "main", "index": 0 }]]
+    },
     "WhatsApp Inbound Webhook": {
+      "main": [[{ "node": "Normalize Inbound Message", "type": "main", "index": 0 }]]
+    },
+    "Normalize Inbound Message": {
       "main": [[{ "node": "Forward to Syncra Portal", "type": "main", "index": 0 }]]
     }
   },
