@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import SyncraBrandLogo from '../components/brand/SyncraBrandLogo'
-import AndroidDownloadCta from '../components/landing/AndroidDownloadCta'
+import FooterAppStoreBadges from '../components/landing/FooterAppStoreBadges'
 import HeroDashboardMockup from '../components/landing/HeroDashboardMockup'
 import SyncraPromiseSection from '../components/landing/SyncraPromiseSection'
 import { usePlatformPricing } from '../hooks/usePlatformPricing'
@@ -94,7 +94,6 @@ export default function LandingPage() {
         <div className="mx-auto flex min-h-14 max-w-7xl flex-col items-stretch justify-between gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-4 sm:px-6 sm:py-0">
           <SyncraBrandLogo to="/" />
           <div className="flex w-full flex-wrap items-stretch gap-3 sm:w-auto sm:items-center">
-            <AndroidDownloadCta variant="navbar" className="w-full sm:w-auto" />
             <Link to="/auth" className={`w-full sm:w-auto ${ui.btnGhost}`}>
               Login Now
             </Link>
@@ -119,14 +118,13 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="flex w-full flex-col items-stretch justify-center gap-4 sm:flex-row sm:flex-wrap sm:items-center lg:justify-start">
+            <div className="flex w-full flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center lg:justify-start">
               <Link
                 to="/register"
                 className={`inline-flex w-full items-center justify-center sm:w-auto ${ui.btnPrimary} px-8 py-4 transition hover:-translate-y-0.5`}
               >
                 Start Your Journey
               </Link>
-              <AndroidDownloadCta variant="hero" />
               <a
                 href="#pricing"
                 className={`inline-flex w-full items-center justify-center sm:w-auto ${ui.btnSecondary} px-8 py-4`}
@@ -285,14 +283,16 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="border-t border-slate-200 bg-syncra-surface-alt py-8 text-slate-600">
-        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 sm:px-6 md:flex-row md:items-center md:justify-between">
+      <footer className="border-t border-slate-200 bg-syncra-surface-alt py-10 text-slate-600">
+        <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-2">
             <p className="text-sm font-semibold text-syncra-primary">Developed by Syncra Systems</p>
             <p className="text-sm">Premium society management for modern communities.</p>
           </div>
-          <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600">
-            <AndroidDownloadCta variant="footer" />
+
+          <FooterAppStoreBadges />
+
+          <div className="flex flex-wrap gap-4 text-sm text-slate-600 lg:justify-end">
             <Link to="/legal/terms" className="hover:text-syncra-blue">
               Terms & Conditions
             </Link>
