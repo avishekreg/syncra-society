@@ -3,6 +3,8 @@ const SOCIETIES_TABLE = 'societies'
 const USER_AND_FLATS_TABLE = 'user_and_flats'
 const FLATS_TABLE = 'flats'
 const SYSTEM_AUTOMATION_USER_ID = 'system-whatsapp-automation'
+const EMERGENCY_SOCIETY_ID = '00000000-0000-4000-8000-000000000001'
+const DEFAULT_WHATSAPP_DESCRIPTION = 'No description provided via WhatsApp'
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
@@ -71,7 +73,24 @@ function readEnvVar(...keys: readonly string[]): string {
 
 function normalizeSupabaseUrl(raw: string): string {
   if (!raw) return ''
-  return raw.replace(/\/rest\/v1\/?$/i, '').replace(/\/+$/, '')
+  let url = raw.trim().replace(/\/rest\/v1\/?$/i, '').replace(/\/+$/, '')
+  if (!/^https?:\/\//i.test(url)) {
+    url = `https://${url}`
+  }
+  return url
+}
+
+function buildRestUrl(baseUrl: string, path: string): string {
+  const normalizedBase = normalizeSupabaseUrl(baseUrl)
+  const normalizedPath = path.replace(/^\//, '')
+  return `${normalizedBase}/rest/v1/${normalizedPath}`
+}
+
+function normalizeDescription(description: string | null): string {
+  if (!description || !description.trim()) {
+    return DEFAULT_WHATSAPP_DESCRIPTION
+  }
+  return description.trim()
 }
 
 function supabaseConfig(): SupabaseRuntimeConfig {
@@ -263,29 +282,55 @@ function logSupabaseError(context: string, error: SupabaseErrorDetails, extra?: 
   })
 }
 
+type SupabaseRequestResult = {
+  ok: boolean
+  status: number
+  text: string
+  json: unknown
+  networkError?: boolean
+}
+
 async function supabaseRequest(
   url: string,
   apiKey: string,
   path: string,
   init?: RequestInit
-): Promise<{ ok: boolean; status: number; text: string; json: unknown }> {
-  const response = await fetch(`${url}/rest/v1/${path}`, {
-    ...init,
-    headers: {
-      ...adminHeaders(apiKey),
-      ...(init?.headers ?? {})
+): Promise<SupabaseRequestResult> {
+  const restUrl = buildRestUrl(url, path)
+
+  try {
+    const response = await fetch(restUrl, {
+      ...init,
+      headers: {
+        ...adminHeaders(apiKey),
+        ...(init?.headers ?? {})
+      }
+    })
+    const text = await response.text()
+    let json: unknown = null
+    if (text) {
+      try {
+        json = JSON.parse(text)
+      } catch {
+        json = text
+      }
     }
-  })
-  const text = await response.text()
-  let json: unknown = null
-  if (text) {
-    try {
-      json = JSON.parse(text)
-    } catch {
-      json = text
+    return { ok: response.ok, status: response.status, text, json }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'fetch failed'
+    console.error('[automation/inbound] Supabase fetch failed', {
+      message,
+      restUrl,
+      path
+    })
+    return {
+      ok: false,
+      status: 0,
+      text: message,
+      json: null,
+      networkError: true
     }
   }
-  return { ok: response.ok, status: response.status, text, json }
 }
 
 async function fetchFirstSocietyId(url: string, apiKey: string): Promise<string | null> {
@@ -303,12 +348,15 @@ async function fetchFirstSocietyId(url: string, apiKey: string): Promise<string 
   return first?.id ?? null
 }
 
-async function societyExists(url: string, apiKey: string, societyId: string): Promise<boolean> {
+async function societyExists(url: string, apiKey: string, societyId: string): Promise<boolean | null> {
   const result = await supabaseRequest(
     url,
     apiKey,
     `${SOCIETIES_TABLE}?select=id&id=eq.${encodeURIComponent(societyId)}&limit=1`
   )
+  if (result.networkError) {
+    return null
+  }
   if (!result.ok) {
     logSupabaseError('Failed to verify society', parseSupabaseError(result.status, result.text), { societyId })
     return false
@@ -322,24 +370,44 @@ async function resolveSocietyId(
   apiKey: string,
   candidate: string | null
 ): Promise<{ societyId: string; source: string }> {
-  if (candidate && UUID_RE.test(candidate) && (await societyExists(url, apiKey, candidate))) {
-    return { societyId: candidate, source: 'payload' }
+  if (candidate && UUID_RE.test(candidate)) {
+    const exists = await societyExists(url, apiKey, candidate)
+    if (exists === true) {
+      return { societyId: candidate, source: 'payload' }
+    }
+    if (exists === null) {
+      console.warn('[automation/inbound] Society lookup unavailable — using payload UUID', { candidate })
+      return { societyId: candidate, source: 'payload_network_fallback' }
+    }
+    console.warn('[automation/inbound] Payload societyId not found in DB — continuing with payload UUID', {
+      candidate
+    })
+    return { societyId: candidate, source: 'payload_unverified' }
   }
 
   if (candidate) {
-    console.warn('[automation/inbound] societyId missing, invalid, or not found — using fallback society', {
-      candidate
-    })
+    console.warn('[automation/inbound] societyId invalid — attempting DB fallback society', { candidate })
   } else {
-    console.warn('[automation/inbound] societyId missing — using fallback society')
+    console.warn('[automation/inbound] societyId missing — attempting DB fallback society')
   }
 
   const fallback = await fetchFirstSocietyId(url, apiKey)
-  if (!fallback) {
-    throw new Error('No society available for inbound WhatsApp routing')
+  if (fallback) {
+    return { societyId: fallback, source: 'fallback_first_society' }
   }
 
-  return { societyId: fallback, source: 'fallback_first_society' }
+  const envFallback = readEnvVar('SYNCRA_INBOUND_FALLBACK_SOCIETY_ID')
+  if (envFallback && UUID_RE.test(envFallback)) {
+    console.warn('[automation/inbound] Using SYNCRA_INBOUND_FALLBACK_SOCIETY_ID emergency fallback')
+    return { societyId: envFallback, source: 'emergency_env' }
+  }
+
+  if (candidate && UUID_RE.test(candidate)) {
+    return { societyId: candidate, source: 'emergency_payload' }
+  }
+
+  console.warn('[automation/inbound] Using hardcoded emergency society UUID — proceeding to insert phase')
+  return { societyId: EMERGENCY_SOCIETY_ID, source: 'emergency_hardcoded' }
 }
 
 async function lookupUserAndFlat(
@@ -452,21 +520,36 @@ async function insertComplaint(input: {
 }) {
   const now = new Date().toISOString()
   const flatHint = input.flatNumber ? `Flat ${input.flatNumber}` : 'Unknown flat'
+  const description =
+    normalizeDescription(input.description) ||
+    `Inbound WhatsApp message from ${input.phone} (${flatHint})`
   const payload = {
     society_id: input.societyId,
     raised_by_user_id: input.raisedByUserId.slice(0, 500),
     subject: input.subject.slice(0, 500),
-    description: (input.description ?? `Inbound WhatsApp message from ${input.phone} (${flatHint})`).slice(0, 4000),
+    description: description.slice(0, 4000),
     status: 'open',
     created_at: now,
     updated_at: now
   }
 
-  const response = await fetch(`${input.url}/rest/v1/${COMPLAINTS_TABLE}`, {
-    method: 'POST',
-    headers: adminHeaders(input.apiKey),
-    body: JSON.stringify(payload)
-  })
+  let response: Response
+  try {
+    response = await fetch(buildRestUrl(input.url, COMPLAINTS_TABLE), {
+      method: 'POST',
+      headers: adminHeaders(input.apiKey),
+      body: JSON.stringify(payload)
+    })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'fetch failed'
+    console.error('[automation/inbound] Complaint insert fetch failed', {
+      message,
+      societyId: input.societyId
+    })
+    const error = new Error(message) as HandlerError
+    error.statusCode = 502
+    throw error
+  }
 
   const text = await response.text()
   if (!response.ok) {
@@ -522,16 +605,7 @@ module.exports = async function handler(
     }
 
     let societyResolution: { societyId: string; source: string }
-    try {
-      societyResolution = await resolveSocietyId(supabase.url, supabase.apiKey, body.societyId)
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unable to resolve society'
-      console.error('[automation/inbound] Society resolution failed:', message, {
-        incomingSocietyId: body.societyId,
-        rawBody: unwrapRecord(req.body)
-      })
-      return res.status(422).json({ error: message })
-    }
+    societyResolution = await resolveSocietyId(supabase.url, supabase.apiKey, body.societyId)
 
     if (body.messageType === 'payment_receipt') {
       return res.status(200).json({
@@ -566,7 +640,7 @@ module.exports = async function handler(
         phone: body.phone,
         flatNumber: body.flatNumber,
         subject,
-        description: body.description
+        description: normalizeDescription(body.description)
       })
 
       const ticketRow = Array.isArray(ticket) ? ticket[0] : ticket
