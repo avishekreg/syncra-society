@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import AuthLayout from '../../layouts/AuthLayout'
+import AuthExistingAccountLink from '../../components/auth/AuthExistingAccountLink'
 import EmailOtpGate from '../../components/auth/EmailOtpGate'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { useAuth } from '../../providers/AuthProvider'
-import { useNavigate, Link, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { savePendingSignup } from '../../lib/emailVerification'
 import { resolveInviteContext, validateJoinCode, type JoinCodeValidationResult } from '../../lib/joinCodeValidation'
 import { ui } from '../../lib/ui'
@@ -200,6 +201,8 @@ export default function SignUp() {
             </div>
           ) : null}
 
+          <AuthExistingAccountLink />
+
           <EmailOtpGate
             email={emailDraft}
             onEmailChange={setEmailDraft}
@@ -316,12 +319,7 @@ export default function SignUp() {
             </form>
           </fieldset>
 
-          <div className="mt-6 border-t border-slate-200 pt-6 text-center text-sm text-slate-600">
-            Already registered?{' '}
-            <Link to="/auth/signin" className="font-semibold text-syncra-blue hover:text-syncra-accent">
-              Sign in
-            </Link>
-          </div>
+          <AuthExistingAccountLink variant="footer" />
         </div>
       </div>
     </AuthLayout>

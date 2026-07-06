@@ -8,6 +8,7 @@ import VerifyEmail from '../pages/auth/VerifyEmail'
 export default function AuthRouter() {
   return (
     <Routes>
+      <Route path="login" element={<AuthPage />} />
       <Route path="signin" element={<SignIn />} />
       <Route path="signup" element={<SignUp />} />
       <Route path="verify-email" element={<VerifyEmail />} />

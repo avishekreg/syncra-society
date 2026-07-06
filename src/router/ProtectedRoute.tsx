@@ -36,7 +36,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     return <div className={ui.loading}>Restoring your Syncra session…</div>
   }
 
-  if (!user) return <Navigate to="/auth" replace />
+  if (!user) return <Navigate to="/auth/login" replace />
 
   if (verified === false) {
     return <Navigate to={`/auth/verify-email?email=${encodeURIComponent(user.email)}`} replace />

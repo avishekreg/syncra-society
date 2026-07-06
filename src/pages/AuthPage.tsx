@@ -75,6 +75,13 @@ export default function AuthPage() {
             Create one
           </Link>
         </div>
+
+        <div className="mt-4 text-center text-sm text-slate-600">
+          Need email verification first?{' '}
+          <Link to="/auth/signin" className="font-semibold text-syncra-blue hover:text-syncra-accent">
+            Sign in with OTP
+          </Link>
+        </div>
       </div>
     </AuthLayout>
   )

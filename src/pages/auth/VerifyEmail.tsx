@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import AuthLayout from '../../layouts/AuthLayout'
+import { AUTH_LOGIN_PATH } from '../../components/auth/AuthExistingAccountLink'
 import SignupDownloadSuccess from '../../components/auth/SignupDownloadSuccess'
 import { useAuth } from '../../providers/AuthProvider'
 import { clearPendingSignup, loadPendingSignup } from '../../lib/emailVerification'
@@ -23,7 +24,7 @@ export default function VerifyEmail() {
   const [resending, setResending] = useState(false)
   const [showDownloadSuccess, setShowDownloadSuccess] = useState(false)
   const [verifiedName, setVerifiedName] = useState<string | undefined>()
-  const [dashboardPath, setDashboardPath] = useState('/auth/signin')
+  const [dashboardPath, setDashboardPath] = useState(AUTH_LOGIN_PATH)
 
   useEffect(() => {
     void (async () => {
@@ -78,7 +79,7 @@ export default function VerifyEmail() {
     }
 
     setStatus('Email verified successfully. You can now sign in.')
-    navigate('/auth/signin')
+    navigate(AUTH_LOGIN_PATH)
   }
 
   async function handleVerifyCode(event: React.FormEvent) {
@@ -103,11 +104,11 @@ export default function VerifyEmail() {
           await completeSignupIfNeeded(result.user.id, result.user.email ?? email.trim())
         } else {
           setStatus('Email verified successfully. Sign in to continue.')
-          navigate('/auth/signin')
+          navigate(AUTH_LOGIN_PATH)
         }
       } else {
         setStatus('Verification accepted. Please sign in to continue.')
-        navigate('/auth/signin')
+        navigate(AUTH_LOGIN_PATH)
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Unable to verify code')
@@ -193,8 +194,8 @@ export default function VerifyEmail() {
             >
               {resending ? 'Sending…' : 'Resend verification email'}
             </button>
-            <Link to="/auth/signin" className={`${ui.btnGhost} flex-1 text-center`}>
-              Back to sign in
+            <Link to={AUTH_LOGIN_PATH} className={`${ui.btnGhost} flex-1 text-center`}>
+              Back to Log In
             </Link>
           </div>
 

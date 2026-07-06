@@ -8,7 +8,7 @@ export function isNativeShell(): boolean {
   return Capacitor.isNativePlatform()
 }
 
-export const NATIVE_LOGIN_PATH = '/auth/signin'
+export const NATIVE_LOGIN_PATH = '/auth/login'
 
 type AppVersionManifest = {
   buildSha?: string

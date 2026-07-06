@@ -97,7 +97,7 @@ export default function LandingPage() {
         <div className="mx-auto flex min-h-14 max-w-7xl flex-col items-stretch justify-between gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-4 sm:px-6 sm:py-0">
           <SyncraBrandLogo to="/" />
           <div className="flex w-full flex-wrap items-stretch gap-3 sm:w-auto sm:items-center">
-            <Link to="/auth" className={`w-full sm:w-auto ${ui.btnGhost}`}>
+            <Link to="/auth/login" className={`w-full sm:w-auto ${ui.btnGhost}`}>
               Login Now
             </Link>
             <Link to="/auth/signup" className={`w-full sm:w-auto ${ui.btnSecondary}`}>

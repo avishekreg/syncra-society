@@ -7,6 +7,7 @@ import * as z from 'zod'
 import { useAuth } from '../../providers/AuthProvider'
 import { useNavigate, Link } from 'react-router-dom'
 import { resolvePostLoginPath } from '../../config/devSeed'
+import { AUTH_LOGIN_PATH } from '../../components/auth/AuthExistingAccountLink'
 import { ui } from '../../lib/ui'
 
 const schema = z.object({
@@ -68,6 +69,13 @@ export default function SignIn() {
         </div>
 
         <div className={ui.card}>
+          <div className="mb-6 rounded-xl border border-slate-200 bg-syncra-surface-alt px-4 py-3 text-center text-sm text-slate-600">
+            Already verified your email?{' '}
+            <Link to={AUTH_LOGIN_PATH} className="font-semibold text-syncra-blue hover:text-syncra-accent">
+              Log In with password
+            </Link>
+          </div>
+
           <EmailOtpGate
             email={emailDraft}
             onEmailChange={setEmailDraft}
@@ -111,9 +119,9 @@ export default function SignIn() {
           </div>
 
           <div className="mt-4 text-center text-sm text-slate-600">
-            Need to verify your email?{' '}
-            <Link to="/auth/verify-email" className="font-semibold text-syncra-blue hover:text-syncra-accent">
-              Enter verification code
+            Need email verification first?{' '}
+            <Link to="/auth/signin" className="font-semibold text-syncra-blue hover:text-syncra-accent">
+              Sign in with OTP
             </Link>
           </div>
         </div>
