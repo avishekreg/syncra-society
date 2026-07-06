@@ -1,6 +1,6 @@
 {
-  "appVersion": "v1.0.0+build.11",
-  "apkUrl": "https://syncra-society.vercel.app/downloads/syncra-society-android-11.apk",
-  "buildSha": "4e8fcb4db8f2557d61f9ec7b2b37ab37b54621d5",
-  "builtAt": "2026-07-06T10:30:10Z"
+  "appVersion": "v1.0.0+build.12",
+  "apkUrl": "https://syncra-society.vercel.app/downloads/syncra-society-android-12.apk",
+  "buildSha": "cdc7f8e875abacb8117a18c1ac66bf53a6fd21b6",
+  "builtAt": "2026-07-06T10:45:40Z"
 }
