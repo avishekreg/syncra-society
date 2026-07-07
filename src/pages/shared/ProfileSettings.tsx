@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import { uploadProfileAvatar } from '../../api/avatarUpload'
 import { useAuth } from '../../providers/AuthProvider'
 import { restGet, restPatch } from '../../api/supabaseClient'
 import type { UserAndFlat } from '../../types/db'
@@ -18,6 +19,7 @@ export default function ProfileSettings() {
   const [phone, setPhone] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
 
   useEffect(() => {
     if (!user?.id) return
@@ -66,6 +68,35 @@ export default function ProfileSettings() {
       cancelled = true
     }
   }, [user, currentSocietyId])
+
+  async function handleAvatarChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file || !user) return
+
+    setUploadingAvatar(true)
+    setError(null)
+    setMessage(null)
+
+    try {
+      const publicUrl = await uploadProfileAvatar(user.id, file)
+      setAvatarUrl(publicUrl)
+
+      if (profileId && !user.id.startsWith('demo-')) {
+        await restPatch(`user_and_flats?id=eq.${profileId}`, {
+          avatar_url: publicUrl,
+          updated_at: new Date().toISOString()
+        })
+      }
+
+      setUser((prev) => (prev ? { ...prev, avatarUrl: publicUrl } : prev))
+      setMessage('Profile photo updated.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Avatar upload failed.')
+    } finally {
+      setUploadingAvatar(false)
+      event.target.value = ''
+    }
+  }
 
   async function handleSave(event: React.FormEvent) {
     event.preventDefault()
@@ -141,14 +172,18 @@ export default function ProfileSettings() {
             )}
           </div>
           <label className="min-w-0 flex-1 space-y-2">
-            <span className={ui.label}>Profile photo URL</span>
+            <span className={ui.label}>Profile photo</span>
             <input
-              type="url"
+              type="file"
+              accept="image/*"
+              capture="user"
               className={ui.input}
-              placeholder="https://…"
-              value={avatarUrl}
-              onChange={(event) => setAvatarUrl(event.target.value)}
+              disabled={uploadingAvatar}
+              onChange={(event) => void handleAvatarChange(event)}
             />
+            <p className="text-xs text-slate-500">
+              On mobile, tap to open your camera or gallery. Photos are stored securely in Supabase.
+            </p>
           </label>
         </div>
 

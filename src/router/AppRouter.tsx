@@ -121,7 +121,7 @@ export default function AppRouter() {
               </ProtectedRoute>
             }
           />
-          <Route path="/dashboard/*" element={<Navigate to="/resident" replace />} />
+          <Route path="/dashboard/society-configuration" element={<Navigate to="/admin/configuration" replace />} />
           <Route
             path="/resident/*"
             element={

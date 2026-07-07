@@ -141,8 +141,16 @@ function setCors(res: import('@vercel/node').VercelResponse) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-syncra-automation-secret, x-syncra-response-format')
 }
 
+function sanitizeTwimlMessage(value: string): string {
+  let text = value.trim()
+  while (text.startsWith('==')) text = text.slice(2).trim()
+  while (text.startsWith('=')) text = text.slice(1).trim()
+  text = text.replace(/\{\{[^}]+\}\}/g, '').trim()
+  return text
+}
+
 function escapeXml(value: string): string {
-  return value
+  return sanitizeTwimlMessage(value)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')

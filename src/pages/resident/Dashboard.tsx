@@ -6,7 +6,12 @@ import { useComplaints, formatComplaintStatus } from '../../hooks/useComplaints'
 import NoticesList from '../../components/NoticesList'
 import ResidentAccountsOverview, { ResidentGateApprovals } from '../../components/ResidentAccountsOverview'
 import { listPendingVisitorLogs } from '../../api/visitorLogs'
-import type { VisitorLog } from '../../types/db'
+import type { VisitorLog, UserAndFlat } from '../../types/db'
+import SuggestiveNotificationBanner from '../../components/SuggestiveNotificationBanner'
+import { fetchSocietyBillingRules } from '../../api/societyBillingRules'
+import { buildSuggestiveNotifications } from '../../lib/suggestiveNotifications'
+import type { SuggestiveNotification } from '../../lib/suggestiveNotifications'
+import { restGet } from '../../api/supabaseClient'
 import { ui } from '../../lib/ui'
 
 const DEFAULT_EMERGENCY_DIRECTORY = [
@@ -25,6 +30,7 @@ export default function ResidentDashboard() {
   const [alertVisitors, setAlertVisitors] = useState<VisitorLog[]>([])
   const [emergencyContacts, setEmergencyContacts] = useState(DEFAULT_EMERGENCY_DIRECTORY)
   const [speedDialOpen, setSpeedDialOpen] = useState(false)
+  const [suggestiveAlerts, setSuggestiveAlerts] = useState<SuggestiveNotification[]>([])
   const flatNumber = user?.flatNumber
   const isLoading = entries === null
 
@@ -87,12 +93,55 @@ export default function ResidentDashboard() {
     }
   }, [currentSocietyId])
 
+  useEffect(() => {
+    if (!currentSocietyId || !user?.id || !flatNumber) {
+      setSuggestiveAlerts([])
+      return
+    }
+
+    let cancelled = false
+    void (async () => {
+      try {
+        const rules = await fetchSocietyBillingRules(currentSocietyId)
+        let profile: UserAndFlat | null = null
+
+        if (!user.id.startsWith('demo-')) {
+          const rows = await restGet<UserAndFlat[]>(
+            `user_and_flats?user_id=eq.${encodeURIComponent(user.id)}&society_id=eq.${encodeURIComponent(currentSocietyId)}&limit=1`
+          )
+          profile = rows?.[0] ?? null
+        }
+
+        const source = profile ?? {
+          flat_number: flatNumber,
+          name: user.displayName ?? user.email,
+          phone: user.phone ?? null,
+          whatsapp_number: user.whatsappNumber ?? null,
+          email: user.email,
+          opening_outstanding_balance: accountSummary.outstanding
+        }
+
+        if (!cancelled) {
+          setSuggestiveAlerts(buildSuggestiveNotifications({ profile: source, rules }))
+        }
+      } catch {
+        if (!cancelled) setSuggestiveAlerts([])
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [currentSocietyId, user, flatNumber, accountSummary.outstanding])
+
   if (isLoading) {
     return <div className={ui.loading}>Loading Resident Dashboard…</div>
   }
 
   return (
     <div className={ui.sectionGap}>
+      <SuggestiveNotificationBanner notifications={suggestiveAlerts} />
+
       <ResidentAccountsOverview
         totalPaid={accountSummary.totalPaid}
         outstanding={accountSummary.outstanding}

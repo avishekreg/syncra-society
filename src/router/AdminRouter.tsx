@@ -43,9 +43,7 @@ export default function AdminRouter() {
             </RoleGuard>
           }
         />
-        <Route
-          path="configuration"
-          element={
+        <Route path="configuration" element={
             <RoleGuard allow={['president']}>
               <TierGuard requiredTier="tier2">
                 <SocietyConfiguration />
@@ -53,6 +51,7 @@ export default function AdminRouter() {
             </RoleGuard>
           }
         />
+        <Route path="society-configuration" element={<Navigate to="/admin/configuration" replace />} />
         <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
       </Route>
     </Routes>

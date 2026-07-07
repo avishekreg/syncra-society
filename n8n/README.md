@@ -62,14 +62,28 @@ Other BSP options:
 
 ## Inbound (WhatsApp → Portal)
 
-Inbound payloads are merged in **Normalize Inbound Message** (single item) before forwarding.
+Inbound payloads POST to the Syncra automation API (or via n8n `WhatsApp Inbound Webhook` → Forward → TwiML response).
 
 Configure your BSP in n8n to POST inbound messages to:
 
 ```
 POST https://syncra-society.vercel.app/api/automation/inbound
 Header: x-syncra-automation-secret: <SYNCRA_AUTOMATION_SECRET>
+Header: x-syncra-response-format: twiml
 ```
+
+## Billing payment reminders (cron)
+
+Trigger automated maintenance reminders based on each society's billing policy:
+
+```
+GET https://syncra-society.vercel.app/api/automation/reminders
+Header: x-syncra-automation-secret: <SYNCRA_AUTOMATION_SECRET>
+```
+
+Optional query params: `?societyId=<uuid>&force=true`
+
+Dispatches `payment.reminder` and `payment.late_fee` events to the outbound n8n webhook.
 
 This route writes tickets to Supabase table **`complaints_and_suggestions`** (not `/rest/v1/complaints`).
 

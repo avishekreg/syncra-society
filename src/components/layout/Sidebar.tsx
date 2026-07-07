@@ -131,6 +131,23 @@ type SidebarProps = {
   title?: string
 }
 
+function SidebarSignOutButton({ onSignOut }: { onSignOut: () => void | Promise<void> }) {
+  const { closeAllGroups } = useNavAccordion()
+
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        closeAllGroups()
+        void onSignOut()
+      }}
+      className={`w-full ${ui.btnGhost}`}
+    >
+      Sign Out
+    </button>
+  )
+}
+
 export default function Sidebar({ children, title }: SidebarProps) {
   const { user, signOut, currentSocietyId } = useAuth()
   const { societyName } = useSocietyBranding()
@@ -515,9 +532,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
       </nav>
 
       <div className="mt-auto shrink-0 border-t border-slate-200 bg-white p-3 sm:p-4">
-        <button type="button" onClick={() => void handleSignOut()} className={`w-full ${ui.btnGhost}`}>
-          Sign Out
-        </button>
+        <SidebarSignOutButton onSignOut={handleSignOut} />
       </div>
     </div>
   )

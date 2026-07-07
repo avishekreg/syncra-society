@@ -5,7 +5,8 @@ const ADMIN_PAGE_TITLES: Record<string, string | null> = {
   '/admin/dashboard': 'Analytics Overview',
   '/admin/notices': 'Notices Management',
   '/admin/helpdesk': 'Complaints Dashboard',
-  '/admin/configuration': null
+  '/admin/configuration': null,
+  '/admin/society-configuration': null
 }
 
 function resolveAdminTitle(pathname: string) {

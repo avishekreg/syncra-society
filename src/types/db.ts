@@ -11,6 +11,16 @@ export interface Society {
   opening_bank_balance?: number | null
 }
 
+export interface SocietyBillingRules {
+  society_id: string
+  maintenance_due_date: number
+  late_fee_grace_period_days: number
+  late_fee_flat_amount: number
+  interest_rate_percentage: number
+  created_at?: string
+  updated_at?: string
+}
+
 export type ActivationStatus = 'pending' | 'activation_paid' | 'active_subscription'
 
 export interface SocietySubscription {
