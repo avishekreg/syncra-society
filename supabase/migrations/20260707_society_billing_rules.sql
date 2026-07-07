@@ -37,13 +37,7 @@ create policy "society_billing_rules_service_all"
   using (true)
   with check (true);
 
-insert into public.society_billing_rules (society_id, maintenance_due_date, late_fee_grace_period_days, late_fee_flat_amount, interest_rate_percentage)
-select id, 5, 7, 500, 1.5
-from public.societies
-where id = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
-on conflict (society_id) do nothing;
-
--- Avatar uploads (public read, authenticated write to own folder).
+-- Avatar uploads (public read, authenticated write).
 insert into storage.buckets (id, name, public)
 values ('avatars', 'avatars', true)
 on conflict (id) do update set public = excluded.public;

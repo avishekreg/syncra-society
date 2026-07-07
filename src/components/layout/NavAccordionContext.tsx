@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react'
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react'
 import { NavLink, type NavLinkProps } from 'react-router-dom'
 
 type NavAccordionContextValue = {
@@ -6,14 +6,18 @@ type NavAccordionContextValue = {
   toggleGroup: (groupId: string) => void
   openGroup: (groupId: string) => void
   closeAllGroups: () => void
+  /** Set when a flat nav link closes groups — blocks path-based auto-expand for one navigation. */
+  suppressAutoOpenRef: React.MutableRefObject<boolean>
 }
 
 const NavAccordionContext = createContext<NavAccordionContextValue | null>(null)
 
 export function NavAccordionProvider({ children }: { children: React.ReactNode }) {
   const [openGroupId, setOpenGroupId] = useState<string | null>(null)
+  const suppressAutoOpenRef = useRef(false)
 
   const toggleGroup = useCallback((groupId: string) => {
+    suppressAutoOpenRef.current = false
     setOpenGroupId((current) => (current === groupId ? null : groupId))
   }, [])
 
@@ -22,11 +26,12 @@ export function NavAccordionProvider({ children }: { children: React.ReactNode }
   }, [])
 
   const closeAllGroups = useCallback(() => {
+    suppressAutoOpenRef.current = true
     setOpenGroupId(null)
   }, [])
 
   const value = useMemo(
-    () => ({ openGroupId, toggleGroup, openGroup, closeAllGroups }),
+    () => ({ openGroupId, toggleGroup, openGroup, closeAllGroups, suppressAutoOpenRef }),
     [openGroupId, toggleGroup, openGroup, closeAllGroups]
   )
 
@@ -52,6 +57,9 @@ export function AccordionNavLink({ onClick, ...props }: NavLinkProps) {
       onClick={(event) => {
         closeAllGroups()
         onClick?.(event)
+      }}
+      onMouseDown={() => {
+        closeAllGroups()
       }}
     />
   )

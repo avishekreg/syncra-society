@@ -33,13 +33,7 @@
             {
               "conditions": {
                 "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.routeCategory }}",
-                    "rightValue": "notice",
-                    "operator": { "type": "string", "operation": "equals" }
-                  }
-                ],
+                "conditions": [{ "leftValue": "={{ $json.routeCategory }}", "rightValue": "notice", "operator": { "type": "string", "operation": "equals" } }],
                 "combinator": "and"
               },
               "renameOutput": true,
@@ -48,13 +42,7 @@
             {
               "conditions": {
                 "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.routeCategory }}",
-                    "rightValue": "visitor",
-                    "operator": { "type": "string", "operation": "equals" }
-                  }
-                ],
+                "conditions": [{ "leftValue": "={{ $json.routeCategory }}", "rightValue": "visitor", "operator": { "type": "string", "operation": "equals" } }],
                 "combinator": "and"
               },
               "renameOutput": true,
@@ -63,13 +51,7 @@
             {
               "conditions": {
                 "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.routeCategory }}",
-                    "rightValue": "payment",
-                    "operator": { "type": "string", "operation": "equals" }
-                  }
-                ],
+                "conditions": [{ "leftValue": "={{ $json.routeCategory }}", "rightValue": "payment", "operator": { "type": "string", "operation": "equals" } }],
                 "combinator": "and"
               },
               "renameOutput": true,
@@ -86,10 +68,7 @@
       "position": [720, 300]
     },
     {
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "jsCode": "const item = $input.first().json;\nreturn [{ json: { ...item, channel: 'notice', whatsappMessage: item.whatsappMessage } }];"
-      },
+      "parameters": { "mode": "runOnceForAllItems", "jsCode": "return [{ json: { ...$input.first().json, channel: 'notice' } }];" },
       "id": "format-notice",
       "name": "Format Notice Message",
       "type": "n8n-nodes-base.code",
@@ -97,10 +76,7 @@
       "position": [960, 120]
     },
     {
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "jsCode": "const item = $input.first().json;\nreturn [{ json: { ...item, channel: 'visitor', whatsappMessage: item.whatsappMessage } }];"
-      },
+      "parameters": { "mode": "runOnceForAllItems", "jsCode": "return [{ json: { ...$input.first().json, channel: 'visitor' } }];" },
       "id": "format-visitor",
       "name": "Format Visitor Message",
       "type": "n8n-nodes-base.code",
@@ -110,7 +86,7 @@
     {
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const item = $input.first().json;\nconst meta = item.metadata ?? {};\nconst amount = meta.amount ?? item.amount ?? null;\nconst suffix = amount ? ` Amount: ₹${amount}` : '';\nconst msg = String(item.whatsappMessage ?? item.summary ?? 'Payment reminder') + suffix;\nreturn [{ json: { ...item, channel: 'payment', whatsappMessage: msg } }];"
+        "jsCode": "const item = $input.first().json;\nconst meta = item.metadata ?? {};\nconst amount = meta.amount ?? item.amount ?? null;\nconst suffix = amount ? ` Amount: ₹${amount}` : '';\nreturn [{ json: { ...item, channel: 'payment', whatsappMessage: String(item.whatsappMessage ?? item.summary ?? 'Payment reminder') + suffix } }];"
       },
       "id": "format-payment",
       "name": "Format Payment Message",
@@ -119,10 +95,7 @@
       "position": [960, 400]
     },
     {
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "jsCode": "const item = $input.first().json;\nreturn [{ json: { ...item, channel: 'fallback', whatsappMessage: item.whatsappMessage ?? item.summary ?? 'Syncra Society update' } }];"
-      },
+      "parameters": { "mode": "runOnceForAllItems", "jsCode": "return [{ json: { ...$input.first().json, channel: 'fallback' } }];" },
       "id": "format-fallback",
       "name": "Format Fallback Message",
       "type": "n8n-nodes-base.code",
@@ -143,19 +116,10 @@
       "type": "n8n-nodes-base.twilio",
       "typeVersion": 1,
       "position": [1200, 300],
-      "credentials": {
-        "twilioApi": {
-          "id": "REPLACE_WITH_TWILIO_CREDENTIAL_ID",
-          "name": "Twilio account"
-        }
-      }
+      "credentials": { "twilioApi": { "id": "REPLACE_WITH_TWILIO_CREDENTIAL_ID", "name": "Twilio account" } }
     },
     {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={{ { success: true, processed: $json } }}",
-        "options": {}
-      },
+      "parameters": { "respondWith": "json", "responseBody": "={{ { success: true, processed: $json } }}", "options": {} },
       "id": "respond-webhook",
       "name": "Respond to Syncra",
       "type": "n8n-nodes-base.respondToWebhook",
@@ -163,12 +127,7 @@
       "position": [1420, 300]
     },
     {
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "whatsapp-inbound",
-        "responseMode": "responseNode",
-        "options": {}
-      },
+      "parameters": { "httpMethod": "POST", "path": "whatsapp-inbound", "responseMode": "responseNode", "options": {} },
       "id": "inbound-webhook",
       "name": "WhatsApp Inbound Webhook",
       "type": "n8n-nodes-base.webhook",
@@ -179,7 +138,7 @@
     {
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const wrapped = $input.first().json;\nconst body = wrapped.body && typeof wrapped.body === 'object' && !Array.isArray(wrapped.body) ? wrapped.body : wrapped;\nconst merged = { ...wrapped, ...body };\nconst description = merged.description ?? merged.text ?? merged.Body ?? merged.body?.Body ?? merged.body?.text ?? '';\nreturn [{ json: { societyId: merged.societyId ?? merged.society_id ?? null, flatNumber: merged.flatNumber ?? merged.flat_number ?? null, phone: merged.phone ?? merged.From ?? merged.from ?? null, messageType: merged.messageType ?? merged.message_type ?? 'ticket', subject: merged.subject ?? merged.Subject ?? null, description: String(description ?? '').trim(), amount: merged.amount ?? null, body: merged.body ?? body } }];"
+        "jsCode": "const wrapped = $input.first().json;\nconst body = wrapped.body && typeof wrapped.body === 'object' && !Array.isArray(wrapped.body) ? wrapped.body : wrapped;\nconst merged = { ...wrapped, ...body };\nconst description = merged.description ?? merged.text ?? merged.Body ?? merged.body?.Body ?? merged.body?.text ?? '';\nreturn [{ json: { societyId: merged.societyId ?? merged.society_id ?? null, flatNumber: merged.flatNumber ?? merged.flat_number ?? null, phone: merged.phone ?? merged.From ?? merged.from ?? null, subject: merged.subject ?? merged.Subject ?? null, description: String(description ?? '').trim(), amount: merged.amount ?? null, body: merged.body ?? body } }];"
       },
       "id": "normalize-inbound",
       "name": "Normalize Inbound Message",
@@ -188,15 +147,70 @@
       "position": [480, 820]
     },
     {
+      "parameters": { "model": "llama-3.3-70b-versatile", "options": { "temperature": 0.4 } },
+      "id": "groq-chat-model",
+      "name": "Groq Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [640, 980],
+      "credentials": { "groqApi": { "id": "REPLACE_WITH_GROQ_CREDENTIAL_ID", "name": "Groq account" } }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ 'You are Syncra Society WhatsApp assistant for a residential society in India.\\n\\nAnalyze the resident message and respond ONLY with valid JSON (no markdown, no code fences):\\n{\"intent\":\"ticket\",\"reply\":\"\"}\\nOR\\n{\"intent\":\"conversation\",\"reply\":\"your helpful short reply here\"}\\n\\nUse intent \"ticket\" when the message is a complaint, maintenance issue, helpdesk request, broken facility, leak, power cut, security concern, or anything requiring society staff action.\\nUse intent \"conversation\" for greetings, thanks, general questions, or small talk — always include a friendly helpful reply in the reply field (max 2 sentences).\\n\\nResident message:\\n' + ($json.description || '') }}",
+        "options": {}
+      },
+      "id": "groq-resident-assistant",
+      "name": "Groq Resident Assistant",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [720, 820]
+    },
+    {
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const item = $input.first().json;\nconst phone = String(item.phone ?? item.From ?? 'whatsapp-unknown').trim();\nconst flatNumber = item.flatNumber ? String(item.flatNumber).trim() : null;\nreturn [{ json: { ...item, portalPayload: { societyId: item.societyId, flatNumber, phone, messageType: item.messageType ?? 'ticket', subject: item.subject?.trim() || (flatNumber ? `WhatsApp helpdesk — Flat ${flatNumber}` : 'WhatsApp helpdesk ticket'), description: String(item.description ?? '').trim(), amount: item.amount ?? null } } }];"
+        "jsCode": "const item = $input.first().json;\nconst raw = item.text ?? item.output ?? item.response ?? '';\nlet intent = 'conversation';\nlet reply = 'Hello! I am Syncra Society assistant. How can I help you today?';\n\ntry {\n  const cleaned = String(raw).replace(/```json|```/gi, '').trim();\n  const parsed = JSON.parse(cleaned);\n  if (parsed.intent) intent = String(parsed.intent).toLowerCase();\n  if (parsed.reply) reply = String(parsed.reply).trim();\n} catch {\n  const lower = String(raw).toLowerCase();\n  if (/complaint|ticket|maintenance|broken|leak|helpdesk|repair|not working|issue/.test(lower)) {\n    intent = 'ticket';\n  } else if (String(raw).trim()) {\n    reply = String(raw).trim().slice(0, 500);\n  }\n}\n\nif (['ticket', 'complaint', 'payment_receipt'].includes(intent)) intent = 'ticket';\nelse intent = 'conversation';\n\nreturn [{ json: { ...item, groqIntent: intent, groqReply: reply } }];"
+      },
+      "id": "parse-groq-intent",
+      "name": "Parse Groq Intent",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [920, 820]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
+                "conditions": [{ "leftValue": "={{ $json.groqIntent }}", "rightValue": "ticket", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ticket"
+            }
+          ]
+        },
+        "options": { "fallbackOutput": "extra" }
+      },
+      "id": "route-groq-intent",
+      "name": "Route Groq Intent",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [1120, 820]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const item = $input.first().json;\nconst phone = String(item.phone ?? 'whatsapp-unknown').trim();\nconst flatNumber = item.flatNumber ? String(item.flatNumber).trim() : null;\nreturn [{ json: { ...item, portalPayload: { societyId: item.societyId, flatNumber, phone, messageType: 'ticket', subject: item.subject?.trim() || (flatNumber ? `WhatsApp helpdesk — Flat ${flatNumber}` : 'WhatsApp helpdesk ticket'), description: String(item.description ?? '').trim(), amount: item.amount ?? null } } }];"
       },
       "id": "prepare-portal-payload",
       "name": "Prepare Portal Payload",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [700, 820]
+      "position": [1340, 720]
     },
     {
       "parameters": {
@@ -219,42 +233,47 @@
       "name": "Forward to Syncra Portal",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [920, 820]
+      "position": [1560, 720]
     },
     {
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const item = $input.first();\nlet twiml = String(item.body ?? item.json ?? '').trim();\nif (!twiml.includes('<Response>')) {\n  let msg = twiml;\n  while (msg.startsWith('==')) msg = msg.slice(2).trim();\n  while (msg.startsWith('=')) msg = msg.slice(1).trim();\n  msg = msg.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n  twiml = `<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>${msg}</Message></Response>`;\n} else {\n  twiml = twiml.replace(/==+/g, '');\n  const match = twiml.match(/<Message>([\\s\\S]*?)<\\/Message>/i);\n  if (match) {\n    let inner = match[1].trim();\n    while (inner.startsWith('=')) inner = inner.slice(1).trim();\n    twiml = `<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>${inner}</Message></Response>`;\n  }\n}\nreturn [{ json: { twiml } }];"
+        "jsCode": "const item = $input.first().json;\nlet msg = String(item.groqReply ?? 'Hello! How can I help you today?').trim();\nwhile (msg.startsWith('==')) msg = msg.slice(2).trim();\nwhile (msg.startsWith('=')) msg = msg.slice(1).trim();\nreturn [{ json: { rawMessage: msg } }];"
+      },
+      "id": "build-conversation-twiml",
+      "name": "Build Conversation Reply",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 920]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "function sanitizeText(raw) {\n  let msg = String(raw ?? '').trim();\n  while (msg.startsWith('==')) msg = msg.slice(2).trim();\n  while (msg.startsWith('=')) msg = msg.slice(1).trim();\n  msg = msg.replace(/==+/g, '');\n  return msg.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\n}\n\nconst item = $input.first();\nconst fromHttp = item.body ?? item.json?.body;\nlet twiml = String(fromHttp ?? item.json?.rawMessage ?? item.json?.twiml ?? '').trim();\n\nif (twiml.includes('<Response>')) {\n  twiml = twiml.replace(/==+/g, '');\n  const match = twiml.match(/<Message>([\\s\\S]*?)<\\/Message>/i);\n  if (match) {\n    const inner = sanitizeText(match[1]);\n    twiml = `<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>${inner}</Message></Response>`;\n  }\n} else {\n  const inner = sanitizeText(twiml);\n  twiml = `<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response><Message>${inner}</Message></Response>`;\n}\n\nreturn [{ json: { twiml } }];"
       },
       "id": "sanitize-twiml",
       "name": "Sanitize TwiML Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1140, 820]
+      "position": [1780, 820]
     },
     {
       "parameters": {
         "respondWith": "text",
         "responseBody": "={{ $json.twiml }}",
-        "options": {
-          "responseHeaders": {
-            "entries": [
-              { "name": "Content-Type", "value": "text/xml; charset=utf-8" }
-            ]
-          }
-        }
+        "options": { "responseHeaders": { "entries": [{ "name": "Content-Type", "value": "text/xml; charset=utf-8" }] } }
       },
       "id": "respond-inbound-twiml",
       "name": "Respond to WhatsApp Inbound",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [1360, 820]
+      "position": [2000, 820]
     },
     {
       "parameters": {
-        "content": "## Outbound router\\n\\n`Route by Event Type` outputs:\\n1. notice — announcements\\n2. visitor — gatekeeper approvals\\n3. payment — billing reminders & receipts\\n4. fallback — catch-all\\n\\nNEVER use `=={{ ... }}` in Twilio fields.",
-        "height": 220,
-        "width": 420
+        "content": "## Inbound (Groq-first)\\n\\n1. Normalize message\\n2. Groq classifies ticket vs conversation\\n3. **ticket** → Syncra Portal API\\n4. **conversation** → Groq reply only\\n5. Sanitize TwiML (strip `==`) → respond\\n\\nOutbound: notice | visitor | payment | fallback",
+        "height": 240,
+        "width": 440
       },
       "id": "note-bsp",
       "name": "WhatsApp BSP Note",
@@ -264,12 +283,8 @@
     }
   ],
   "connections": {
-    "Syncra Event Webhook": {
-      "main": [[{ "node": "Normalize Portal Event", "type": "main", "index": 0 }]]
-    },
-    "Normalize Portal Event": {
-      "main": [[{ "node": "Route by Event Type", "type": "main", "index": 0 }]]
-    },
+    "Syncra Event Webhook": { "main": [[{ "node": "Normalize Portal Event", "type": "main", "index": 0 }]] },
+    "Normalize Portal Event": { "main": [[{ "node": "Route by Event Type", "type": "main", "index": 0 }]] },
     "Route by Event Type": {
       "main": [
         [{ "node": "Format Notice Message", "type": "main", "index": 0 }],
@@ -278,36 +293,26 @@
         [{ "node": "Format Fallback Message", "type": "main", "index": 0 }]
       ]
     },
-    "Format Notice Message": {
-      "main": [[{ "node": "Twilio WhatsApp Send", "type": "main", "index": 0 }]]
+    "Format Notice Message": { "main": [[{ "node": "Twilio WhatsApp Send", "type": "main", "index": 0 }]] },
+    "Format Visitor Message": { "main": [[{ "node": "Twilio WhatsApp Send", "type": "main", "index": 0 }]] },
+    "Format Payment Message": { "main": [[{ "node": "Twilio WhatsApp Send", "type": "main", "index": 0 }]] },
+    "Format Fallback Message": { "main": [[{ "node": "Twilio WhatsApp Send", "type": "main", "index": 0 }]] },
+    "Twilio WhatsApp Send": { "main": [[{ "node": "Respond to Syncra", "type": "main", "index": 0 }]] },
+    "WhatsApp Inbound Webhook": { "main": [[{ "node": "Normalize Inbound Message", "type": "main", "index": 0 }]] },
+    "Normalize Inbound Message": { "main": [[{ "node": "Groq Resident Assistant", "type": "main", "index": 0 }]] },
+    "Groq Chat Model": { "ai_languageModel": [[{ "node": "Groq Resident Assistant", "type": "ai_languageModel", "index": 0 }]] },
+    "Groq Resident Assistant": { "main": [[{ "node": "Parse Groq Intent", "type": "main", "index": 0 }]] },
+    "Parse Groq Intent": { "main": [[{ "node": "Route Groq Intent", "type": "main", "index": 0 }]] },
+    "Route Groq Intent": {
+      "main": [
+        [{ "node": "Prepare Portal Payload", "type": "main", "index": 0 }],
+        [{ "node": "Build Conversation Reply", "type": "main", "index": 0 }]
+      ]
     },
-    "Format Visitor Message": {
-      "main": [[{ "node": "Twilio WhatsApp Send", "type": "main", "index": 0 }]]
-    },
-    "Format Payment Message": {
-      "main": [[{ "node": "Twilio WhatsApp Send", "type": "main", "index": 0 }]]
-    },
-    "Format Fallback Message": {
-      "main": [[{ "node": "Twilio WhatsApp Send", "type": "main", "index": 0 }]]
-    },
-    "Twilio WhatsApp Send": {
-      "main": [[{ "node": "Respond to Syncra", "type": "main", "index": 0 }]]
-    },
-    "WhatsApp Inbound Webhook": {
-      "main": [[{ "node": "Normalize Inbound Message", "type": "main", "index": 0 }]]
-    },
-    "Normalize Inbound Message": {
-      "main": [[{ "node": "Prepare Portal Payload", "type": "main", "index": 0 }]]
-    },
-    "Prepare Portal Payload": {
-      "main": [[{ "node": "Forward to Syncra Portal", "type": "main", "index": 0 }]]
-    },
-    "Forward to Syncra Portal": {
-      "main": [[{ "node": "Sanitize TwiML Response", "type": "main", "index": 0 }]]
-    },
-    "Sanitize TwiML Response": {
-      "main": [[{ "node": "Respond to WhatsApp Inbound", "type": "main", "index": 0 }]]
-    }
+    "Prepare Portal Payload": { "main": [[{ "node": "Forward to Syncra Portal", "type": "main", "index": 0 }]] },
+    "Forward to Syncra Portal": { "main": [[{ "node": "Sanitize TwiML Response", "type": "main", "index": 0 }]] },
+    "Build Conversation Reply": { "main": [[{ "node": "Sanitize TwiML Response", "type": "main", "index": 0 }]] },
+    "Sanitize TwiML Response": { "main": [[{ "node": "Respond to WhatsApp Inbound", "type": "main", "index": 0 }]] }
   },
   "pinData": {},
   "settings": { "executionOrder": "v1" },

@@ -52,7 +52,7 @@ type NavGroupProps = {
 
 function NavGroup({ groupId, label, paths, defaultOpen = false, children }: NavGroupProps) {
   const location = useLocation()
-  const { openGroupId, toggleGroup, openGroup } = useNavAccordion()
+  const { openGroupId, toggleGroup, openGroup, suppressAutoOpenRef } = useNavAccordion()
   const childActive = paths.some((path) => location.pathname.startsWith(path))
   const open = openGroupId === groupId
   const didMountDefault = useRef(false)
@@ -68,10 +68,11 @@ function NavGroup({ groupId, label, paths, defaultOpen = false, children }: NavG
   useEffect(() => {
     if (lastPathRef.current === location.pathname) return
     lastPathRef.current = location.pathname
-    if (childActive) {
+    if (childActive && !suppressAutoOpenRef.current) {
       openGroup(groupId)
     }
-  }, [location.pathname, childActive, groupId, openGroup])
+    suppressAutoOpenRef.current = false
+  }, [location.pathname, childActive, groupId, openGroup, suppressAutoOpenRef])
 
   const handleToggle = () => {
     toggleGroup(groupId)

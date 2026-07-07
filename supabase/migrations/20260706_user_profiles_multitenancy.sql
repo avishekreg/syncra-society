@@ -94,34 +94,3 @@ create policy "visitor_logs_service_all"
   to service_role
   using (true)
   with check (true);
-
--- Demo gatekeeper seed (Windsor Castle society UUID from schema.sql)
-insert into public.user_and_flats (
-  user_id,
-  society_id,
-  flat_number,
-  name,
-  username,
-  email,
-  phone,
-  role,
-  requires_password_change
-)
-values (
-  'demo-gatekeeper@syncrademo.com',
-  'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-  'Gate-Desk',
-  'Demo Gatekeeper',
-  'gatekeeper_demo',
-  'gatekeeper@syncrademo.com',
-  '+919999999999',
-  'gatekeeper',
-  true
-)
-on conflict (society_id, username) do update
-set
-  name = excluded.name,
-  role = excluded.role,
-  requires_password_change = excluded.requires_password_change,
-  email = excluded.email,
-  updated_at = now();
