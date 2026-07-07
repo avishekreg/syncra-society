@@ -138,7 +138,131 @@ function adminHeaders(apiKey: string) {
 function setCors(res: import('@vercel/node').VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-syncra-automation-secret')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-syncra-automation-secret, x-syncra-response-format')
+}
+
+function escapeXml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;')
+}
+
+function buildTwiml(message: string): string {
+  return `<?xml version="1.0" encoding="UTF-8"?><Response><Message>${escapeXml(message)}</Message></Response>`
+}
+
+function isTwilioWebhookPayload(raw: Record<string, unknown>): boolean {
+  return Boolean(
+    raw.Body ||
+      raw.From ||
+      raw.To ||
+      raw.SmsMessageSid ||
+      raw.MessageSid ||
+      raw.WaId ||
+      raw.ProfileName
+  )
+}
+
+function shouldRespondWithTwiml(req: import('@vercel/node').VercelRequest): boolean {
+  const formatHeader = safeString(req.headers['x-syncra-response-format']).toLowerCase()
+  if (formatHeader === 'json') return false
+  if (formatHeader === 'twiml' || formatHeader === 'xml') return true
+
+  const merged = unwrapRecord(req.body)
+  if (isTwilioWebhookPayload(merged)) return true
+
+  const accept = safeString(req.headers.accept).toLowerCase()
+  if (accept.includes('application/xml') || accept.includes('text/xml')) return true
+
+  // n8n → portal bridge for WhatsApp inbound defaults to TwiML unless JSON explicitly requested.
+  if (safeString(req.headers['x-syncra-automation-secret'])) return true
+
+  return false
+}
+
+function sendTwiml(res: import('@vercel/node').VercelResponse, status: number, message: string) {
+  res.setHeader('Content-Type', 'text/xml; charset=utf-8')
+  return res.status(status).send(buildTwiml(message))
+}
+
+function sendHandlerResponse(
+  res: import('@vercel/node').VercelResponse,
+  req: import('@vercel/node').VercelRequest,
+  status: number,
+  payload: Record<string, unknown>,
+  whatsappMessage?: string
+) {
+  if (shouldRespondWithTwiml(req)) {
+    const message =
+      whatsappMessage ||
+      safeString(payload.message) ||
+      (status >= 400
+        ? 'Syncra Society: We could not process your WhatsApp message. Please try again or contact your society office.'
+        : 'Syncra Society: Your message has been received.')
+    // Twilio webhooks expect HTTP 200 even for handled application errors.
+    const twilioStatus = isTwilioWebhookPayload(unwrapRecord(req.body)) ? 200 : status
+    return sendTwiml(res, twilioStatus, message)
+  }
+
+  return res.status(status).json(payload)
+}
+
+async function generateWhatsAppReply(input: {
+  messageType: MessageType
+  description: string | null
+  flatNumber: string | null
+  ticketId: string
+}): Promise<string> {
+  const groqKey = readEnvVar('GROQ_API_KEY')
+  const groqModel = readEnvVar('GROQ_MODEL') || 'llama-3.1-8b-instant'
+
+  if (groqKey && input.description) {
+    try {
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${groqKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: groqModel,
+          temperature: 0.3,
+          max_tokens: 140,
+          messages: [
+            {
+              role: 'system',
+              content:
+                'You are Syncra Society WhatsApp assistant. Reply in at most 2 short sentences confirming the resident request was logged. Plain text only, no markdown.'
+            },
+            {
+              role: 'user',
+              content: `Type: ${input.messageType}. Flat: ${input.flatNumber ?? 'unknown'}. Message: ${input.description}`
+            }
+          ]
+        })
+      })
+
+      if (response.ok) {
+        const payload = (await response.json()) as {
+          choices?: Array<{ message?: { content?: string } }>
+        }
+        const generated = payload.choices?.[0]?.message?.content?.trim()
+        if (generated) return generated.slice(0, 1000)
+      }
+    } catch (err) {
+      console.warn('[automation/inbound] Groq reply generation failed', err)
+    }
+  }
+
+  if (input.messageType === 'payment_receipt') {
+    return 'Syncra Society: Your payment receipt has been received. Our accounts team will verify and update your ledger shortly.'
+  }
+
+  const flatHint = input.flatNumber ? ` for Flat ${input.flatNumber}` : ''
+  return `Syncra Society: Your helpdesk ticket${flatHint} has been registered (Ref ${input.ticketId.slice(0, 8)}). Our team will review it shortly.`
 }
 
 function safeString(value: unknown, fallback = ''): string {
@@ -608,17 +732,31 @@ module.exports = async function handler(
     societyResolution = await resolveSocietyId(supabase.url, supabase.apiKey, body.societyId)
 
     if (body.messageType === 'payment_receipt') {
-      return res.status(200).json({
-        success: true,
-        action: 'receipt_logged',
-        receiptId: `wa-receipt-${Date.now()}`,
-        societyId: societyResolution.societyId,
-        societySource: societyResolution.source,
+      const receiptId = `wa-receipt-${Date.now()}`
+      const whatsappMessage = await generateWhatsAppReply({
+        messageType: 'payment_receipt',
+        description: normalizeDescription(body.description),
         flatNumber: body.flatNumber,
-        amount: body.amount,
-        reference: body.reference,
-        message: 'Payment receipt recorded for admin review'
+        ticketId: receiptId
       })
+
+      return sendHandlerResponse(
+        res,
+        req,
+        200,
+        {
+          success: true,
+          action: 'receipt_logged',
+          receiptId,
+          societyId: societyResolution.societyId,
+          societySource: societyResolution.source,
+          flatNumber: body.flatNumber,
+          amount: body.amount,
+          reference: body.reference,
+          message: whatsappMessage
+        },
+        whatsappMessage
+      )
     }
 
     const subject =
@@ -644,20 +782,33 @@ module.exports = async function handler(
       })
 
       const ticketRow = Array.isArray(ticket) ? ticket[0] : ticket
-
-      return res.status(201).json({
-        success: true,
-        action: 'ticket_created',
-        ticketId: ticketRow?.id ?? `wa-ticket-${Date.now()}`,
-        table: COMPLAINTS_TABLE,
-        ticket: ticketRow,
-        societyId: societyResolution.societyId,
-        societySource: societyResolution.source,
-        raisedByUserId: userResolution.userId,
-        raisedBySource: userResolution.source,
-        supabaseKeySource: supabase.keySource,
-        message: 'Ticket stored in complaints_and_suggestions'
+      const ticketId = String(ticketRow?.id ?? `wa-ticket-${Date.now()}`)
+      const whatsappMessage = await generateWhatsAppReply({
+        messageType: body.messageType,
+        description: normalizeDescription(body.description),
+        flatNumber: body.flatNumber,
+        ticketId
       })
+
+      return sendHandlerResponse(
+        res,
+        req,
+        201,
+        {
+          success: true,
+          action: 'ticket_created',
+          ticketId,
+          table: COMPLAINTS_TABLE,
+          ticket: ticketRow,
+          societyId: societyResolution.societyId,
+          societySource: societyResolution.source,
+          raisedByUserId: userResolution.userId,
+          raisedBySource: userResolution.source,
+          supabaseKeySource: supabase.keySource,
+          message: whatsappMessage
+        },
+        whatsappMessage
+      )
     } catch (err) {
       const handlerError = err as HandlerError
       const statusCode = handlerError.statusCode ?? 500
@@ -677,15 +828,28 @@ module.exports = async function handler(
         })
       }
 
-      return res.status(statusCode).json({
-        error: message,
-        details: handlerError.supabase?.details ?? null,
-        hint: handlerError.supabase?.hint ?? null,
-        code: handlerError.supabase?.code ?? null
-      })
+      return sendHandlerResponse(
+        res,
+        req,
+        statusCode,
+        {
+          error: message,
+          details: handlerError.supabase?.details ?? null,
+          hint: handlerError.supabase?.hint ?? null,
+          code: handlerError.supabase?.code ?? null,
+          message
+        },
+        `Syncra Society: ${message}`
+      )
     }
   } catch (error) {
     console.error('[automation/inbound] Unhandled error:', error)
-    return res.status(500).json({ error: 'Failed to process inbound WhatsApp message' })
+    return sendHandlerResponse(
+      res,
+      req,
+      500,
+      { error: 'Failed to process inbound WhatsApp message' },
+      'Syncra Society: We could not process your WhatsApp message right now. Please try again shortly.'
+    )
   }
 }
