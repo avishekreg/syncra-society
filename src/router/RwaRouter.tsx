@@ -15,6 +15,8 @@ import RewardsGovernance from '../pages/rwa/RewardsGovernance'
 import WorkspaceCashflowPage from '../pages/rwa/workspace/CashflowPage'
 import WorkspaceComplaintsPage from '../pages/rwa/workspace/ComplaintsPage'
 import WorkspaceFlatsPage from '../pages/rwa/workspace/FlatsPage'
+import SecretaryDashboard from '../pages/rwa/workspace/SecretaryDashboard'
+import AccountantDashboard from '../pages/rwa/workspace/AccountantDashboard'
 import TierGuard from './TierGuard'
 import RoleGuard from './RoleGuard'
 import WorkspaceIndexRedirect from './WorkspaceIndexRedirect'
@@ -29,6 +31,26 @@ export default function RwaRouter() {
           element={
             <RoleGuard allow={['president', 'secretary']}>
               <WorkspaceIndexRedirect />
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="workspace/secretary"
+          element={
+            <RoleGuard allow={['secretary']}>
+              <TierGuard requiredTier="tier2">
+                <SecretaryDashboard />
+              </TierGuard>
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="workspace/accountant"
+          element={
+            <RoleGuard allow={['accountant']}>
+              <TierGuard requiredTier="tier2">
+                <AccountantDashboard />
+              </TierGuard>
             </RoleGuard>
           }
         />

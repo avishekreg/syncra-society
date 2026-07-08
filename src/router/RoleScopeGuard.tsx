@@ -56,8 +56,11 @@ export default function RoleScopeGuard({
   }
 
   if (scope === 'resident') {
+    const flatNumber = (user as { flatNumber?: string | null }).flatNumber
     if (workspaceRole === 'secretary' || workspaceRole === 'accountant') {
-      return <Navigate to={defaultPathForRole(workspaceRole)} replace />
+      if (!flatNumber) {
+        return <Navigate to={defaultPathForRole(workspaceRole)} replace />
+      }
     }
     return children
   }

@@ -40,9 +40,9 @@ export function defaultPathForRole(role: WorkspaceRole): string {
     case 'president':
       return '/admin/dashboard'
     case 'secretary':
-      return '/admin/helpdesk'
+      return '/rwa/workspace/secretary'
     case 'accountant':
-      return '/finance/ledger'
+      return '/rwa/workspace/accountant'
     case 'gatekeeper':
       return '/gatekeeper'
     default:
@@ -51,7 +51,11 @@ export function defaultPathForRole(role: WorkspaceRole): string {
 }
 
 export function canAccessResidentPortal(user: AuthUser | null | undefined): boolean {
+  if (!user || isGlobalSuperAdmin(user)) return false
   const role = resolveWorkspaceRole(user)
+  const flatNumber = (user as AuthUser & { flatNumber?: string | null }).flatNumber
+  if (role === 'gatekeeper') return false
+  if (role === 'secretary' || role === 'accountant') return Boolean(flatNumber)
   return role === 'resident' || role === 'president'
 }
 

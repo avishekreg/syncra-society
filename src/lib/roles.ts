@@ -47,12 +47,18 @@ export function isGatekeeper(user: AuthUser | null | undefined): boolean {
   return role === 'gatekeeper' || Boolean(user.roles?.includes('gatekeeper'))
 }
 
-/** Resident portal access — residents and presidents only. */
+/** Resident portal access — all society members including staff with a linked flat. */
 export function canAccessResidentPortal(user: AuthUser | null | undefined): boolean {
   if (!user || isGlobalSuperAdmin(user)) return false
   const role = user.user_metadata?.role ?? user.role ?? 'resident'
   const roles = user.roles ?? []
-  if (role === 'rwa_secretary' || roles.includes('rwa_secretary')) return false
-  if (role === 'rwa_accountant' || roles.includes('rwa_accountant')) return false
+  const flatNumber = (user as AuthUser & { flatNumber?: string | null }).flatNumber
+  if (role === 'gatekeeper' || roles.includes('gatekeeper')) return false
+  if (role === 'rwa_secretary' || roles.includes('rwa_secretary')) {
+    return Boolean(flatNumber)
+  }
+  if (role === 'rwa_accountant' || roles.includes('rwa_accountant')) {
+    return Boolean(flatNumber)
+  }
   return true
 }

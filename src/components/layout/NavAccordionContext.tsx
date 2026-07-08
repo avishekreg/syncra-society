@@ -67,16 +67,16 @@ export function useNavAccordion() {
   return context
 }
 
-/** Top-level flat nav links — closes every open dropdown before navigating. */
+/** Top-level flat nav links — preserve accordion state to avoid sidebar scroll jumps. */
 export function AccordionNavLink({ onClick, ...props }: NavLinkProps) {
-  const { closeAllGroups } = useNavAccordion()
+  const { suppressAutoOpenRef } = useNavAccordion()
 
   return (
     <NavLink
       preventScrollReset
       {...props}
       onClick={(event) => {
-        closeAllGroups()
+        suppressAutoOpenRef.current = true
         onClick?.(event)
       }}
     />

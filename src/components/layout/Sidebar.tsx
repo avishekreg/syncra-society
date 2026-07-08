@@ -170,9 +170,10 @@ export default function Sidebar({ children, title }: SidebarProps) {
 
   useEffect(() => {
     const nav = navScrollRef.current
-    if (nav) {
+    if (!nav) return
+    requestAnimationFrame(() => {
       nav.scrollTop = navScrollTopRef.current
-    }
+    })
   }, [location.pathname])
 
   useEffect(() => {
@@ -199,7 +200,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
   const workspaceRole = resolveWorkspaceRole(user)
   const showResidentNav = canAccessResidentPortal(user)
   const showStaffNav = isRwaStaff(user)
-  const embedResidentInStaffNav = showStaffNav && showResidentNav && workspaceRole === 'president'
+  const embedResidentInStaffNav = showStaffNav && showResidentNav
   const showStandaloneResidentNav = showResidentNav && !embedResidentInStaffNav
 
   async function handleSignOut() {
@@ -360,6 +361,18 @@ export default function Sidebar({ children, title }: SidebarProps) {
             <p className="mb-2 mt-4 px-3.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 sm:mt-6">
               Administration
             </p>
+
+            {workspaceRole === 'secretary' && (
+              <AccordionNavLink to="/rwa/workspace/secretary" className={navLinkClass}>
+                Secretary Dashboard
+              </AccordionNavLink>
+            )}
+
+            {workspaceRole === 'accountant' && (
+              <AccordionNavLink to="/rwa/workspace/accountant" className={navLinkClass}>
+                Accountant Dashboard
+              </AccordionNavLink>
+            )}
 
             {showFinancialConsole && (
               <NavGroup
@@ -571,7 +584,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
 
   return (
     <NavAccordionProvider>
-      <div className="flex min-h-screen flex-col bg-syncra-surface lg:h-screen lg:min-h-0 lg:flex-row lg:overflow-hidden">
+      <div className="flex min-h-screen flex-col bg-syncra-surface md:h-screen md:min-h-0 md:flex-row md:overflow-hidden lg:h-screen">
       <header className="sticky top-0 z-40 flex min-h-14 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 lg:hidden">
         <button
           type="button"
@@ -600,14 +613,14 @@ export default function Sidebar({ children, title }: SidebarProps) {
 
       <aside
         className={[
-          'fixed inset-y-0 left-0 z-50 flex h-screen w-[min(100vw-3rem,17.5rem)] flex-col border-r border-slate-200 bg-white shadow-xl transition-transform duration-200 ease-out lg:static lg:z-auto lg:h-full lg:w-[17.5rem] lg:shrink-0 lg:translate-x-0 lg:shadow-none',
-          mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          'fixed inset-y-0 left-0 z-50 flex h-screen w-[min(100vw-3rem,17.5rem)] flex-col border-r border-slate-200 bg-white shadow-xl transition-transform duration-200 ease-out md:sticky md:top-0 md:z-auto md:h-screen md:w-[17.5rem] md:shrink-0 md:translate-x-0 md:shadow-none lg:static',
+          mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         ].join(' ')}
       >
         {navContent}
       </aside>
 
-      <main className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-syncra-surface text-slate-900 lg:h-full">
+      <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain bg-syncra-surface text-slate-900 md:h-screen lg:h-full">
         {children}
       </main>
       </div>

@@ -1,6 +1,7 @@
 import React from 'react'
 import SocietyIntegrationCredentials from '../../components/society/SocietyIntegrationCredentials'
 import SocietyBillingRulesForm from '../../components/society/SocietyBillingRulesForm'
+import PresidentGovernanceTree from '../../components/admin/PresidentGovernanceTree'
 import { ui } from '../../lib/ui'
 
 export default function SocietyConfiguration() {
@@ -15,6 +16,7 @@ export default function SocietyConfiguration() {
         </p>
       </header>
 
+      <PresidentGovernanceTree />
       <SocietyBillingRulesForm />
       <SocietyIntegrationCredentials />
     </div>

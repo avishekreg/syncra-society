@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import AdminRouteLayout from '../layouts/AdminRouteLayout'
 import AdminDashboard from '../pages/admin/Dashboard'
 import AdminNotices from '../pages/admin/Notices'
-import AdminHelpdeskDashboard from '../pages/admin/HelpdeskDashboard'
+import AdminHelpdeskRoute from './AdminHelpdeskRoute'
 import SocietyConfiguration from '../pages/admin/SocietyConfiguration'
 import TierGuard from './TierGuard'
 import RoleGuard from './RoleGuard'
@@ -38,7 +38,7 @@ export default function AdminRouter() {
           element={
             <RoleGuard allow={['president', 'secretary']}>
               <TierGuard requiredTier="tier2">
-                <AdminHelpdeskDashboard />
+                <AdminHelpdeskRoute />
               </TierGuard>
             </RoleGuard>
           }

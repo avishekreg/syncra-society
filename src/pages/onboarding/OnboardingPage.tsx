@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../providers/AuthProvider'
 import { createSociety } from '../../api/societies'
 import { writeLocalBillingStatus } from '../../api/payments'
+import { initializeFoundingPresident } from '../../lib/governanceRoles'
 import { ui } from '../../lib/ui'
 
 export default function OnboardingPage() {
@@ -65,6 +66,7 @@ export default function OnboardingPage() {
       navigate('/onboarding/activation', { replace: true })
     } catch {
       const societyId = `society-${Date.now()}`
+      initializeFoundingPresident(societyId, user!.email ?? '')
       setCurrentSocietyId(societyId)
       setShowcaseData({
         society: {

@@ -47,6 +47,7 @@ export const DEMO_LOGINS: Record<string, DemoLoginConfig> = {
     roles: ['rwa_secretary'],
     role: 'rwa_secretary',
     tier: 'tier2',
+    flatNumber: '302',
     label: 'Society Secretary'
   },
   'accountant@syncrademo.com': {
@@ -54,6 +55,7 @@ export const DEMO_LOGINS: Record<string, DemoLoginConfig> = {
     roles: ['rwa_accountant'],
     role: 'rwa_accountant',
     tier: 'tier2',
+    flatNumber: '205',
     label: 'Society Accountant'
   },
   'resident@syncrademo.com': {
@@ -110,8 +112,8 @@ export function getPostLoginPath(roles: string[], societyId: string | null, role
   if (roles.includes('super_admin') || role === 'super_admin') return '/super-admin/dashboard'
   if (roles.includes('gatekeeper') || role === 'gatekeeper') return '/gatekeeper'
   if (!societyId && (roles.includes('rwa_owner') || role === 'rwa_owner')) return '/onboarding'
-  if (roles.includes('rwa_secretary') || role === 'rwa_secretary') return '/admin/helpdesk'
-  if (roles.includes('rwa_accountant') || role === 'rwa_accountant') return '/finance/ledger'
+  if (roles.includes('rwa_secretary') || role === 'rwa_secretary') return '/rwa/workspace/secretary'
+  if (roles.includes('rwa_accountant') || role === 'rwa_accountant') return '/rwa/workspace/accountant'
   if (
     roles.includes('rwa_owner') ||
     role === 'rwa_owner'

@@ -2,6 +2,11 @@ import React, { useState } from 'react'
 import { useAuth } from '../../providers/AuthProvider'
 import { restPost } from '../../api/supabaseClient'
 import { uploadDocument } from '../../utils/upload'
+import {
+  classifyExpense,
+  submitExpense,
+  type ExpenseCategory
+} from '../../lib/expenseApproval'
 import { ui } from '../../lib/ui'
 
 type Props = {
@@ -9,11 +14,13 @@ type Props = {
 }
 
 export default function LedgerManager({ embedded = false }: Props) {
-  const { currentSocietyId } = useAuth()
+  const { currentSocietyId, user } = useAuth()
   const [type, setType] = useState<'credit' | 'debit'>('credit')
   const [amount, setAmount] = useState<number | ''>('')
   const [description, setDescription] = useState('')
+  const [category, setCategory] = useState<ExpenseCategory | 'auto'>('auto')
   const [file, setFile] = useState<File | null>(null)
+  const [feedback, setFeedback] = useState('')
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault()
@@ -24,19 +31,34 @@ export default function LedgerManager({ embedded = false }: Props) {
     let invoice_url: string | undefined
     if (file) invoice_url = await uploadDocument(file)
 
-    await restPost('society_ledger', {
-      society_id: currentSocietyId,
-      date: new Date().toISOString(),
+    const resolvedCategory = category === 'auto' ? classifyExpense(description) : category
+    const expense = submitExpense(currentSocietyId, {
       type,
       amount: Number(amount),
       description,
-      invoice_url
+      category: resolvedCategory,
+      invoiceUrl: invoice_url ?? null,
+      submittedBy: user?.email ?? undefined
     })
+
+    if (expense.category === 'fixed' || expense.status === 'auto_posted') {
+      await restPost('society_ledger', {
+        society_id: currentSocietyId,
+        date: new Date().toISOString(),
+        type,
+        amount: Number(amount),
+        description,
+        invoice_url
+      })
+      setFeedback('Fixed expense posted to cashbook automatically.')
+    } else {
+      setFeedback('Incidental expense submitted — pending accountant approval before cashbook posting.')
+    }
 
     setAmount('')
     setDescription('')
     setFile(null)
-    alert('Ledger entry added')
+    setCategory('auto')
   }
 
   return (
@@ -59,10 +81,20 @@ export default function LedgerManager({ embedded = false }: Props) {
         <input
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Description"
+          placeholder="Description (e.g. Guard Salary, Elevator Repair)"
           className={ui.input}
         />
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value as ExpenseCategory | 'auto')}
+          className={ui.input}
+        >
+          <option value="auto">Auto-detect expense type</option>
+          <option value="fixed">Fixed / recurring (auto-post)</option>
+          <option value="incidental">Incidental / custom (requires approval)</option>
+        </select>
         <input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className={ui.input} />
+        {feedback ? <p className="text-sm text-syncra-blue">{feedback}</p> : null}
         <div className="flex justify-end pt-1">
           <button type="submit" className={ui.btnPrimary}>
             Add Entry

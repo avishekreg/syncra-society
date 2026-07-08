@@ -128,5 +128,3 @@ export function formatPlanPriceLabel(planType: SaasPlanType | string): string {
 export function formatWhatsAppUsageLabel(sent: number, limit = WHATSAPP_MONTHLY_ALERT_LIMIT) {
   return `${sent} / ${limit} Alerts Used`
 }
-
-export { WHATSAPP_MONTHLY_ALERT_LIMIT }

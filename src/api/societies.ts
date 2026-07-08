@@ -3,6 +3,7 @@ import { restGet, restPatch, restPost } from './supabaseClient'
 import { fetchApiJson } from './safeFetch'
 import { isSocietyUuid, resolveSocietyUuid } from '../lib/resolveSocietyContext'
 import { SEED_SOCIETIES } from '../lib/seedSocieties'
+import { initializeFoundingPresident } from '../lib/governanceRoles'
 
 const SOCIETY_SELECT =
   'id,name,address,created_at,subscription_tier,subscription_status,pricing_slab_id,total_flats,opening_bank_balance'
@@ -174,6 +175,8 @@ export async function createSociety(payload: {
   } catch {
     // Table may not exist yet in remote Supabase — payment server will create on first status call.
   }
+
+  initializeFoundingPresident(society.id, payload.admin_email)
 
   return { society: normalizeSocietyRecord(society)!, profile }
 }
