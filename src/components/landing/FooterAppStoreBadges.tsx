@@ -2,15 +2,24 @@ import React, { useEffect, useState } from 'react'
 import { SYNCRA_ANDROID_LANDING_PATH } from '../../lib/androidApp'
 import { ui } from '../../lib/ui'
 
-/** Identical shell — flat solid black, no borders, no nested frames. */
-const STORE_BUTTON_CLASS =
-  'inline-flex h-12 w-[172px] shrink-0 items-center gap-2.5 rounded-xl bg-black px-3.5 text-left text-white ' +
-  'shadow-sm outline-none transition hover:opacity-90 ' +
+const BADGE_IMG_STYLE: React.CSSProperties = { borderRadius: '8px' }
+const BADGE_IMG_CLASS = 'block h-10 w-[135px] max-w-full rounded-md object-cover overflow-hidden'
+const BADGE_IMG_CLASS_FULL = 'block h-12 w-[172px] max-w-full rounded-md object-cover overflow-hidden'
+
+const PILL_BUTTON_CLASS =
+  'inline-flex min-h-11 items-center gap-2.5 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-syncra-primary ' +
+  'shadow-sm outline-none transition hover:border-syncra-accent/40 hover:bg-syncra-surface-alt ' +
   'focus-visible:ring-2 focus-visible:ring-syncra-accent/40 focus-visible:ring-offset-2'
 
-function GooglePlayIcon({ className = 'h-7 w-7 shrink-0' }: { className?: string }) {
+function GooglePlayIcon({ className = 'h-5 w-5 shrink-0 rounded-md overflow-hidden' }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      style={BADGE_IMG_STYLE}
+      aria-hidden="true"
+    >
       <path
         fill="#4285F4"
         d="M3 20.5V3.5C3 2.91 3.34 2.39 3.84 2.15L13.69 12 3.84 21.85C3.34 21.61 3 21.09 3 20.5Z"
@@ -25,12 +34,13 @@ function GooglePlayIcon({ className = 'h-7 w-7 shrink-0' }: { className?: string
   )
 }
 
-function AppleIcon({ className = 'h-7 w-7 shrink-0' }: { className?: string }) {
+function AppleIcon({ className = 'h-5 w-5 shrink-0 rounded-md overflow-hidden' }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
+      style={BADGE_IMG_STYLE}
       aria-hidden="true"
       fill="currentColor"
     >
@@ -39,28 +49,25 @@ function AppleIcon({ className = 'h-7 w-7 shrink-0' }: { className?: string }) {
   )
 }
 
-function GooglePlayButtonLabel() {
-  return (
-    <span className="flex min-w-0 flex-col leading-none">
-      <span className="text-[9px] font-medium uppercase tracking-[0.08em] text-white">
-        GET IT ON
-      </span>
-      <span className="mt-1 text-[15px] font-semibold tracking-tight text-white">Google Play</span>
-    </span>
-  )
+type FooterAppStoreBadgesProps = {
+  align?: 'left' | 'center'
+  variant?: 'store' | 'pill'
+  /** Stack store buttons vertically instead of side-by-side. */
+  stacked?: boolean
+  /** Hide the built-in heading (when rendered by SyncraFooter). */
+  hideHeading?: boolean
 }
 
-function AppStoreButtonLabel() {
-  return (
-    <span className="flex min-w-0 flex-col leading-none">
-      <span className="text-[9px] font-medium tracking-[0.01em] text-white/95">Download on the</span>
-      <span className="mt-1 text-[15px] font-semibold tracking-tight text-white">App Store</span>
-    </span>
-  )
-}
-
-export default function FooterAppStoreBadges() {
+export default function FooterAppStoreBadges({
+  align = 'left',
+  variant = 'store',
+  stacked = false,
+  hideHeading = false
+}: FooterAppStoreBadgesProps) {
   const [iosModalOpen, setIosModalOpen] = useState(false)
+  const compact = stacked
+  const badgeImgClass = compact ? BADGE_IMG_CLASS : BADGE_IMG_CLASS_FULL
+  const alignClass = align === 'center' ? 'items-center text-center' : 'items-start text-left'
 
   useEffect(() => {
     if (!iosModalOpen) return
@@ -71,32 +78,70 @@ export default function FooterAppStoreBadges() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [iosModalOpen])
 
+  const iosTrigger =
+    variant === 'pill' ? (
+      <button
+        type="button"
+        onClick={() => setIosModalOpen(true)}
+        className={PILL_BUTTON_CLASS}
+        aria-label="Download on the App Store — coming soon"
+      >
+        <AppleIcon className="h-5 w-5 shrink-0 text-syncra-primary" />
+        iPhone App
+      </button>
+    ) : (
+      <button
+        type="button"
+        onClick={() => setIosModalOpen(true)}
+        className="inline-block border-0 bg-transparent p-0"
+        aria-label="Download on the App Store — coming soon"
+      >
+        <img
+          src="/badges/app-store.svg"
+          alt="Download on the App Store"
+          className={badgeImgClass}
+          style={BADGE_IMG_STYLE}
+        />
+      </button>
+    )
+
+  const androidLink =
+    variant === 'pill' ? (
+      <a href={SYNCRA_ANDROID_LANDING_PATH} className={PILL_BUTTON_CLASS} aria-label="Get Android app">
+        <GooglePlayIcon />
+        Android App
+      </a>
+    ) : (
+      <a href={SYNCRA_ANDROID_LANDING_PATH} className="inline-block" aria-label="Get it on Google Play">
+        <img
+          src="/badges/google-play.svg"
+          alt="Get it on Google Play"
+          className={badgeImgClass}
+          style={BADGE_IMG_STYLE}
+        />
+      </a>
+    )
+
   return (
     <>
-      <div className="flex w-full flex-col gap-3 lg:w-auto lg:items-center">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-syncra-accent lg:text-center">
-          Get the app
-        </p>
+      <div className={`flex w-full flex-col space-y-2 lg:w-auto ${alignClass}`}>
+        {variant === 'store' && !hideHeading && (
+          <p className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-syncra-blue">
+            Get the app
+          </p>
+        )}
 
         <div
-          className="flex flex-row flex-wrap items-center gap-3 sm:gap-4"
+          className={
+            stacked
+              ? 'flex w-full flex-col items-start space-y-1.5'
+              : 'flex flex-nowrap items-center gap-3 sm:gap-4'
+          }
           role="group"
           aria-label="Download Syncra Society mobile apps"
         >
-          <a href={SYNCRA_ANDROID_LANDING_PATH} className={STORE_BUTTON_CLASS} aria-label="Get it on Google Play">
-            <GooglePlayIcon />
-            <GooglePlayButtonLabel />
-          </a>
-
-          <button
-            type="button"
-            onClick={() => setIosModalOpen(true)}
-            className={`${STORE_BUTTON_CLASS} border-0`}
-            aria-label="Download on the App Store — coming soon"
-          >
-            <AppleIcon />
-            <AppStoreButtonLabel />
-          </button>
+          {androidLink}
+          {iosTrigger}
         </div>
       </div>
 

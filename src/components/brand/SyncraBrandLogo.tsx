@@ -5,6 +5,8 @@ type SyncraBrandLogoProps = {
   to?: string
   className?: string
   variant?: 'light' | 'dark'
+  /** When false, shows a single-line Syncra wordmark without the Society subtitle. */
+  showSubtitle?: boolean
 }
 
 function SyncraInsignia({ className }: { className?: string }) {
@@ -71,8 +73,29 @@ function SyncraInsignia({ className }: { className?: string }) {
   )
 }
 
-function SyncraWordmark({ variant = 'light' }: { variant?: 'light' | 'dark' }) {
+function SyncraWordmark({
+  variant = 'light',
+  showSubtitle = true
+}: {
+  variant?: 'light' | 'dark'
+  showSubtitle?: boolean
+}) {
   const isDark = variant === 'dark'
+
+  if (!showSubtitle) {
+    return (
+      <span
+        className={
+          isDark
+            ? 'bg-gradient-to-r from-white via-slate-100 to-cyan-100 bg-clip-text text-base font-bold tracking-tight text-transparent'
+            : 'text-base font-bold tracking-tight text-syncra-primary'
+        }
+      >
+        Syncra
+      </span>
+    )
+  }
+
   return (
     <div className="flex min-w-0 flex-col justify-center leading-none">
       <span
@@ -101,11 +124,16 @@ function SyncraWordmark({ variant = 'light' }: { variant?: 'light' | 'dark' }) {
   )
 }
 
-export default function SyncraBrandLogo({ to = '/', className = '', variant = 'light' }: SyncraBrandLogoProps) {
+export default function SyncraBrandLogo({
+  to = '/',
+  className = '',
+  variant = 'light',
+  showSubtitle = true
+}: SyncraBrandLogoProps) {
   const content = (
     <div className={`flex h-9 items-center gap-2.5 ${className}`}>
       <SyncraInsignia className="h-8 w-8 shrink-0" />
-      <SyncraWordmark variant={variant} />
+      <SyncraWordmark variant={variant} showSubtitle={showSubtitle} />
     </div>
   )
 

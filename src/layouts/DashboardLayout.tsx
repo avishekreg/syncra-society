@@ -22,7 +22,7 @@ export default function DashboardLayout({ title, children }: { title?: string; c
           </header>
         )}
         <div className="min-w-0 flex-1">{children}</div>
-        <SyncraFooter compact className="mt-10 rounded-2xl border border-gray-200 shadow-sm" />
+        <SyncraFooter className="mt-10 rounded-2xl border border-gray-200 shadow-sm" showAppBadges={false} />
       </div>
     </Sidebar>
   )

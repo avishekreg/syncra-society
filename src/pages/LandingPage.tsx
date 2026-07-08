@@ -1,11 +1,11 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import SyncraBrandLogo from '../components/brand/SyncraBrandLogo'
-import FooterAppStoreBadges from '../components/landing/FooterAppStoreBadges'
 import AntiDisputeHarmonySection from '../components/landing/AntiDisputeHarmonySection'
 import HeroDashboardMockup from '../components/landing/HeroDashboardMockup'
 import SyncraPromiseSection from '../components/landing/SyncraPromiseSection'
 import SyncraFooter from '../components/layout/SyncraFooter'
+import FooterEnterpriseCta from '../components/layout/FooterEnterpriseCta'
 import { SYNCRA_LEGAL_ENTITY } from '../lib/brandConstants'
 import { usePlatformPricing } from '../hooks/usePlatformPricing'
 import {
@@ -90,7 +90,7 @@ export default function LandingPage() {
   const { pricing } = usePlatformPricing()
 
   return (
-    <div className={`relative overflow-hidden ${ui.page}`}>
+    <div className={`relative overflow-x-hidden ${ui.page}`}>
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(0,180,216,0.08),_transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(0,82,204,0.06),_transparent_24%)]" />
 
       <header className="relative z-20 border-b border-slate-200 bg-white/95 backdrop-blur-sm">
@@ -278,21 +278,10 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <p className="text-center text-xs text-slate-500">
-            Need a custom township rollout?{' '}
-            <a href="mailto:hello@syncrasystems.com" className="font-medium text-syncra-blue hover:underline">
-              Contact {SYNCRA_LEGAL_ENTITY}
-            </a>{' '}
-            for enterprise onboarding.
-          </p>
         </section>
       </main>
 
-      <div className="relative z-10 border-t border-gray-200 bg-white py-8">
-        <div className="mx-auto flex max-w-7xl justify-center px-4 sm:px-6">
-          <FooterAppStoreBadges />
-        </div>
-      </div>
+      <FooterEnterpriseCta />
 
       <SyncraFooter />
     </div>

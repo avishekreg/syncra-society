@@ -119,7 +119,7 @@ export default function LegalPageLayout({ title, children }: LegalPageLayoutProp
         </div>
       </main>
 
-      <SyncraFooter compact />
+      <SyncraFooter showAppBadges={false} />
     </div>
   )
 }

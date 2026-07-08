@@ -5,6 +5,7 @@
 @tailwind utilities;
 
 :root {
+  --radius: 0.5rem;
   --syncra-bg: #ffffff;
   --syncra-surface: #f4f5f7;
   --syncra-surface-alt: #fafbfc;

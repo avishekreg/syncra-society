@@ -31,7 +31,7 @@ export default function AuthLayout({
           </div>
         </div>
       </div>
-      <SyncraFooter compact />
+      <SyncraFooter showAppBadges={false} />
     </div>
   )
 }
