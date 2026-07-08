@@ -46,46 +46,47 @@ type NavGroupProps = {
   groupId: string
   label: string
   paths: string[]
-  defaultOpen?: boolean
+  /** Primary route opened when the group label is clicked. */
+  defaultRoute?: string
   children: React.ReactNode
 }
 
-function NavGroup({ groupId, label, paths, defaultOpen = false, children }: NavGroupProps) {
+function NavGroup({ groupId, label, paths, defaultRoute, children }: NavGroupProps) {
   const location = useLocation()
-  const { openGroupId, toggleGroup, openGroup, suppressAutoOpenRef } = useNavAccordion()
+  const navigate = useNavigate()
+  const { openGroupId, toggleGroup, openGroup } = useNavAccordion()
   const childActive = paths.some((path) => location.pathname.startsWith(path))
   const open = openGroupId === groupId
-  const didMountDefault = useRef(false)
-  const lastPathRef = useRef(location.pathname)
 
-  useEffect(() => {
-    if (!didMountDefault.current && defaultOpen && openGroupId === null) {
-      didMountDefault.current = true
-      openGroup(groupId)
+  const handleLabelClick = () => {
+    if (defaultRoute) {
+      if (!childActive) {
+        navigate(defaultRoute)
+        openGroup(groupId)
+        return
+      }
+      if (!open) {
+        openGroup(groupId)
+        return
+      }
     }
-  }, [defaultOpen, groupId, openGroup, openGroupId])
+    toggleGroup(groupId)
+  }
 
-  useEffect(() => {
-    if (lastPathRef.current === location.pathname) return
-    lastPathRef.current = location.pathname
-    if (childActive && !suppressAutoOpenRef.current) {
-      openGroup(groupId)
-    }
-    suppressAutoOpenRef.current = false
-  }, [location.pathname, childActive, groupId, openGroup, suppressAutoOpenRef])
-
-  const handleToggle = () => {
+  const handleChevronToggle = () => {
     toggleGroup(groupId)
   }
 
   return (
     <div className="space-y-0.5" data-nav-group={groupId}>
       <div
-        className={`${ui.navLink} flex w-full items-center justify-between gap-2 p-0 text-slate-600 hover:bg-syncra-surface-alt hover:text-syncra-primary`}
+        className={`${ui.navLink} flex w-full items-center justify-between gap-2 p-0 text-slate-600 hover:bg-syncra-surface-alt hover:text-syncra-primary ${
+          childActive ? ui.navLinkActive : ui.navLinkIdle
+        }`}
       >
         <button
           type="button"
-          onClick={handleToggle}
+          onClick={handleLabelClick}
           aria-expanded={open}
           aria-controls={`nav-group-${groupId}`}
           className="min-h-11 flex-1 px-3.5 py-2.5 text-left"
@@ -94,7 +95,7 @@ function NavGroup({ groupId, label, paths, defaultOpen = false, children }: NavG
         </button>
         <button
           type="button"
-          onClick={handleToggle}
+          onClick={handleChevronToggle}
           aria-label={open ? `Collapse ${label}` : `Expand ${label}`}
           aria-expanded={open}
           className="flex h-11 w-11 shrink-0 items-center justify-center"
@@ -231,7 +232,8 @@ export default function Sidebar({ children, title }: SidebarProps) {
     '/finance/ledger',
     '/finance/downloads',
     '/finance/bank-upload',
-    '/finance/cashflow'
+    '/finance/cashflow',
+    '/finance/billing-policy'
   ]
 
   const embeddedResidentPaths = [
@@ -320,7 +322,12 @@ export default function Sidebar({ children, title }: SidebarProps) {
               Activity
             </AccordionNavLink>
             {showResidentCommunity && (
-              <NavGroup groupId="resident-community" label="Community & Governance" paths={residentCommunityPaths}>
+              <NavGroup
+                groupId="resident-community"
+                label="Community & Governance"
+                paths={residentCommunityPaths}
+                defaultRoute={residentCommunityPaths[0]}
+              >
                 {moduleEnabled('surveys') && (
                   <SidebarSubNavLink to="/resident/surveys" className={subNavLinkClass}>
                     Surveys
@@ -356,9 +363,17 @@ export default function Sidebar({ children, title }: SidebarProps) {
             </p>
 
             {showFinancialConsole && (
-              <NavGroup groupId="financial-console" label="Financial Console" paths={financePaths} defaultOpen={workspaceRole === 'accountant'}>
+              <NavGroup
+                groupId="financial-console"
+                label="Financial Console"
+                paths={financePaths}
+                defaultRoute="/finance/ledger"
+              >
                 <SidebarSubNavLink to="/finance/ledger" className={subNavLinkClass}>
                   Financial Ledger
+                </SidebarSubNavLink>
+                <SidebarSubNavLink to="/finance/billing-policy" className={subNavLinkClass}>
+                  Maintenance Due Date
                 </SidebarSubNavLink>
                 <SidebarSubNavLink to="/finance/downloads" className={subNavLinkClass}>
                   Download Center
@@ -373,7 +388,12 @@ export default function Sidebar({ children, title }: SidebarProps) {
             )}
 
             {showPresidentConsole && (
-              <NavGroup groupId="president-console" label="President Console" paths={presidentConsolePaths} defaultOpen>
+              <NavGroup
+                groupId="president-console"
+                label="President Console"
+                paths={presidentConsolePaths}
+                defaultRoute="/admin/dashboard"
+              >
                 <SidebarSubNavLink to="/admin/dashboard" className={subNavLinkClass}>
                   Analytics Overview
                 </SidebarSubNavLink>
@@ -396,7 +416,12 @@ export default function Sidebar({ children, title }: SidebarProps) {
             )}
 
             {embedResidentInStaffNav && (
-              <NavGroup groupId="my-flat-community" label="My Flat & Community" paths={embeddedResidentPaths}>
+              <NavGroup
+                groupId="my-flat-community"
+                label="My Flat & Community"
+                paths={embeddedResidentPaths}
+                defaultRoute="/resident"
+              >
                 <SidebarSubNavLink to="/resident" end className={subNavLinkClass}>
                   Resident Dashboard
                 </SidebarSubNavLink>
@@ -442,7 +467,12 @@ export default function Sidebar({ children, title }: SidebarProps) {
             )}
 
             {showPresidentConsole && showWorkspaceGroup && (
-              <NavGroup groupId="society-operations" label="Society Operations" paths={workspacePaths}>
+              <NavGroup
+                groupId="society-operations"
+                label="Society Operations"
+                paths={workspacePaths}
+                defaultRoute={workspacePaths[0]}
+              >
                 {canAccessWorkspaceCashflow(user) && (
                   <SidebarSubNavLink to="/rwa/workspace/cashflow" className={subNavLinkClass}>
                     Cashflow Forecast
@@ -483,7 +513,12 @@ export default function Sidebar({ children, title }: SidebarProps) {
             )}
 
             {showRwaControls && (
-              <NavGroup groupId="rwa-community" label="Community & Governance" paths={rwaControlPaths}>
+              <NavGroup
+                groupId="rwa-community"
+                label="Community & Governance"
+                paths={rwaControlPaths}
+                defaultRoute={rwaControlPaths[0]}
+              >
                 {moduleEnabled('surveys') && (
                   <SidebarSubNavLink to="/rwa/surveys" className={subNavLinkClass}>
                     Surveys

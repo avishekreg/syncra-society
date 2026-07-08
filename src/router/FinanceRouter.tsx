@@ -6,6 +6,7 @@ import FinanceLedgerPage from '../pages/finance/LedgerPage'
 import FinanceDownloadCenterPage from '../pages/finance/DownloadCenterPage'
 import FinanceBankUploadPage from '../pages/finance/BankUploadPage'
 import FinanceCashflowPage from '../pages/finance/CashflowPage'
+import FinanceBillingPolicyPage from '../pages/finance/BillingPolicyPage'
 
 export default function FinanceRouter() {
   return (
@@ -22,6 +23,7 @@ export default function FinanceRouter() {
         <Route path="downloads" element={<FinanceDownloadCenterPage />} />
         <Route path="bank-upload" element={<FinanceBankUploadPage />} />
         <Route path="cashflow" element={<FinanceCashflowPage />} />
+        <Route path="billing-policy" element={<FinanceBillingPolicyPage />} />
         <Route path="*" element={<Navigate to="/finance/ledger" replace />} />
       </Route>
     </Routes>

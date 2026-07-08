@@ -15,10 +15,10 @@ export default function SocietyBillingRulesForm() {
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const [dueDate, setDueDate] = useState(5)
   const [graceDays, setGraceDays] = useState(7)
   const [lateFee, setLateFee] = useState(0)
   const [interestRate, setInterestRate] = useState(0)
+  const [storedDueDay, setStoredDueDay] = useState(5)
 
   useEffect(() => {
     if (!societyId) return
@@ -28,7 +28,7 @@ export default function SocietyBillingRulesForm() {
       try {
         const rules = await fetchSocietyBillingRules(societyId)
         if (cancelled) return
-        setDueDate(rules.maintenance_due_date)
+        setStoredDueDay(rules.maintenance_due_date)
         setGraceDays(rules.late_fee_grace_period_days)
         setLateFee(Number(rules.late_fee_flat_amount))
         setInterestRate(Number(rules.interest_rate_percentage))
@@ -55,7 +55,7 @@ export default function SocietyBillingRulesForm() {
 
     try {
       const payload: Omit<SocietyBillingRules, 'society_id' | 'created_at' | 'updated_at'> = {
-        maintenance_due_date: Math.min(28, Math.max(1, dueDate)),
+        maintenance_due_date: storedDueDay,
         late_fee_grace_period_days: Math.max(0, graceDays),
         late_fee_flat_amount: Math.max(0, lateFee),
         interest_rate_percentage: Math.max(0, interestRate)
@@ -89,26 +89,14 @@ export default function SocietyBillingRulesForm() {
     <form onSubmit={(event) => void handleSubmit(event)} className={`${ui.card} space-y-5`}>
       <div>
         <p className={ui.eyebrow}>Billing policy engine</p>
-        <h2 className={`mt-2 ${ui.heading}`}>Maintenance due dates & penalties</h2>
+        <h2 className={`mt-2 ${ui.heading}`}>Late fees & penalties</h2>
         <p className={`mt-2 ${ui.body}`}>
-          Configure society-wide billing rules. Automated WhatsApp payment reminders and late-fee alerts use these values.
+          Configure penalty rules applied after the maintenance due date. Set the monthly due date in the Financial
+          Console under Maintenance Due Date.
         </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="block space-y-2">
-          <span className={ui.label}>Maintenance due date (day of month)</span>
-          <input
-            type="number"
-            min={1}
-            max={28}
-            className={ui.input}
-            value={dueDate}
-            onChange={(event) => setDueDate(Number(event.target.value))}
-          />
-          <p className="text-xs text-slate-500">Residents must pay by this date each month (1–28).</p>
-        </label>
-
         <label className="block space-y-2">
           <span className={ui.label}>Late fee grace period (days)</span>
           <input

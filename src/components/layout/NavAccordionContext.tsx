@@ -1,20 +1,40 @@
 import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react'
-import { NavLink, type NavLinkProps } from 'react-router-dom'
+import { NavLink, type NavLinkProps, useLocation } from 'react-router-dom'
+import { resolveActiveNavGroup } from '../../lib/navGroups'
 
 type NavAccordionContextValue = {
   openGroupId: string | null
   toggleGroup: (groupId: string) => void
   openGroup: (groupId: string) => void
   closeAllGroups: () => void
-  /** Set when a flat nav link closes groups — blocks path-based auto-expand for one navigation. */
+  /** Blocks path-based auto-expand for one navigation after a flat nav link is used. */
   suppressAutoOpenRef: React.MutableRefObject<boolean>
 }
 
 const NavAccordionContext = createContext<NavAccordionContextValue | null>(null)
 
 export function NavAccordionProvider({ children }: { children: React.ReactNode }) {
-  const [openGroupId, setOpenGroupId] = useState<string | null>(null)
+  const location = useLocation()
+  const [openGroupId, setOpenGroupId] = useState<string | null>(() =>
+    resolveActiveNavGroup(location.pathname)
+  )
   const suppressAutoOpenRef = useRef(false)
+  const lastSyncedPathRef = useRef(location.pathname)
+
+  React.useEffect(() => {
+    if (lastSyncedPathRef.current === location.pathname) return
+    lastSyncedPathRef.current = location.pathname
+
+    if (suppressAutoOpenRef.current) {
+      suppressAutoOpenRef.current = false
+      return
+    }
+
+    const activeGroup = resolveActiveNavGroup(location.pathname)
+    if (activeGroup) {
+      setOpenGroupId(activeGroup)
+    }
+  }, [location.pathname])
 
   const toggleGroup = useCallback((groupId: string) => {
     suppressAutoOpenRef.current = false
@@ -22,6 +42,7 @@ export function NavAccordionProvider({ children }: { children: React.ReactNode }
   }, [])
 
   const openGroup = useCallback((groupId: string) => {
+    suppressAutoOpenRef.current = false
     setOpenGroupId(groupId)
   }, [])
 
@@ -57,9 +78,6 @@ export function AccordionNavLink({ onClick, ...props }: NavLinkProps) {
       onClick={(event) => {
         closeAllGroups()
         onClick?.(event)
-      }}
-      onMouseDown={() => {
-        closeAllGroups()
       }}
     />
   )
