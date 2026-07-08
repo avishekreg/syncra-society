@@ -10,6 +10,13 @@ import {
   resolveNoticeReceiverPhones,
   resolveSocietySenderWhatsapp
 } from '../lib/whatsappRouting'
+import {
+  fetchSocietySubscription,
+  fetchUsageCounter,
+  incrementWhatsAppAlertCounter
+} from './subscriptions'
+import { publishAdminAlert } from '../lib/adminAlerts'
+import { shouldSimulateWhatsApp, TRIAL_WHATSAPP_SIMULATION_MESSAGE } from '../lib/saasBilling'
 
 export type NoticeViewReceipt = {
   noticeId: string
@@ -146,6 +153,17 @@ async function postNoticePublishedToN8n(notice: Notice) {
       `[notices] whatsapp_alerts inactive for society ${notice.society_id} — skipping n8n dispatch`
     )
     return
+  }
+
+  const [subscription, usage] = await Promise.all([
+    fetchSocietySubscription(notice.society_id),
+    fetchUsageCounter(notice.society_id)
+  ])
+
+  if (shouldSimulateWhatsApp(subscription, usage)) {
+    await incrementWhatsAppAlertCounter(notice.society_id)
+    publishAdminAlert(TRIAL_WHATSAPP_SIMULATION_MESSAGE)
+    return { simulated: true, message: TRIAL_WHATSAPP_SIMULATION_MESSAGE }
   }
 
   const societyName = societyNameForId(notice.society_id)

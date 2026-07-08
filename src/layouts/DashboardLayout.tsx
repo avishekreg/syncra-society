@@ -1,6 +1,7 @@
 import React from 'react'
 import Sidebar from '../components/layout/Sidebar'
 import SyncraFooter from '../components/layout/SyncraFooter'
+import AdminSimulationAlert from '../components/billing/AdminSimulationAlert'
 import { useSocietyBranding } from '../hooks/useSocietyBranding'
 import { ui } from '../lib/ui'
 
@@ -9,6 +10,7 @@ export default function DashboardLayout({ title, children }: { title?: string; c
 
   return (
     <Sidebar title={title}>
+      <AdminSimulationAlert />
       <div className={`flex min-h-full flex-col ${ui.pageShell}`}>
         <div className="mb-4 rounded-2xl border border-syncra-accent/20 bg-gradient-to-r from-syncra-accent/10 via-white to-white px-4 py-3 sm:px-5">
           <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-syncra-blue">Your society</p>

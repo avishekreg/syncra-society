@@ -66,9 +66,11 @@ export default function WhatsAppAutomation() {
     if (!currentSocietyId) return
     const result = await sendAutomationTest(currentSocietyId, societyName)
     setStatus(
-      result.forwarded
-        ? 'Test message sent through Syncra Automated Message Gateway.'
-        : 'Test delivery failed. Please retry or contact Syncra support.'
+      result.simulated
+        ? result.message
+        : result.forwarded
+          ? 'Test message sent through Syncra Automated Message Gateway.'
+          : 'Test delivery failed. Please retry or contact Syncra support.'
     )
   }
 

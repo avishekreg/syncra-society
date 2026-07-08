@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../../providers/AuthProvider'
 import { useResolvedSocietyUuid } from '../../hooks/useResolvedSocietyUuid'
+import { useSaasBilling } from '../../hooks/useSaasBilling'
+import WhatsAppUsageWidget from '../../components/billing/WhatsAppUsageWidget'
 import { fetchSocietyBillingRules, upsertSocietyBillingRules } from '../../api/societyBillingRules'
 import { MAINTENANCE_DUE_DAY_OPTIONS, ordinalDay } from '../../lib/billing'
 import { ui } from '../../lib/ui'
@@ -56,6 +58,13 @@ export default function RwaBillingEngine() {
   const { currentSocietyId } = useAuth()
   const { uuid } = useResolvedSocietyUuid()
   const societyId = uuid ?? currentSocietyId
+  const {
+    subscription,
+    usage,
+    loading: saasLoading,
+    upgradeMock,
+    activateWhatsAppAddonMock
+  } = useSaasBilling(societyId)
   const [billingModel, setBillingModel] = useState<BillingModel>(DEFAULT_BILLING_CONFIG.billingModel)
   const [monthlyMaintenanceFee, setMonthlyMaintenanceFee] = useState(DEFAULT_BILLING_CONFIG.monthlyMaintenanceFee)
   const [perSqFtRate, setPerSqFtRate] = useState(DEFAULT_BILLING_CONFIG.perSqFtRate)
@@ -199,6 +208,16 @@ export default function RwaBillingEngine() {
           </p>
         </div>
         <div className={ui.badge}>Split charge workflow</div>
+      </div>
+
+      <div className="mt-8">
+        <WhatsAppUsageWidget
+          subscription={subscription}
+          usage={usage}
+          loading={saasLoading}
+          onUpgrade={(plan) => upgradeMock(plan)}
+          onActivateAddon={() => activateWhatsAppAddonMock()}
+        />
       </div>
 
       <form onSubmit={(event) => void handleSave(event)} className="mt-8 space-y-8">

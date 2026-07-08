@@ -1,6 +1,19 @@
 import React, { useRef, useState } from 'react'
 import ShowcaseUnitsPanel from '../../../components/ShowcaseUnitsPanel'
+import PlanLimitModal from '../../../components/billing/TrialLimitModal'
 import { useShowcaseWorkspace } from '../../../hooks/useShowcaseWorkspace'
+import { useSaasBilling } from '../../../hooks/useSaasBilling'
+import { useResolvedSocietyUuid } from '../../../hooks/useResolvedSocietyUuid'
+import type { MockUpgradePlan } from '../../../api/subscriptions'
+import {
+  buildFlatLimitMessage,
+  getNextUpgradePlan,
+  getPlanTier,
+  getSubscriptionMaxFlats,
+  isFlatLimitReached,
+  PAID_UPGRADE_PLANS,
+  type PaidSaasPlanType
+} from '../../../lib/saasBilling'
 import { ui } from '../../../lib/ui'
 import {
   downloadSocietyImportTemplate,
@@ -11,6 +24,9 @@ import {
 
 export default function WorkspaceFlatsPage() {
   const { workingShowcase, currentSocietyId, setShowcaseData } = useShowcaseWorkspace()
+  const { uuid } = useResolvedSocietyUuid()
+  const societyId = uuid ?? currentSocietyId
+  const { subscription, upgradeMock } = useSaasBilling(societyId)
   const [uploadMessage, setUploadMessage] = useState('')
   const [dragActive, setDragActive] = useState(false)
   const [blockName, setBlockName] = useState('')
@@ -19,6 +35,8 @@ export default function WorkspaceFlatsPage() {
   const [ownerFullName, setOwnerFullName] = useState('')
   const [ownerEmail, setOwnerEmail] = useState('')
   const [ownerMobile, setOwnerMobile] = useState('')
+  const [showLimitModal, setShowLimitModal] = useState(false)
+  const [upgradeMessage, setUpgradeMessage] = useState('')
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   if (!workingShowcase) {
@@ -31,12 +49,27 @@ export default function WorkspaceFlatsPage() {
   }
 
   const currentUnits = workingShowcase.units ?? []
+  const flatLimitReached =
+    subscription != null && isFlatLimitReached(subscription, currentUnits.length)
+  const limitMessage = subscription ? buildFlatLimitMessage(subscription) : ''
+  const nextUpgradePlan = subscription ? getNextUpgradePlan(subscription.plan_type) : 'medium'
+  const upgradeOptions: PaidSaasPlanType[] = nextUpgradePlan
+    ? PAID_UPGRADE_PLANS.filter(
+        (plan) =>
+          PAID_UPGRADE_PLANS.indexOf(plan) >= PAID_UPGRADE_PLANS.indexOf(nextUpgradePlan)
+      )
+    : []
 
   const handleTemplateUpload = async (file: File) => {
     try {
       const text = await file.text()
       const rows = parseSocietyCsv(text)
       const result = rowsToDemoUnits(rows)
+
+      if (subscription && isFlatLimitReached(subscription, result.importedCount)) {
+        setShowLimitModal(true)
+        return
+      }
 
       if (currentSocietyId) {
         await persistSocietyImport(currentSocietyId, result)
@@ -80,6 +113,10 @@ export default function WorkspaceFlatsPage() {
 
   const addUnitToMatrix = () => {
     if (!setShowcaseData || !workingShowcase) return
+    if (flatLimitReached) {
+      setShowLimitModal(true)
+      return
+    }
     if (!blockName || !flatNumberInput || !areaSize || !ownerFullName || !ownerEmail || !ownerMobile) return
 
     const newUnit = {
@@ -105,8 +142,40 @@ export default function WorkspaceFlatsPage() {
     setOwnerMobile('')
   }
 
+  async function handleSandboxUpgrade(plan: MockUpgradePlan) {
+    try {
+      const updated = await upgradeMock(plan)
+      const tier = getPlanTier(plan)
+      setUpgradeMessage(
+        `Sandbox upgrade applied: ${tier.label} (up to ${updated?.max_flats ?? tier.max_flats} flats at ₹${tier.price_per_flat_inr}/flat/month).`
+      )
+      setShowLimitModal(false)
+    } catch (err) {
+      setUpgradeMessage(err instanceof Error ? err.message : 'Sandbox upgrade failed.')
+    }
+  }
+
   return (
     <div className={ui.sectionGap}>
+      {subscription ? (
+        <div className="rounded-xl border border-slate-200 bg-syncra-surface-alt px-4 py-3 text-sm text-slate-700">
+          Active plan: <strong>{getPlanTier(subscription.plan_type).label}</strong> —{' '}
+          {currentUnits.length} / {getSubscriptionMaxFlats(subscription)} flats used
+        </div>
+      ) : null}
+
+      {flatLimitReached ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          {limitMessage}
+        </div>
+      ) : null}
+
+      {upgradeMessage ? (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          {upgradeMessage}
+        </div>
+      ) : null}
+
       <section className={ui.grid2}>
         <article className={ui.cardFill}>
           <header className={ui.cardHeader}>
@@ -209,13 +278,26 @@ export default function WorkspaceFlatsPage() {
           ))}
         </div>
         <div className="mt-6">
-          <button type="button" onClick={addUnitToMatrix} className={ui.btnPrimary}>
+          <button
+            type="button"
+            onClick={addUnitToMatrix}
+            disabled={flatLimitReached}
+            className={ui.btnPrimary}
+          >
             Add Single Unit to Matrix
           </button>
         </div>
       </section>
 
       <ShowcaseUnitsPanel units={currentUnits} />
+
+      <PlanLimitModal
+        open={showLimitModal}
+        onClose={() => setShowLimitModal(false)}
+        message={limitMessage}
+        upgradeOptions={upgradeOptions}
+        onUpgrade={(plan) => void handleSandboxUpgrade(plan)}
+      />
     </div>
   )
 }

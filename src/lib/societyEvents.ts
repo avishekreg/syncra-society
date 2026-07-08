@@ -1,5 +1,12 @@
 import type { ActivityEntry } from './activityLog'
 import { dispatchToN8n } from './n8nClient'
+import {
+  fetchSocietySubscription,
+  fetchUsageCounter,
+  incrementWhatsAppAlertCounter
+} from '../api/subscriptions'
+import { publishAdminAlert } from './adminAlerts'
+import { shouldSimulateWhatsApp, TRIAL_WHATSAPP_SIMULATION_MESSAGE } from './saasBilling'
 
 export type SocietyEventType =
   | 'visitor.pending'
@@ -41,6 +48,17 @@ export async function dispatchSocietyEvent(input: DispatchSocietyEventInput) {
     occurredAt: new Date().toISOString(),
     metadata: input.metadata ?? {},
     recipients: input.recipients
+  }
+
+  const [subscription, usage] = await Promise.all([
+    fetchSocietySubscription(input.societyId),
+    fetchUsageCounter(input.societyId)
+  ])
+
+  if (shouldSimulateWhatsApp(subscription, usage)) {
+    await incrementWhatsAppAlertCounter(input.societyId)
+    publishAdminAlert(TRIAL_WHATSAPP_SIMULATION_MESSAGE)
+    return { ok: true, simulated: true, message: TRIAL_WHATSAPP_SIMULATION_MESSAGE }
   }
 
   const direct = await dispatchToN8n(payload)
@@ -143,6 +161,21 @@ export async function saveWhatsAppContacts(
 }
 
 export async function sendAutomationTest(societyId: string, societyName: string) {
+  const [subscription, usage] = await Promise.all([
+    fetchSocietySubscription(societyId),
+    fetchUsageCounter(societyId)
+  ])
+
+  if (shouldSimulateWhatsApp(subscription, usage)) {
+    await incrementWhatsAppAlertCounter(societyId)
+    publishAdminAlert(TRIAL_WHATSAPP_SIMULATION_MESSAGE)
+    return {
+      forwarded: false,
+      simulated: true,
+      message: TRIAL_WHATSAPP_SIMULATION_MESSAGE
+    }
+  }
+
   const res = await fetch(`${API_BASE}/api/automation/test`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

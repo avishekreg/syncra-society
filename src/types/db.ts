@@ -38,6 +38,32 @@ export interface SocietySubscription {
   updated_at?: string
 }
 
+export type SaasPlanType = 'trial' | 'medium' | 'portfolio' | 'enterprise'
+export type SaasSubscriptionStatus = 'active' | 'trialing' | 'expired' | 'past_due'
+
+export interface SaasSubscription {
+  id: string
+  society_id: string
+  plan_type: SaasPlanType
+  status: SaasSubscriptionStatus
+  max_flats: number
+  trial_start?: string | null
+  trial_end?: string | null
+  razorpay_sub_id?: string | null
+  created_at?: string | null
+  updated_at?: string | null
+}
+
+export interface UsageCounter {
+  id: string
+  society_id: string
+  billing_cycle_start: string
+  whatsapp_alerts_sent: number
+  whatsapp_addon_active: boolean
+  created_at?: string | null
+  updated_at?: string | null
+}
+
 export interface CustomRole {
   id: string
   society_id: string

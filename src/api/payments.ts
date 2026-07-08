@@ -72,6 +72,15 @@ export type SubscribeResponse = {
   message?: string
 }
 
+/** Sandbox Razorpay upgrade — applies tier-specific caps until Checkout is wired. */
+export async function mockSandboxSubscriptionUpgrade(
+  societyId: string,
+  planType: 'medium' | 'portfolio' | 'enterprise' = 'medium'
+) {
+  const { mockUpgradeSubscription } = await import('./subscriptions')
+  return mockUpgradeSubscription(societyId, planType)
+}
+
 export async function createRecurringSubscription(payload: {
   societyId: string
   totalFlats: number
