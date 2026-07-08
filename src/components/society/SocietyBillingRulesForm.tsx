@@ -91,8 +91,8 @@ export default function SocietyBillingRulesForm() {
         <p className={ui.eyebrow}>Billing policy engine</p>
         <h2 className={`mt-2 ${ui.heading}`}>Late fees & penalties</h2>
         <p className={`mt-2 ${ui.body}`}>
-          Configure penalty rules applied after the maintenance due date. Set the monthly due date in the Financial
-          Console under Maintenance Due Date.
+          Configure penalty rules applied after the maintenance due date. Set the monthly due date in RWA Settings under
+          Maintenance Billing.
         </p>
       </div>
 

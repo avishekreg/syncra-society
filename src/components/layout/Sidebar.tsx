@@ -232,8 +232,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
     '/finance/ledger',
     '/finance/downloads',
     '/finance/bank-upload',
-    '/finance/cashflow',
-    '/finance/billing-policy'
+    '/finance/cashflow'
   ]
 
   const embeddedResidentPaths = [
@@ -371,9 +370,6 @@ export default function Sidebar({ children, title }: SidebarProps) {
               >
                 <SidebarSubNavLink to="/finance/ledger" className={subNavLinkClass}>
                   Financial Ledger
-                </SidebarSubNavLink>
-                <SidebarSubNavLink to="/finance/billing-policy" className={subNavLinkClass}>
-                  Maintenance Due Date
                 </SidebarSubNavLink>
                 <SidebarSubNavLink to="/finance/downloads" className={subNavLinkClass}>
                   Download Center

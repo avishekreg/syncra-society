@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../../providers/AuthProvider'
+import { useResolvedSocietyUuid } from '../../hooks/useResolvedSocietyUuid'
+import { fetchSocietyBillingRules, upsertSocietyBillingRules } from '../../api/societyBillingRules'
+import { MAINTENANCE_DUE_DAY_OPTIONS, ordinalDay } from '../../lib/billing'
 import { ui } from '../../lib/ui'
 
 type BillingModel = 'flat' | 'perSqFt'
@@ -51,6 +54,8 @@ const saveBtn = 'inline-flex min-h-11 items-center justify-center rounded-xl bg-
 
 export default function RwaBillingEngine() {
   const { currentSocietyId } = useAuth()
+  const { uuid } = useResolvedSocietyUuid()
+  const societyId = uuid ?? currentSocietyId
   const [billingModel, setBillingModel] = useState<BillingModel>(DEFAULT_BILLING_CONFIG.billingModel)
   const [monthlyMaintenanceFee, setMonthlyMaintenanceFee] = useState(DEFAULT_BILLING_CONFIG.monthlyMaintenanceFee)
   const [perSqFtRate, setPerSqFtRate] = useState(DEFAULT_BILLING_CONFIG.perSqFtRate)
@@ -63,6 +68,8 @@ export default function RwaBillingEngine() {
   const [requestDueDate, setRequestDueDate] = useState('2026-07-25')
   const [requestNotes, setRequestNotes] = useState('Split cost across premium flats for urgent pump replacement.')
   const [status, setStatus] = useState('')
+  const [dueDay, setDueDay] = useState(5)
+  const [dueDayLoading, setDueDayLoading] = useState(true)
 
   useEffect(() => {
     if (!currentSocietyId) return
@@ -82,7 +89,29 @@ export default function RwaBillingEngine() {
     }
   }, [currentSocietyId])
 
-  function handleSave(event: React.FormEvent<HTMLFormElement>) {
+  useEffect(() => {
+    if (!societyId) {
+      setDueDayLoading(false)
+      return
+    }
+    let cancelled = false
+    void (async () => {
+      setDueDayLoading(true)
+      try {
+        const rules = await fetchSocietyBillingRules(societyId)
+        if (!cancelled) setDueDay(rules.maintenance_due_date)
+      } catch {
+        if (!cancelled) setStatus('Unable to load maintenance due date from Supabase.')
+      } finally {
+        if (!cancelled) setDueDayLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [societyId])
+
+  async function handleSave(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!currentSocietyId) {
       setStatus('Select a society before saving billing settings.')
@@ -99,7 +128,25 @@ export default function RwaBillingEngine() {
     }
 
     localStorage.setItem(getStorageKey(currentSocietyId), JSON.stringify(payload))
-    setStatus('RWA billing configuration saved successfully.')
+
+    if (societyId) {
+      try {
+        const existing = await fetchSocietyBillingRules(societyId)
+        await upsertSocietyBillingRules(societyId, {
+          maintenance_due_date: dueDay,
+          late_fee_grace_period_days: existing.late_fee_grace_period_days,
+          late_fee_flat_amount: Number(existing.late_fee_flat_amount),
+          interest_rate_percentage: Number(existing.interest_rate_percentage)
+        })
+        setStatus(
+          `Maintenance billing saved. Due date set to before the ${ordinalDay(dueDay)} of every month — synced to Supabase for WhatsApp reminders.`
+        )
+      } catch {
+        setStatus('Local billing settings saved, but the maintenance due date could not be synced to Supabase.')
+      }
+    } else {
+      setStatus('RWA billing configuration saved successfully.')
+    }
   }
 
   function createSplitRequest() {
@@ -154,7 +201,35 @@ export default function RwaBillingEngine() {
         <div className={ui.badge}>Split charge workflow</div>
       </div>
 
-      <form onSubmit={handleSave} className="mt-8 space-y-8">
+      <form onSubmit={(event) => void handleSave(event)} className="mt-8 space-y-8">
+        <div className={ui.innerItem}>
+          <p className="text-lg font-semibold text-syncra-primary">Maintenance due date</p>
+          <p className={`mt-2 ${ui.body}`}>
+            Set the monthly deadline for maintenance payments. This syncs to Supabase and powers n8n and Groq AI resident
+            reminders before the selected day.
+          </p>
+          <label className="mt-5 block max-w-xl space-y-2">
+            <span className={ui.label}>Monthly due date</span>
+            <select
+              className={ui.input}
+              value={dueDay}
+              disabled={dueDayLoading}
+              onChange={(event) => setDueDay(Number(event.target.value))}
+            >
+              {MAINTENANCE_DUE_DAY_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-slate-500">
+              {dueDayLoading
+                ? 'Loading saved due date…'
+                : `Residents must pay maintenance before the ${ordinalDay(dueDay)} of each month.`}
+            </p>
+          </label>
+        </div>
+
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className={ui.innerItem}>
             <p className="text-lg font-semibold text-syncra-primary">Billing model</p>

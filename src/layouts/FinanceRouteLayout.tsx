@@ -5,8 +5,7 @@ const FINANCE_TITLES: Record<string, string> = {
   '/finance/ledger': 'Financial Ledger',
   '/finance/downloads': 'Download Center',
   '/finance/bank-upload': 'Bank Statement Upload',
-  '/finance/cashflow': 'Cashflow Transparency',
-  '/finance/billing-policy': 'Maintenance Due Date'
+  '/finance/cashflow': 'Cashflow Transparency'
 }
 
 function resolveFinanceTitle(pathname: string) {

@@ -11,7 +11,7 @@ export default function SocietyConfiguration() {
         <h1 className={`mt-2 ${ui.headingLg}`}>Society configuration</h1>
         <p className={`mt-2 max-w-2xl ${ui.body}`}>
           Configure late-fee penalties and integration identifiers for automated WhatsApp payment reminders. Maintenance
-          due dates are managed in the Financial Console.
+          due dates are managed in RWA Settings.
         </p>
       </header>
 
