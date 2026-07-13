@@ -74,6 +74,11 @@ export function canAccessNoticesManagement(user: AuthUser | null | undefined): b
   return role === 'president' || role === 'secretary' || role === 'super_admin'
 }
 
+export function canAccessRulesGuidebook(user: AuthUser | null | undefined): boolean {
+  const role = resolveWorkspaceRole(user)
+  return role === 'president' || role === 'secretary' || role === 'super_admin'
+}
+
 export function canAccessHelpdeskDashboard(user: AuthUser | null | undefined): boolean {
   const role = resolveWorkspaceRole(user)
   return role === 'president' || role === 'secretary' || role === 'super_admin'

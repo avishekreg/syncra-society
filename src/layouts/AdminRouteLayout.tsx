@@ -4,6 +4,7 @@ import DashboardLayout from './DashboardLayout'
 const ADMIN_PAGE_TITLES: Record<string, string | null> = {
   '/admin/dashboard': 'Analytics Overview',
   '/admin/notices': 'Notices Management',
+  '/admin/guidebook': 'Rules & Regulations',
   '/admin/helpdesk': 'Complaints Dashboard',
   '/admin/configuration': null,
   '/admin/society-configuration': null

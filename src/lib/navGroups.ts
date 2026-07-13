@@ -30,6 +30,7 @@ export function resolveActiveNavGroup(pathname: string): string | null {
     pathname.startsWith('/resident/helpdesk') ||
     pathname.startsWith('/resident/visitor-logs') ||
     pathname.startsWith('/resident/notices') ||
+    pathname.startsWith('/resident/rules-guidebook') ||
     pathname.startsWith('/resident/activity')
   ) {
     return 'my-flat-community'

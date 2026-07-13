@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../../providers/AuthProvider'
 import {
   fetchAutomationSettings,
@@ -92,6 +93,13 @@ export default function WhatsAppAutomation() {
           messages through your approved business service provider. Inbound messages can create tickets and
           log receipts.
         </p>
+        <div className="mt-4 rounded-xl border border-syncra-accent/25 bg-cyan-50/60 px-4 py-3 text-sm text-syncra-blue">
+          Resident inquiries about amenity timings, charges, and society rules are answered from your{' '}
+          <Link to="/admin/guidebook" className="font-semibold underline underline-offset-2">
+            Rules & Regulations guidebook
+          </Link>
+          . Keep it updated before enabling automated Q&amp;A.
+        </div>
         <div className={`mt-4 ${ui.innerItem} text-sm`}>
           <p>
             Gateway Status:{' '}

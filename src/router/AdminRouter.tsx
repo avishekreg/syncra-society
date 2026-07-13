@@ -4,6 +4,7 @@ import AdminRouteLayout from '../layouts/AdminRouteLayout'
 import AdminDashboard from '../pages/admin/Dashboard'
 import AdminNotices from '../pages/admin/Notices'
 import AdminHelpdeskRoute from './AdminHelpdeskRoute'
+import RulesGuidebookPage from '../pages/admin/RulesGuidebookPage'
 import SocietyConfiguration from '../pages/admin/SocietyConfiguration'
 import TierGuard from './TierGuard'
 import RoleGuard from './RoleGuard'
@@ -39,6 +40,16 @@ export default function AdminRouter() {
             <RoleGuard allow={['president', 'secretary']}>
               <TierGuard requiredTier="tier2">
                 <AdminHelpdeskRoute />
+              </TierGuard>
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="guidebook"
+          element={
+            <RoleGuard allow={['president', 'secretary']}>
+              <TierGuard requiredTier="tier2">
+                <RulesGuidebookPage />
               </TierGuard>
             </RoleGuard>
           }

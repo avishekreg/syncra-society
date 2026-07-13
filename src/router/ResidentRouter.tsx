@@ -11,6 +11,7 @@ import ResidentSurveysPage from '../pages/resident/Surveys'
 import ResidentGalleryPage from '../pages/resident/Gallery'
 import ResidentElectionsPage from '../pages/resident/Elections'
 import ResidentRewardsPage from '../pages/resident/RewardsRecognition'
+import ResidentRulesGuidebookPage from '../pages/resident/RulesGuidebookPage'
 import NoticesList from '../components/NoticesList'
 import { useAuth } from '../providers/AuthProvider'
 import { ui } from '../lib/ui'
@@ -45,6 +46,7 @@ export default function ResidentRouter() {
         <Route path="helpdesk" element={<ResidentHelpdesk />} />
         <Route path="visitor-logs" element={<VisitorLogsPage />} />
         <Route path="notices" element={<NoticesPage />} />
+        <Route path="rules-guidebook" element={<ResidentRulesGuidebookPage />} />
         <Route path="activity" element={<ResidentActivityPage />} />
         <Route path="surveys" element={<ResidentSurveysPage />} />
         <Route path="gallery" element={<ResidentGalleryPage />} />

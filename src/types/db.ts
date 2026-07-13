@@ -192,3 +192,53 @@ export interface VisitorLogEvent {
   notes?: string | null
   created_at: string
 }
+
+export type GuidebookFacilityType =
+  | 'swimming_pool'
+  | 'gym'
+  | 'community_hall'
+  | 'clubhouse'
+  | 'tennis_court'
+  | 'kids_play_area'
+  | 'library'
+  | 'parking'
+  | 'other'
+
+export interface GuidebookAmenity {
+  id: string
+  name: string
+  facility_type: GuidebookFacilityType
+  open_time: string
+  close_time: string
+  operating_days: string
+  charges: string
+  charge_notes: string
+  facility_rules: string
+  sort_order: number
+}
+
+export interface GuidebookCustomSection {
+  id: string
+  title: string
+  body: string
+  sort_order: number
+}
+
+export interface SocietyRulesGuidebook {
+  society_id: string
+  security_rules: string
+  community_rules: string
+  visitor_vehicle_policy: string
+  amenities: GuidebookAmenity[]
+  custom_sections: GuidebookCustomSection[]
+  updated_at?: string
+  updated_by?: string | null
+}
+
+export type GuidebookSearchHit = {
+  section: string
+  title: string
+  excerpt: string
+  score: number
+}
+

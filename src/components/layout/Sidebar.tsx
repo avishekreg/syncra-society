@@ -14,6 +14,7 @@ import {
   canAccessNoticesManagement,
   canAccessPresidentConsole,
   canAccessResidentPortal,
+  canAccessRulesGuidebook,
   canAccessRwaControls,
   canAccessRwaSettings,
   canAccessSocietyConfiguration,
@@ -241,12 +242,14 @@ export default function Sidebar({ children, title }: SidebarProps) {
     '/resident/helpdesk',
     '/resident/visitor-logs',
     '/resident/notices',
+    '/resident/rules-guidebook',
     '/resident/activity',
     ...residentCommunityPaths
   ]
   const presidentConsolePaths = [
     '/admin/dashboard',
     '/admin/notices',
+    '/admin/guidebook',
     '/admin/helpdesk',
     '/admin/configuration',
     ...workspacePaths
@@ -318,6 +321,9 @@ export default function Sidebar({ children, title }: SidebarProps) {
                 Notices
               </AccordionNavLink>
             )}
+            <AccordionNavLink to="/resident/rules-guidebook" className={navLinkClass}>
+              Rules & Regulations
+            </AccordionNavLink>
             <AccordionNavLink to="/resident/activity" className={navLinkClass}>
               Activity
             </AccordionNavLink>
@@ -411,6 +417,11 @@ export default function Sidebar({ children, title }: SidebarProps) {
                     Notices Management
                   </SidebarSubNavLink>
                 )}
+                {canAccessRulesGuidebook(user) && (
+                  <SidebarSubNavLink to="/admin/guidebook" className={subNavLinkClass}>
+                    Rules & Regulations
+                  </SidebarSubNavLink>
+                )}
                 {moduleEnabled('helpdesk') && canAccessHelpdeskDashboard(user) && (
                   <SidebarSubNavLink to="/admin/helpdesk" className={subNavLinkClass}>
                     Complaints Dashboard
@@ -449,6 +460,9 @@ export default function Sidebar({ children, title }: SidebarProps) {
                     Notices
                   </SidebarSubNavLink>
                 )}
+                <SidebarSubNavLink to="/resident/rules-guidebook" className={subNavLinkClass}>
+                  Rules & Regulations
+                </SidebarSubNavLink>
                 <SidebarSubNavLink to="/resident/activity" className={subNavLinkClass}>
                   Activity
                 </SidebarSubNavLink>
@@ -518,6 +532,12 @@ export default function Sidebar({ children, title }: SidebarProps) {
             {!showPresidentConsole && canAccessNoticesManagement(user) && moduleEnabled('notices') && (
               <AccordionNavLink to="/admin/notices" className={navLinkClass}>
                 Notices Management
+              </AccordionNavLink>
+            )}
+
+            {!showPresidentConsole && canAccessRulesGuidebook(user) && (
+              <AccordionNavLink to="/admin/guidebook" className={navLinkClass}>
+                Rules & Regulations
               </AccordionNavLink>
             )}
 

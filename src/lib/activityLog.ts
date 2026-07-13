@@ -3,6 +3,7 @@ export type ActivityCategory =
   | 'payment'
   | 'visitor'
   | 'notice'
+  | 'governance'
   | 'survey'
   | 'gallery'
   | 'election'
