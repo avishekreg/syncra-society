@@ -14,7 +14,7 @@ export type SaasPlanTier = {
   flat_range_label: string
 }
 
-/** Strict Syncra SaaS tier caps and per-flat pricing. */
+/** Strict mAI Society SaaS tier caps and per-flat pricing. */
 export const SAAS_PLAN_TIERS: Record<SaasPlanType, SaasPlanTier> = {
   trial: {
     plan_type: 'trial',

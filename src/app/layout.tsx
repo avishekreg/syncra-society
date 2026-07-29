@@ -5,7 +5,7 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
-  title: 'Syncra Society',
+  title: 'mAI Society',
   description: 'Institutional housing society management platform',
   icons: {
     icon: [

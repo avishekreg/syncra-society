@@ -254,7 +254,7 @@ const GatekeeperConsole = ({ societyId }) => {
   return (
     <div className="space-y-6">
       <div className={ui.card}>
-        <p className={ui.eyebrow}>Syncra Gatekeeper</p>
+        <p className={ui.eyebrow}>mAI Gatekeeper</p>
         <h2 className={`mt-2 ${ui.heading}`}>Visitor entry console</h2>
         <p className={`mt-2 ${ui.body}`}>
           Flat numbers are loaded from society records — guards cannot type arbitrary flat numbers, ensuring

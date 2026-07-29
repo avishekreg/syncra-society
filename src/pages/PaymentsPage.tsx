@@ -110,7 +110,7 @@ export default function PaymentsPage() {
       <PageHeader
         eyebrow="Global Payment Configuration"
         title="Multi-regional collections"
-        description="Orchestrate maintenance collections through Razorpay, Stripe, or regional providers — with automated owner confirmation via the Syncra communications gateway."
+        description="Orchestrate maintenance collections through Razorpay, Stripe, or regional providers — with automated owner confirmation via the mAI Society communications gateway."
         action={
           <Button asChild variant="outline" size="sm" className="border-neutral-200">
             <Link to="/admin/config">Runtime gateway settings</Link>

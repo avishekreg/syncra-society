@@ -28,7 +28,7 @@ export default function AiExecutiveSummary({ summary, loading }: Props) {
               <Sparkles className="relative h-5 w-5 text-syncra-blue" aria-hidden="true" />
             </div>
             <div>
-              <p className={cc.eyebrowPrimary}>Syncra AI executive summary</p>
+              <p className={cc.eyebrowPrimary}>mAI executive summary</p>
               <h2 className={`mt-1 ${cc.headingSm}`}>
                 {loading ? 'Synthesizing platform intelligence…' : summary?.headline ?? 'Awaiting telemetry'}
               </h2>

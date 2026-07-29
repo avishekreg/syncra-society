@@ -138,7 +138,7 @@ export default function FooterAppStoreBadges({
               : 'flex flex-nowrap items-center gap-3 sm:gap-4'
           }
           role="group"
-          aria-label="Download Syncra Society mobile apps"
+          aria-label="Download mAI Society mobile apps"
         >
           {androidLink}
           {iosTrigger}
@@ -159,7 +159,7 @@ export default function FooterAppStoreBadges({
               Coming soon
             </h2>
             <p className={`mt-3 ${ui.body}`}>
-              The Syncra Society iOS app is in development. Android is available now — or use the web
+              The mAI Society iOS app is in development. Android is available now — or use the web
               platform on Safari in the meantime.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">

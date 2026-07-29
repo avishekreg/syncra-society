@@ -76,7 +76,7 @@ function buildRuleBasedSummary(data: PlatformControlTowerData): ExecutiveSummary
         : 'Platform operating within normal bounds'
 
   const narrative = [
-    `Syncra is monitoring ${societies.length} onboarded societies with ${formatInr(mrr)} MRR.`,
+    `mAI is monitoring ${societies.length} onboarded societies with ${formatInr(mrr)} MRR.`,
     `Gatekeeper consoles processed ${visitorLogs24h} visitor log events in the last 24 hours (${gatekeeperTone} load).`,
     pending > 0
       ? `${pending} subscription or invoice flag(s) need Super Admin review.`
@@ -128,7 +128,7 @@ async function tryN8nExecutiveSummary(data: PlatformControlTowerData): Promise<E
         eventId: `exec-${Date.now()}`,
         type: 'platform.executive_summary',
         societyId: 'platform',
-        societyName: 'Syncra Platform',
+        societyName: 'mAI Society Platform',
         summary: 'Generate Super Admin executive summary',
         occurredAt: new Date().toISOString(),
         metadata: context
@@ -178,7 +178,7 @@ async function tryLlmExecutiveSummary(data: PlatformControlTowerData): Promise<E
 
   const model = resolveNoticeEnhancerModel()
   const prompt = [
-    'You are Syncra AI, the executive intelligence layer for a housing society management platform.',
+    'You are mAI, the executive intelligence layer for a housing society management platform.',
     'Write a concise platform briefing for the Super Admin.',
     'Return ONLY valid JSON with keys: headline (string), narrative (string), insights (array of {label, detail, severity}).',
     'severity must be info, watch, or critical.',

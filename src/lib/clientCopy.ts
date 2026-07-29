@@ -16,7 +16,7 @@ export function sanitizeAutomationStatusMessage(message?: string | null) {
   if (!message) return null
   const lower = message.toLowerCase()
   if (lower.includes('n8n') || lower.includes('webhook') || lower.includes('hugging')) {
-    return 'Syncra Core infrastructure is preparing your message gateway.'
+    return 'mAI Core infrastructure is preparing your message gateway.'
   }
   return message
 }

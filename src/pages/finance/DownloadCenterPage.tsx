@@ -36,7 +36,7 @@ export default function FinanceDownloadCenterPage() {
     const totalIn = credits.reduce((sum, e) => sum + e.amount, 0)
     const totalOut = debits.reduce((sum, e) => sum + e.amount, 0)
     const lines = [
-      'Syncra Society Financial Statement',
+      'mAI Society Financial Statement',
       `Society: ${workingShowcase?.society.name ?? currentSocietyId ?? 'N/A'}`,
       `Generated: ${new Date().toLocaleString('en-IN')}`,
       '',

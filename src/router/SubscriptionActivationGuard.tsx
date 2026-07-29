@@ -48,7 +48,7 @@ export default function SubscriptionActivationGuard({ children }: { children: Re
   if (loading) {
     return (
       <div className={`${ui.page} flex min-h-screen items-center justify-center p-8 text-slate-500`}>
-        Verifying Syncra billing status…
+        Verifying mAI billing status…
       </div>
     )
   }

@@ -19,7 +19,7 @@ export default function RefundPolicy() {
           This Refund & Cancellation Policy (&quot;Policy&quot;) governs subscription fees, one-time activation fees,
           add-on module charges, and related payments made by housing societies, residents&apos; welfare associations,
           and authorized management bodies (&quot;Society&quot;, &quot;Customer&quot;, or &quot;you&quot;) to{' '}
-          <strong>{LEGAL_ENTITY}</strong> (&quot;Syncra&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) for
+          <strong>{LEGAL_ENTITY}</strong> (&quot;mAI Society&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) for
           access to <strong>{LEGAL_PLATFORM}</strong> (&quot;Platform&quot;).
         </LegalParagraph>
         <LegalParagraph>
@@ -45,7 +45,7 @@ export default function RefundPolicy() {
         <LegalParagraph>
           Because the Platform is provisioned immediately upon payment confirmation — including creation of the Society
           workspace, activation of selected modules, allocation of messaging credits (where applicable), and enablement
-          of administrative and resident-facing features — fees compensate Syncra for software access, infrastructure,
+          of administrative and resident-facing features — fees compensate mAI Society for software access, infrastructure,
           and support for the full committed period.
         </LegalParagraph>
       </LegalSection>
@@ -71,8 +71,8 @@ export default function RefundPolicy() {
         </LegalParagraph>
         <LegalParagraph>
           The activation fee is <strong>non-refundable</strong> once paid, including if the Society chooses not to
-          complete onboarding, fails to configure flats, or cancels before recurring billing begins, except where Syncra
-          fails to provision any part of the Service due to a fault solely attributable to Syncra and not remedied
+          complete onboarding, fails to configure flats, or cancels before recurring billing begins, except where mAI Society
+          fails to provision any part of the Service due to a fault solely attributable to mAI Society and not remedied
           within thirty (30) days of written notice.
         </LegalParagraph>
       </LegalSection>
@@ -92,27 +92,27 @@ export default function RefundPolicy() {
         </LegalParagraph>
         <LegalParagraph>
           Cancellation notice must be sent from the registered billing contact email or by an authorized Society
-          Administrator identified in the account. Syncra may request reasonable verification of authority before
+          Administrator identified in the account. mAI Society may request reasonable verification of authority before
           processing cancellation.
         </LegalParagraph>
       </LegalSection>
 
-      <LegalSection title="6. Non-Payment and Syncra-Initiated Termination">
+      <LegalSection title="6. Non-Payment and mAI Society-Initiated Termination">
         <LegalParagraph>
-          If subscription or add-on fees are not paid by the due date, Syncra may suspend access after a grace period
+          If subscription or add-on fees are not paid by the due date, mAI Society may suspend access after a grace period
           (typically seven (7) days from invoice due date unless otherwise stated) and terminate the account if payment
           remains outstanding. Suspension or termination for non-payment does not entitle the Society to any refund of
           previously paid amounts.
         </LegalParagraph>
         <LegalParagraph>
-          Syncra may terminate access immediately for material breach of the Terms & Conditions, including abuse of
+          mAI Society may terminate access immediately for material breach of the Terms & Conditions, including abuse of
           messaging integrations or violation of the Acceptable Use Policy, without refund.
         </LegalParagraph>
       </LegalSection>
 
       <LegalSection title="7. Free Trials and Promotional Credits">
         <LegalParagraph>
-          From time to time, Syncra may offer limited free trials or promotional credits at its discretion. Trial
+          From time to time, mAI Society may offer limited free trials or promotional credits at its discretion. Trial
           periods convert to paid subscriptions unless cancelled before the trial end date in accordance with trial
           terms displayed at signup. Promotional credits have no cash value and are non-refundable.
         </LegalParagraph>
@@ -129,12 +129,12 @@ export default function RefundPolicy() {
 
       <LegalSection title="9. Service Outages and SLA Credits">
         <LegalParagraph>
-          Syncra uses commercially reasonable efforts to maintain Platform availability. Planned maintenance will, where
+          mAI Society uses commercially reasonable efforts to maintain Platform availability. Planned maintenance will, where
           practicable, be communicated in advance. Isolated downtime, third-party provider outages (including Supabase
           or Twilio), or force majeure events do not automatically entitle Societies to refunds.
         </LegalParagraph>
         <LegalParagraph>
-          If Syncra offers a written service level agreement (SLA) to an enterprise Society, any service credits under
+          If mAI Society offers a written service level agreement (SLA) to an enterprise Society, any service credits under
           that SLA are the exclusive remedy for covered availability failures and are applied as billing credits, not
           cash refunds, unless otherwise agreed in writing.
         </LegalParagraph>
@@ -153,7 +153,7 @@ export default function RefundPolicy() {
 
       <LegalSection title="11. Chargebacks and Payment Disputes">
         <LegalParagraph>
-          Societies agree to contact Syncra to resolve billing disputes before initiating chargebacks or payment
+          Societies agree to contact mAI Society to resolve billing disputes before initiating chargebacks or payment
           reversals with their bank or card issuer. Unjustified chargebacks may result in immediate account suspension
           and recovery of associated fees, interest, and reasonable administrative costs permitted by law.
         </LegalParagraph>
@@ -162,7 +162,7 @@ export default function RefundPolicy() {
       <LegalSection title="12. Taxes">
         <LegalParagraph>
           All fees are exclusive of applicable taxes, including GST. Invoices will reflect taxes as required by Indian
-          law. Tax amounts paid are non-refundable except where Syncra is required by law to refund tax or issue a
+          law. Tax amounts paid are non-refundable except where mAI Society is required by law to refund tax or issue a
           credit note.
         </LegalParagraph>
       </LegalSection>
@@ -171,13 +171,13 @@ export default function RefundPolicy() {
         <LegalParagraph>
           Following cancellation, Societies may request export of their workspace data within thirty (30) days of the
           effective cancellation date, subject to technical feasibility and payment of any outstanding amounts. After
-          this window, Syncra may delete Society data in accordance with the Privacy Policy.
+          this window, mAI Society may delete Society data in accordance with the Privacy Policy.
         </LegalParagraph>
       </LegalSection>
 
       <LegalSection title="14. Changes to This Policy">
         <LegalParagraph>
-          Syncra may update this Policy from time to time. Changes apply to renewals and new purchases after the
+          mAI Society may update this Policy from time to time. Changes apply to renewals and new purchases after the
           updated effective date. Material changes will be communicated to registered billing contacts or posted on the
           Platform.
         </LegalParagraph>

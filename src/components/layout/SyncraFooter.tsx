@@ -80,7 +80,7 @@ export default function SyncraFooter({ className = '', showAppBadges = true }: S
         </div>
 
         <p className="mt-8 text-sm leading-relaxed text-slate-600">
-          Syncra Society is an official product developed, owned, and maintained by {SYNCRA_LEGAL_ENTITY}. All
+          mAI Society is an official product developed, owned, and maintained by {SYNCRA_LEGAL_ENTITY}. All
           rights reserved. © {year} {SYNCRA_LEGAL_ENTITY}.
         </p>
       </div>

@@ -1,4 +1,4 @@
-/** Shared light corporate design tokens for Syncra Society UI — mobile-first responsive. */
+/** Shared light corporate design tokens for mAI Society UI — mobile-first responsive. */
 export const ui = {
   page: 'min-h-screen bg-white text-slate-900',
   pageMuted: 'bg-syncra-surface-alt',

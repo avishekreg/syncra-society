@@ -80,7 +80,7 @@ export default function SuperAdminAccessManagement() {
         )
         return
       }
-      setStatus('Only Syncra Super Admin can transfer the Society President role during elections or restructuring.')
+      setStatus('Only Platform Super Admin can transfer the Society President role during elections or restructuring.')
       return
     }
     if (!presidentEmail.trim()) {

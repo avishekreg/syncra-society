@@ -75,7 +75,7 @@ export default function ActivationPage() {
         key: order.keyId,
         amount: order.amount,
         currency: order.currency ?? 'INR',
-        name: 'Syncra Platform Activation',
+        name: 'mAI Society Activation',
         description: `One-time activation for ${societyName}`,
         order_id: order.orderId,
         prefill: {
@@ -119,7 +119,7 @@ export default function ActivationPage() {
   if (loading) {
     return (
       <div className={`${ui.page} flex min-h-screen items-center justify-center`}>
-        <p className={ui.loading}>Preparing Syncra Platform Activation…</p>
+        <p className={ui.loading}>Preparing mAI Society Activation…</p>
       </div>
     )
   }
@@ -130,7 +130,7 @@ export default function ActivationPage() {
         <div className={ui.card}>
           <header className={ui.cardHeader}>
             <p className={ui.eyebrow}>Phase 1 · Platform activation</p>
-            <h1 className={`mt-1 ${ui.headingLg}`}>Syncra Platform Activation</h1>
+            <h1 className={`mt-1 ${ui.headingLg}`}>mAI Society Activation</h1>
             <p className={`mt-2 ${ui.body}`}>
               Complete the one-time activation fee for <strong>{societyName}</strong> to unlock flat
               configuration and recurring billing setup.

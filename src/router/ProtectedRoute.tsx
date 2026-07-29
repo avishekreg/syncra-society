@@ -33,7 +33,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   }, [user?.id, user?.email, initializing])
 
   if (initializing) {
-    return <div className={ui.loading}>Restoring your Syncra session…</div>
+    return <div className={ui.loading}>Restoring your mAI Society session…</div>
   }
 
   if (!user) return <Navigate to="/auth/login" replace />

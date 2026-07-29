@@ -17,7 +17,7 @@ export default function AntiDisputeHarmonySection() {
         </h2>
         <p className="text-base leading-relaxed text-slate-600 sm:text-lg">
           Financial management in traditional societies often leads to internal friction, lack of clarity, and
-          unnecessary disputes among members. Syncra solves this forever with our{' '}
+          unnecessary disputes among members. mAI Society solves this forever with our{' '}
           <span className="font-semibold text-syncra-blue">No-Brainer Accounts</span> framework. By providing
           automated, real-time sync between bank statements, cashflows, and owner dashboards, we eliminate the room
           for manual errors or false accusations. No friction, no blame-games—just an unshakeable ecosystem of absolute

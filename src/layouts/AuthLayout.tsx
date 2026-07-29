@@ -1,5 +1,6 @@
 import React from 'react'
 import SyncraFooter from '../components/layout/SyncraFooter'
+import MaiSocietyWordmark from '../components/brand/MaiSocietyWordmark'
 
 export default function AuthLayout({
   children,
@@ -18,7 +19,9 @@ export default function AuthLayout({
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-card sm:p-6 md:p-10">
             <div className="mb-8 flex flex-col gap-4 rounded-xl border border-slate-200 bg-syncra-surface p-6 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-syncra-accent">Syncra Society</p>
+                <p className="text-sm font-semibold tracking-[0.2em]">
+                  <MaiSocietyWordmark layout="inline" className="text-base" />
+                </p>
                 <h1 className="mt-2 text-2xl font-semibold tracking-tight text-syncra-primary md:text-3xl">
                   {title || 'Secure access to your society dashboard'}
                 </h1>

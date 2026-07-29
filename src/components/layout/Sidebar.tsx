@@ -6,7 +6,7 @@ import { useAuth } from '../../providers/AuthProvider'
 import { usePlatformConfig } from '../../providers/PlatformConfigProvider'
 import { useSocietyBranding } from '../../hooks/useSocietyBranding'
 import { AccordionNavLink, NavAccordionProvider, useNavAccordion } from './NavAccordionContext'
-import { isGlobalSuperAdmin, isRwaStaff } from '../../lib/roles'
+import { MAI_PLATFORM_NAME } from '../../lib/brandConstants'
 import {
   canAccessFinancialConsole,
   canAccessGuardConsole,
@@ -189,7 +189,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
   if (!user) {
     return (
       <div className={`${ui.page} flex items-center justify-center p-6 text-slate-500 sm:p-8`}>
-        Loading Syncra Workspace Safely...
+        Loading mAI Society…
       </div>
     )
   }
@@ -617,7 +617,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
         </button>
         <div className="min-w-0 flex-1 text-center">
           <p className="truncate text-xs font-semibold uppercase tracking-wide text-syncra-blue">{societyName}</p>
-          <p className="truncate text-sm font-semibold text-syncra-primary">{title ?? 'Syncra Society'}</p>
+          <p className="truncate text-sm font-semibold text-syncra-primary">{title ?? 'mAI Society'}</p>
         </div>
         <div className="w-11" aria-hidden="true" />
       </header>

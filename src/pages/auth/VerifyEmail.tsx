@@ -151,7 +151,7 @@ export default function VerifyEmail() {
             <h2 className={`mt-2 ${ui.heading}`}>Confirm your email to finish signup</h2>
             <p className={`mt-3 ${ui.body}`}>
               {isWebFirstFlow
-                ? 'Enter the one-time code we sent to your inbox. Once verified, you can download the Syncra Society app and access your dashboard.'
+                ? 'Enter the one-time code we sent to your inbox. Once verified, you can download the mAI Society app and access your dashboard.'
                 : 'We sent a verification link and one-time code to your inbox. Click the link or enter the code below to activate your account.'}
             </p>
           </div>

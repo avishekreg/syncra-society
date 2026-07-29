@@ -13,7 +13,7 @@ export default function AdminHelpdeskDashboard() {
   const { uuid, loading: resolvingUuid } = useResolvedSocietyUuid()
 
   if (!user) {
-    return <div className={ui.loading}>Loading Syncra Workspace Safely...</div>
+    return <div className={ui.loading}>Loading mAI Society…</div>
   }
 
   if (isGlobalSuperAdmin(user)) {

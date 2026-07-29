@@ -32,7 +32,7 @@ export default function SuperAdminPayments() {
         <p className={ui.eyebrow}>Global Payment Settlement Engine</p>
         <h1 className={`mt-2 ${ui.headingLg}`}>Razorpay API Keys</h1>
         <p className={`mt-2 ${ui.body}`}>
-          Configure the parent Razorpay gateway credentials used by Syncra managed payment routing.
+          Configure the parent Razorpay gateway credentials used by mAI Society managed payment routing.
         </p>
       </header>
 

@@ -144,7 +144,7 @@ export default function ResidentHelpdesk() {
     <div className={ui.sectionGap}>
       <section className={ui.card}>
         <div className="mb-6">
-          <p className={ui.eyebrow}>Syncra Smart Helpdesk</p>
+          <p className={ui.eyebrow}>mAI Smart Helpdesk</p>
           <h2 className={`mt-2 ${ui.headingLg}`}>Smart Helpdesk & Asset Audit</h2>
           <p className={`mt-2 ${ui.body}`}>
             File issue tickets with AI voice dictation, auto-categorization, urgency detection, and supporting

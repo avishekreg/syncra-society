@@ -26,10 +26,10 @@ export default function SocietyIntegrationCredentials({ className = '' }: Props)
         />
 
         <div className="relative">
-          <p className={ui.eyebrow}>Syncra Integration Credentials</p>
+          <p className={ui.eyebrow}>mAI Integration Credentials</p>
           <h2 className={`mt-2 ${ui.heading}`}>Society Identifiers</h2>
           <p className={`mt-2 max-w-2xl ${ui.body}`}>
-            Use this unique Society ID when connecting third-party integrations such as the Syncra Automated
+            Use this unique Society ID when connecting third-party integrations such as the mAI Society Automated
             Message Gateway, webhooks, or external billing tools.
           </p>
 

@@ -26,7 +26,7 @@ export default function SignupDownloadSuccess({ fullName, dashboardPath = '/auth
           {fullName ? `${fullName}, your account is ready!` : 'Your account is ready!'}
         </h2>
         <p className={`${ui.body} text-base leading-relaxed`}>
-          Account Verified Successfully! Now, download the official Syncra Society App to access your gatekeeper logs
+          Account Verified Successfully! Now, download the official mAI Society App to access your gatekeeper logs
           and dashboard.
         </p>
 
@@ -36,7 +36,7 @@ export default function SignupDownloadSuccess({ fullName, dashboardPath = '/auth
             download="syncra-society-latest.apk"
             className={`${ui.btnPrimary} w-full justify-center px-6 py-4 text-base`}
           >
-            Download Syncra Society App
+            Download mAI Society App
           </a>
           <a href={SYNCRA_ANDROID_LANDING_PATH} className={`${ui.btnSecondary} w-full justify-center`}>
             View install instructions

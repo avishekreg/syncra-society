@@ -1,5 +1,5 @@
 /**
- * Syncra Society Governance Scoring — v1.0.0
+ * mAI Society Governance Scoring — v1.0.0
  * Published, fixed weights. No black-box AI for point allocation.
  * Scores are derived only from auditable activity log events + payment status.
  */

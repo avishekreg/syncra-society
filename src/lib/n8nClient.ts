@@ -80,10 +80,10 @@ export async function dispatchEmailVerification(input: {
     eventId: `verify-${Date.now()}`,
     type: 'auth.email_verification',
     societyId: 'system',
-    societyName: 'Syncra Society',
+    societyName: 'mAI Society',
     flatNumber: null,
     email: input.email,
-    summary: `Verify your Syncra Society account (${input.fullName ?? input.email})`,
+    summary: `Verify your mAI Society account (${input.fullName ?? input.email})`,
     occurredAt: new Date().toISOString(),
     metadata: {
       email: input.email,

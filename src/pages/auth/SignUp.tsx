@@ -176,7 +176,7 @@ export default function SignUp() {
             <p className={ui.eyebrow}>Web-first onboarding</p>
             <h2 className={ui.heading}>Register as a Society Admin or Resident.</h2>
             <p className={`leading-7 ${ui.body}`}>
-              Verify your email, complete signup in the mobile browser, then download the Syncra Society app for
+              Verify your email, complete signup in the mobile browser, then download the mAI Society app for
               gatekeeper logs and your resident dashboard.
             </p>
           </div>

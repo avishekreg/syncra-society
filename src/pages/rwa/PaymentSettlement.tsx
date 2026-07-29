@@ -62,7 +62,7 @@ export default function PaymentSettlement() {
           <p className={ui.eyebrow}>Financial Settlements</p>
           <h2 className={`mt-3 ${ui.headingLg}`}>Payment collection infrastructure</h2>
           <p className={`mt-2 ${ui.body}`}>
-            Choose between direct member settlement or Syncra’s Razorpay-managed payment rail.
+            Choose between direct member settlement or mAI Society’s Razorpay-managed payment rail.
           </p>
         </div>
         <div className={ui.badge}>Dual-route payment engine</div>
@@ -110,9 +110,9 @@ export default function PaymentSettlement() {
         <div className={ui.innerItem}>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-lg font-semibold text-syncra-primary">Route 2: Syncra Managed Processing</p>
+              <p className="text-lg font-semibold text-syncra-primary">Route 2: mAI Managed Processing</p>
               <p className={`mt-2 ${ui.body}`}>
-                Activate the Syncra payment rail and route transactions through the Razorpay pipeline.
+                Activate the mAI payment rail and route transactions through the Razorpay pipeline.
               </p>
             </div>
             <label className={`inline-flex items-center gap-3 ${ui.innerItem}`}>
@@ -122,7 +122,7 @@ export default function PaymentSettlement() {
                 onChange={(event) => setUseSyncraRail(event.target.checked)}
                 className="h-5 w-5 rounded border-slate-300 text-syncra-accent focus:ring-syncra-accent"
               />
-              <span className={ui.label}>Activate Syncra Payment Rail</span>
+              <span className={ui.label}>Activate mAI Payment Rail</span>
             </label>
           </div>
           <p className={`mt-4 ${ui.body}`}>

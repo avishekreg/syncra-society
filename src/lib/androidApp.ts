@@ -1,4 +1,4 @@
-/** Syncra Society Android app — download paths and Capacitor shell config. */
+/** mAI Society Android app — download paths and Capacitor shell config. */
 
 export const SYNCRA_ANDROID_APP_ORIGIN =
   import.meta.env.VITE_SYNCRA_APP_ORIGIN || 'https://syncra-society.vercel.app'
@@ -23,7 +23,7 @@ export function resolveAndroidDownloadHref(origin?: string) {
 
 export const SYNCRA_CAPACITOR_APP_ID = 'in.syncrasystems.society'
 
-export const SYNCRA_CAPACITOR_APP_NAME = 'Syncra Society'
+export const SYNCRA_CAPACITOR_APP_NAME = 'mAI Society'
 
 /** Runtime deployment manifest emitted at build time for native OTA refresh checks. */
 export const SYNCRA_APP_VERSION_MANIFEST = '/app-version.json'

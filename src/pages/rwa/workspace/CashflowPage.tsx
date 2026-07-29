@@ -8,7 +8,7 @@ export default function WorkspaceCashflowPage() {
       <section className={ui.grid2}>
         <article className={ui.cardFill}>
           <header className={ui.cardHeader}>
-            <p className={ui.eyebrow}>Syncra AI Predictive Engine</p>
+            <p className={ui.eyebrow}>mAI Predictive Engine</p>
             <h2 className={`mt-1 ${ui.headingLg}`}>Cashflow forecast</h2>
           </header>
           <div className={ui.cardBody}>

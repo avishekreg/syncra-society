@@ -90,7 +90,7 @@ export function initializeFoundingPresident(
 }
 
 /**
- * Election / restructure mode — only Syncra Super Admin may transfer an existing president role.
+ * Election / restructure mode — only Platform Super Admin may transfer an existing president role.
  */
 export function canReassignPresident(
   actor: AuthUser | null | undefined,
@@ -129,7 +129,7 @@ export function transferPresidentRole(
 ): { ok: true; tree: SocietyGovernanceTree; demotedPresident: string | null } | { ok: false; error: string } {
   if (!canReassignPresident(actor, societyId)) {
     if (!isGlobalSuperAdmin(actor)) {
-      return { ok: false, error: 'Only Syncra Super Admin can transfer the Society President role.' }
+      return { ok: false, error: 'Only Platform Super Admin can transfer the Society President role.' }
     }
     return {
       ok: false,

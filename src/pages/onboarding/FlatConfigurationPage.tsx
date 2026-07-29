@@ -115,7 +115,7 @@ export default function FlatConfigurationPage() {
       await openCheckout({
         key: result.keyId,
         subscription_id: result.subscriptionId,
-        name: 'Syncra Society Subscription',
+        name: 'mAI Society Subscription',
         description: `Monthly recurring billing for ${totalFlats} flats`,
         prefill: {
           email: user?.email ?? '',
@@ -188,7 +188,7 @@ export default function FlatConfigurationPage() {
             <p className={ui.eyebrow}>Phase 2 · Recurring subscription</p>
             <h1 className={`mt-1 ${ui.headingLg}`}>Flat Configuration</h1>
             <p className={`mt-2 ${ui.body}`}>
-              Enter the total flats for <strong>{societyName}</strong>. Syncra calculates your tier-based
+              Enter the total flats for <strong>{societyName}</strong>. mAI Society calculates your tier-based
               monthly dues and sets up Razorpay recurring billing.
             </p>
           </header>

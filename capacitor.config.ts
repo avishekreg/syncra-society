@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
   appId: 'in.syncrasystems.society',
-  appName: 'Syncra Society',
+  appName: 'mAI Society',
   webDir: 'dist',
   plugins: {
     PushNotifications: {

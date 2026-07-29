@@ -70,8 +70,8 @@ export default function WhatsAppAutomation() {
       result.simulated
         ? result.message
         : result.forwarded
-          ? 'Test message sent through Syncra Automated Message Gateway.'
-          : 'Test delivery failed. Please retry or contact Syncra support.'
+          ? 'Test message sent through mAI Message Gateway.'
+          : 'Test delivery failed. Please retry or contact mAI support.'
     )
   }
 
@@ -87,9 +87,9 @@ export default function WhatsAppAutomation() {
     <div className="space-y-6">
       <section className={ui.card}>
         <p className={ui.eyebrow}>WhatsApp automation</p>
-        <h2 className={`mt-2 ${ui.headingLg}`}>Syncra Automated Message Gateway</h2>
+        <h2 className={`mt-2 ${ui.headingLg}`}>mAI Message Gateway</h2>
         <p className={`mt-2 ${ui.body}`}>
-          Portal events are processed securely via Syncra Core infrastructure, which delivers WhatsApp
+          Portal events are processed securely via mAI Core infrastructure, which delivers WhatsApp
           messages through your approved business service provider. Inbound messages can create tickets and
           log receipts.
         </p>
@@ -208,7 +208,7 @@ export default function WhatsAppAutomation() {
       <section className={`${ui.innerItem} text-sm ${ui.body}`}>
         <p className="font-semibold text-syncra-primary">Enterprise activation</p>
         <p className="mt-2">
-          WhatsApp automation is provisioned through Syncra Core. Contact your Syncra Systems LLP administrator
+          WhatsApp automation is provisioned through mAI Core. Contact your mAI platform administrator
           to connect your society&apos;s approved messaging channel and resident opt-in registry.
         </p>
       </section>

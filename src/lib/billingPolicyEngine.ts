@@ -84,12 +84,12 @@ export function buildPaymentReminderMessage(input: {
   const dueDay = rules.maintenance_due_date
 
   if (bill.status === 'overdue') {
-    return `*${societyName}* — Maintenance Overdue\n\nFlat ${bill.flatNumber}: ₹${bill.totalDue.toLocaleString('en-IN')} due (incl. late fee ₹${bill.lateFeeApplied.toLocaleString('en-IN')}). Due date was the ${dueDay}th. Please pay via the Syncra Society portal to avoid further penalties.`
+    return `*${societyName}* — Maintenance Overdue\n\nFlat ${bill.flatNumber}: ₹${bill.totalDue.toLocaleString('en-IN')} due (incl. late fee ₹${bill.lateFeeApplied.toLocaleString('en-IN')}). Due date was the ${dueDay}th. Please pay via the mAI Society portal to avoid further penalties.`
   }
 
   if (bill.status === 'grace') {
     return `*${societyName}* — Payment Grace Period\n\nFlat ${bill.flatNumber}: ₹${bill.baseOutstanding.toLocaleString('en-IN')} is past the ${dueDay}th due date. Grace period ends ${bill.graceEndsAt.toLocaleDateString('en-IN')}. Late fee of ₹${Number(rules.late_fee_flat_amount).toLocaleString('en-IN')} applies after that.`
   }
 
-  return `*${societyName}* — Maintenance Reminder\n\nFlat ${bill.flatNumber}: ₹${bill.baseOutstanding.toLocaleString('en-IN')} is due by the ${dueDay}th of this month. Pay on time via the Syncra Society portal.`
+  return `*${societyName}* — Maintenance Reminder\n\nFlat ${bill.flatNumber}: ₹${bill.baseOutstanding.toLocaleString('en-IN')} is due by the ${dueDay}th of this month. Pay on time via the mAI Society portal.`
 }

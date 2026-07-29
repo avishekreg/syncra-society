@@ -77,7 +77,7 @@ export function parseSyncraCommand(raw: string, societies: Society[]): CommandBa
   if (/^(help|\?|commands?)$/.test(lower)) {
     return {
       type: 'help',
-      message: 'Natural language commands for the Syncra control tower.',
+      message: 'Natural language commands for the mAI Society control tower.',
       suggestions: [
         'Generate link for [Society Name]',
         'Show global webhook errors',

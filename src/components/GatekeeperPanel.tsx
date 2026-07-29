@@ -138,7 +138,7 @@ export default function GatekeeperPanel({ onPending }: GatekeeperPanelProps) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
-        <h3 className="text-lg font-semibold text-syncra-primary">Syncra Gatekeeper</h3>
+        <h3 className="text-lg font-semibold text-syncra-primary">mAI Gatekeeper</h3>
         {loading && <span className="text-xs font-medium text-syncra-accent">Live</span>}
       </div>
       <p className="mt-1 text-xs text-slate-500">Real-time visitor approvals for your flat.</p>

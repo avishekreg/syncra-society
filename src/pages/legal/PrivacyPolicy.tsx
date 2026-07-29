@@ -15,18 +15,18 @@ export default function PrivacyPolicy() {
     <LegalPageLayout title="Privacy Policy">
       <LegalSection title="1. Introduction">
         <LegalParagraph>
-          This Privacy Policy explains how <strong>{LEGAL_ENTITY}</strong> (&quot;Syncra&quot;, &quot;we&quot;,
+          This Privacy Policy explains how <strong>{LEGAL_ENTITY}</strong> (&quot;mAI Society&quot;, &quot;we&quot;,
           &quot;us&quot;, or &quot;our&quot;) collects, uses, stores, shares, and protects personal data when you access
           or use <strong>{LEGAL_PLATFORM}</strong> (&quot;Platform&quot;), including through our website, mobile web
           experience, and native Android application distributed by {LEGAL_ENTITY}.
         </LegalParagraph>
         <LegalParagraph>
-          Syncra acts as a <strong>Data Fiduciary</strong> under the Digital Personal Data Protection Act, 2023
+          mAI Society acts as a <strong>Data Fiduciary</strong> under the Digital Personal Data Protection Act, 2023
           (&quot;DPDP Act&quot;) for personal data processed to operate the Platform, bill Societies, secure accounts,
           and deliver contracted services. Where a housing society or residents&apos; welfare association
           (&quot;Society&quot;) uploads resident records, configures messaging, or determines purposes of processing
           within its workspace, the Society may also act as a Data Fiduciary or Data Processor (as applicable) toward its
-          members, and this Policy describes Syncra&apos;s role in that ecosystem.
+          members, and this Policy describes mAI Society&apos;s role in that ecosystem.
         </LegalParagraph>
         <LegalParagraph>
           By using the Platform, you acknowledge that you have read this Privacy Policy. If you do not agree, please
@@ -79,7 +79,7 @@ export default function PrivacyPolicy() {
             </>,
             <>
               <strong>Financial and ledger data:</strong> payment references, transaction metadata, outstanding balances,
-              defaulter flags, and reconciliation records where Societies use financial modules (Syncra does not receive
+              defaulter flags, and reconciliation records where Societies use financial modules (mAI Society does not receive
               complete bank account credentials).
             </>,
             <>
@@ -109,7 +109,7 @@ export default function PrivacyPolicy() {
         />
         <LegalParagraph>
           Societies are responsible for ensuring they have a lawful basis to upload resident contact details and to
-          enable messaging features. Syncra processes such data on documented instructions from the Society and to
+          enable messaging features. mAI Society processes such data on documented instructions from the Society and to
           perform the Service.
         </LegalParagraph>
       </LegalSection>
@@ -157,7 +157,7 @@ export default function PrivacyPolicy() {
         </LegalParagraph>
         <LegalParagraph>
           Societies must obtain and document valid opt-in from residents before sending promotional or non-essential
-          WhatsApp messages and must honour opt-out requests. Syncra logs message metadata for delivery troubleshooting,
+          WhatsApp messages and must honour opt-out requests. mAI Society logs message metadata for delivery troubleshooting,
           billing of messaging add-ons, and abuse prevention.
         </LegalParagraph>
       </LegalSection>
@@ -209,7 +209,7 @@ export default function PrivacyPolicy() {
 
       <LegalSection id="data-security" title="9. Data Security">
         <LegalParagraph>
-          Given the sensitive nature of resident identities, contact details, and community records, Syncra implements
+          Given the sensitive nature of resident identities, contact details, and community records, mAI Society implements
           administrative, technical, and organizational safeguards designed to protect personal data, including:
         </LegalParagraph>
         <LegalList
@@ -243,7 +243,7 @@ export default function PrivacyPolicy() {
           ]}
         />
         <LegalParagraph>
-          Upon account termination, Syncra may delete or anonymize personal data after applicable notice periods, except
+          Upon account termination, mAI Society may delete or anonymize personal data after applicable notice periods, except
           where retention is legally required or necessary for legitimate business purposes.
         </LegalParagraph>
       </LegalSection>
@@ -251,7 +251,7 @@ export default function PrivacyPolicy() {
       <LegalSection title="11. Cross-Border Processing">
         <LegalParagraph>
           Some subprocessors may process or store data on servers located outside India. Where personal data is
-          transferred internationally, Syncra takes steps consistent with applicable law, including contractual
+          transferred internationally, mAI Society takes steps consistent with applicable law, including contractual
           protections and reliance on permitted transfer mechanisms under the DPDP Act and related rules.
         </LegalParagraph>
       </LegalSection>
@@ -293,7 +293,7 @@ export default function PrivacyPolicy() {
       <LegalSection id="grievance" title="14. Grievance Officer">
         <LegalParagraph>
           In accordance with the DPDP Act and Information Technology (Intermediary Guidelines and Digital Media Ethics
-          Code) Rules, 2021, as applicable, Syncra has designated a Grievance Officer for privacy-related complaints:
+          Code) Rules, 2021, as applicable, mAI Society has designated a Grievance Officer for privacy-related complaints:
         </LegalParagraph>
         <LegalList
           items={[
@@ -316,7 +316,7 @@ export default function PrivacyPolicy() {
 
       <LegalSection title="15. Mobile Application and OTA Updates">
         <LegalParagraph>
-          Where you install the Syncra Society native Android application, we may collect device and app version
+          Where you install the mAI Society native Android application, we may collect device and app version
           information to deliver security updates, over-the-air content refreshes, and compatibility fixes. The mobile
           application loads the same authenticated {LEGAL_PLATFORM} experience as the web portal; session, helpdesk,
           notice, and messaging data are processed under the same rules described in this Policy.

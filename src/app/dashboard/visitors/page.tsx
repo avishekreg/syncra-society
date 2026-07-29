@@ -97,7 +97,7 @@ export default function VisitorsPage() {
       <PageHeader
         eyebrow="Visitor Gatekeeper Logs"
         title="Gate operations"
-        description="Register inbound visitors against unit records and route automated WhatsApp notifications to flat owners through Syncra Core."
+        description="Register inbound visitors against unit records and route automated WhatsApp notifications to flat owners through mAI Core."
       />
 
       {!whatsappEnabled && selectedSociety && (

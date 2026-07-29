@@ -14,7 +14,7 @@ export default function ShowcaseUnitsPanel({ units }: { units: DemoUnit[] }) {
       <header className={`${ui.cardHeader} flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between`}>
         <div>
           <p className={ui.eyebrow}>Flat owner showcase</p>
-          <h2 className={`mt-2 ${ui.headingLg}`}>Syncra Windsor Castle Flats Overview</h2>
+          <h2 className={`mt-2 ${ui.headingLg}`}>Windsor Castle Flats Overview</h2>
           <p className={`mt-2 ${ui.body}`}>
             Live flat owner balances, due status, and recent payment snapshots for the demo society.
           </p>

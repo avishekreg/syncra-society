@@ -20,7 +20,7 @@ export default function PortalEntryPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-neutral-50 px-4 py-16">
       <div className="mb-10 text-center">
-        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-neutral-400">Syncra Society</p>
+        <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-neutral-400">mAI Society</p>
         <h1 className="mt-3 text-2xl font-semibold tracking-tight text-neutral-900">Operations Portal</h1>
         <p className="mt-2 max-w-sm text-sm leading-relaxed text-neutral-500">
           Secure access for housing society administrators, gatekeepers, and platform operators.

@@ -57,7 +57,7 @@ function buildNodes(societies: Society[]): GraphNode[] {
   const nodes: GraphNode[] = [
     {
       id: 'core',
-      label: 'Syncra Core',
+      label: 'mAI Core',
       sublabel: 'Global Core Platform',
       x: CX,
       y: CY,
@@ -478,7 +478,7 @@ export default function PlatformTopologyMap({ societies, visitorLogs24h, loading
               viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
               className="relative h-auto w-full min-h-[320px] sm:min-h-[400px]"
               role="img"
-              aria-label="Infrastructure telemetry map showing Syncra Core, societies, gatekeeper, and WhatsApp webhook"
+              aria-label="Infrastructure telemetry map showing mAI Core, societies, gatekeeper, and WhatsApp webhook"
             >
               <defs>
                 <linearGradient id="syncra-edge-flow" x1="0%" y1="0%" x2="100%" y2="0%">

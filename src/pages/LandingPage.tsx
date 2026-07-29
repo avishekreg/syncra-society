@@ -24,8 +24,8 @@ const landingFeatures = [
   { icon: '📝', title: 'Contract Tracking', description: 'Monitor vendor agreements, renewals, and obligations from one control hub.' },
   {
     icon: '🛂',
-    title: 'Syncra Gatekeeper',
-    description: 'Syncra Gate Visitor Log — guard entry, resident approvals, and exit trace.'
+    title: 'mAI Gatekeeper',
+    description: 'mAI Gate Visitor Log — guard entry, resident approvals, and exit trace.'
   },
   {
     icon: '🛠️',
@@ -48,7 +48,7 @@ const premiumAddonMeta: PremiumAddon[] = [
     name: 'WhatsApp Automation',
     description:
       'Stack automated notice broadcasts and resident alerts on any base plan — fixed monthly add-on or bundled volume packs.',
-    highlights: ['Syncra notice relays', 'Opt-in resident contact routing', 'Volume-tier alert packs']
+    highlights: ['mAI notice relays', 'Opt-in resident contact routing', 'Volume-tier alert packs']
   },
   {
     id: 'voice-helpdesk',
@@ -116,8 +116,8 @@ export default function LandingPage() {
                 Ultra-premium governance for modern communities.
               </h2>
               <p className={`text-lg leading-relaxed ${ui.body}`}>
-                syncra-society from {SYNCRA_LEGAL_ENTITY} unifies Multi-Society RWA, Ledgers, Notice Board, Contract
-                Tracking, and Syncra Gatekeeper into one elegant, privacy-first platform.
+                mAI Society from {SYNCRA_LEGAL_ENTITY} unifies Multi-Society RWA, Ledgers, Notice Board, Contract
+                Tracking, and mAI Gatekeeper into one elegant, privacy-first platform.
               </p>
             </div>
 
@@ -162,7 +162,7 @@ export default function LandingPage() {
               Everything your society needs, beautifully organized.
             </h3>
             <p className={`text-base leading-relaxed ${ui.body}`}>
-              From resident logistics to financial accountability, syncra-society provides clear workflows, fast
+              From resident logistics to financial accountability, mAI Society provides clear workflows, fast
               approvals, and a premium user experience.
             </p>
           </div>
@@ -239,7 +239,7 @@ export default function LandingPage() {
               </h3>
               <p className={`text-base leading-relaxed ${ui.body}`}>
                 Modular automation modules societies can activate on top of Tier 1–3 — zero-touch enablement via
-                secure Syncra billing after checkout.
+                secure mAI billing after checkout.
               </p>
             </div>
 

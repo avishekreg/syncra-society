@@ -58,7 +58,7 @@ export default function SyncraCommandBar({ onSubmit, lastAction, busy = false }:
         <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-syncra-blue" aria-hidden="true" />
-            <p className={cc.eyebrowPrimary}>Ask Syncra AI</p>
+            <p className={cc.eyebrowPrimary}>Ask mAI</p>
           </div>
           <div className="flex items-center gap-1.5 text-xs text-slate-500">
             <kbd className={cc.kbd}>
@@ -81,7 +81,7 @@ export default function SyncraCommandBar({ onSubmit, lastAction, busy = false }:
             onBlur={() => setFocused(false)}
             placeholder='Try "Generate link for Regency Crest" or "Show global webhook errors"'
             className={`${cc.input} pl-11 pr-28 font-medium text-slate-900`}
-            aria-label="Ask Syncra AI command bar"
+            aria-label="Ask mAI command bar"
           />
           <button
             type="submit"

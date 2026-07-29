@@ -11,7 +11,7 @@ const promiseCards: PromiseCard[] = [
   {
     title: 'Absolute Privacy (No Data Selling)',
     description:
-      'Unlike free, ad-heavy alternatives, Syncra never monetizes your resident directory, gate logs, or contact graphs — and we do not broker leaks to home-service vendors or third-party marketers.',
+      'Unlike free, ad-heavy alternatives, mAI Society never monetizes your resident directory, gate logs, or contact graphs — and we do not broker leaks to home-service vendors or third-party marketers.',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6" aria-hidden="true">
         <path
@@ -63,9 +63,9 @@ export default function SyncraPromiseSection() {
       />
 
       <div className="mx-auto max-w-3xl space-y-5 text-center">
-        <p className={ui.eyebrowPrimary}>The Syncra Promise</p>
+        <p className={ui.eyebrowPrimary}>The mAI Society Promise</p>
         <h3 className="text-3xl font-semibold leading-tight tracking-tight text-syncra-primary sm:text-4xl">
-          Why Syncra Society? Because Your Privacy Is Not For Sale.
+          Why mAI Society? Because Your Privacy Is Not For Sale.
         </h3>
         <p className={`text-base leading-relaxed ${ui.body}`}>
           Premium societies deserve a platform that protects residents first — with enterprise-grade security,

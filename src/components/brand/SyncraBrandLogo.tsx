@@ -1,18 +1,21 @@
 import React, { useId } from 'react'
 import { Link } from 'react-router-dom'
+import { MAI_PLATFORM_NAME } from '../../lib/brandConstants'
+import MaiSocietyWordmark from './MaiSocietyWordmark'
 
 type SyncraBrandLogoProps = {
   to?: string
   className?: string
   variant?: 'light' | 'dark'
-  /** When false, shows a single-line Syncra wordmark without the Society subtitle. */
+  /** When false, shows inline mAI without the Society subtitle. */
   showSubtitle?: boolean
 }
 
 function SyncraInsignia({ className }: { className?: string }) {
   const uid = useId().replace(/:/g, '')
-  const strokeId = `syncra-stroke-${uid}`
-  const fillId = `syncra-fill-${uid}`
+  const strokeId = `mai-stroke-${uid}`
+  const fillId = `mai-fill-${uid}`
+  const accentId = `mai-accent-${uid}`
 
   return (
     <svg
@@ -31,6 +34,10 @@ function SyncraInsignia({ className }: { className?: string }) {
         <linearGradient id={fillId} x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
           <stop stopColor="#F8FAFC" />
           <stop offset="1" stopColor="#EEF2FF" />
+        </linearGradient>
+        <linearGradient id={accentId} x1="14" y1="8" x2="22" y2="16" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#FFB347" />
+          <stop offset="1" stopColor="#E67E00" />
         </linearGradient>
       </defs>
 
@@ -69,58 +76,13 @@ function SyncraInsignia({ className }: { className?: string }) {
         opacity="0.55"
       />
       <circle cx="16" cy="18.8" r="1.35" fill="#0052CC" opacity="0.85" />
-    </svg>
-  )
-}
-
-function SyncraWordmark({
-  variant = 'light',
-  showSubtitle = true
-}: {
-  variant?: 'light' | 'dark'
-  showSubtitle?: boolean
-}) {
-  const isDark = variant === 'dark'
-
-  if (!showSubtitle) {
-    return (
-      <span
-        className={
-          isDark
-            ? 'bg-gradient-to-r from-white via-slate-100 to-cyan-100 bg-clip-text text-base font-bold tracking-tight text-transparent'
-            : 'text-base font-bold tracking-tight text-syncra-primary'
-        }
-      >
-        Syncra
-      </span>
-    )
-  }
-
-  return (
-    <div className="flex min-w-0 flex-col justify-center leading-none">
-      <span
-        className={
-          isDark
-            ? 'bg-gradient-to-r from-white via-slate-100 to-cyan-100 bg-clip-text text-[14px] font-bold tracking-tight text-transparent'
-            : 'text-[14px] font-bold tracking-tight text-slate-900'
-        }
-      >
-        Syncra
-      </span>
-      <span
-        aria-hidden="true"
-        className={isDark ? 'my-[3px] block h-px w-full bg-white/15' : 'my-[3px] block h-px w-full bg-slate-200'}
+      {/* Orange AI accent mark */}
+      <path
+        d="M21.5 10.5L23.5 8.5L25 10.5L23 12.5Z"
+        fill={`url(#${accentId})`}
+        opacity="0.95"
       />
-      <span
-        className={
-          isDark
-            ? 'text-[10px] font-semibold uppercase tracking-[0.14em] text-cyan-300/90'
-            : 'text-[10px] font-semibold uppercase tracking-[0.14em] text-syncra-blue'
-        }
-      >
-        Society
-      </span>
-    </div>
+    </svg>
   )
 }
 
@@ -133,7 +95,7 @@ export default function SyncraBrandLogo({
   const content = (
     <div className={`flex h-9 items-center gap-2.5 ${className}`}>
       <SyncraInsignia className="h-8 w-8 shrink-0" />
-      <SyncraWordmark variant={variant} showSubtitle={showSubtitle} />
+      <MaiSocietyWordmark variant={variant} showSociety={showSubtitle} />
     </div>
   )
 
@@ -142,7 +104,7 @@ export default function SyncraBrandLogo({
   return (
     <Link
       to={to}
-      aria-label="Syncra Society home"
+      aria-label={`${MAI_PLATFORM_NAME} home`}
       className={`inline-flex shrink-0 rounded-lg outline-none transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-cyan-400/40 ${
         variant === 'dark' ? 'focus-visible:ring-offset-[#0c1528]' : 'focus-visible:ring-offset-2'
       }`}
