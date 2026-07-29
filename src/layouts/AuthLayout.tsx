@@ -20,7 +20,7 @@ export default function AuthLayout({
             <div className="mb-8 flex flex-col gap-4 rounded-xl border border-slate-200 bg-syncra-surface p-6 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-semibold tracking-[0.2em]">
-                  <MaiSocietyWordmark layout="inline" className="text-base" />
+                  <MaiSocietyWordmark className="text-base" />
                 </p>
                 <h1 className="mt-2 text-2xl font-semibold tracking-tight text-syncra-primary md:text-3xl">
                   {title || 'Secure access to your society dashboard'}

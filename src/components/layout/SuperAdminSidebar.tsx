@@ -95,7 +95,7 @@ export default function SuperAdminSidebar({ title, children }: SuperAdminSidebar
           <Menu className="h-5 w-5" aria-hidden="true" />
         </button>
         <div className="min-w-0 flex-1 text-center">
-          <p className="truncate text-sm font-semibold text-syncra-primary">{title ?? 'Syncra Platform Admin'}</p>
+          <p className="truncate text-sm font-semibold text-syncra-primary">{title ?? 'mAI Platform Admin'}</p>
         </div>
         <div className="w-11" aria-hidden="true" />
       </header>

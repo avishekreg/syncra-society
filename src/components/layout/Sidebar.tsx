@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import { NavLink, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import SyncraBrandLogo from '../brand/SyncraBrandLogo'
+import MaiSocietyWordmark from '../brand/MaiSocietyWordmark'
 import { useAuth } from '../../providers/AuthProvider'
 import { usePlatformConfig } from '../../providers/PlatformConfigProvider'
 import { useSocietyBranding } from '../../hooks/useSocietyBranding'
@@ -617,7 +618,13 @@ export default function Sidebar({ children, title }: SidebarProps) {
         </button>
         <div className="min-w-0 flex-1 text-center">
           <p className="truncate text-xs font-semibold uppercase tracking-wide text-syncra-blue">{societyName}</p>
-          <p className="truncate text-sm font-semibold text-syncra-primary">{title ?? 'mAI Society'}</p>
+          {title ? (
+            <p className="truncate text-sm font-semibold text-syncra-primary">{title}</p>
+          ) : (
+            <div className="flex justify-center">
+              <MaiSocietyWordmark />
+            </div>
+          )}
         </div>
         <div className="w-11" aria-hidden="true" />
       </header>

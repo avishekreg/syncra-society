@@ -15,7 +15,7 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
         <Link href="/" className="flex items-center gap-2 font-semibold text-primary">
           <Building2 className="h-5 w-5" />
-          Syncra Society
+          mAI Society
         </Link>
         <nav className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
           {links.map((link) => (
