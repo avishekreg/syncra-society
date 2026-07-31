@@ -94,8 +94,8 @@ export default function LandingPage() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(0,180,216,0.08),_transparent_22%),radial-gradient(circle_at_bottom_right,_rgba(0,82,204,0.06),_transparent_24%)]" />
 
       <header className="relative z-20 border-b border-slate-200 bg-white/95 backdrop-blur-sm">
-        <div className="mx-auto flex min-h-14 max-w-7xl flex-col items-stretch justify-between gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-4 sm:px-6 sm:py-0">
-          <SyncraBrandLogo to="/" />
+        <div className="mx-auto flex min-h-16 max-w-7xl flex-col items-stretch justify-between gap-3 px-4 py-3 sm:min-h-[4.25rem] sm:flex-row sm:items-center sm:gap-4 sm:px-6 sm:py-2">
+          <SyncraBrandLogo to="/" size="lg" />
           <div className="flex w-full flex-wrap items-stretch gap-3 sm:w-auto sm:items-center">
             <Link to="/auth/login" className={`w-full sm:w-auto ${ui.btnGhost}`}>
               Login Now

@@ -7,9 +7,22 @@ type SyncraBrandLogoProps = {
   to?: string
   className?: string
   variant?: 'light' | 'dark'
+  /** Larger mark for landing hero / marketing headers. */
+  size?: 'default' | 'lg'
   /** When false, shows inline mAI without the Society subtitle. */
   showSubtitle?: boolean
 }
+
+const logoSizeStyles = {
+  default: {
+    container: 'h-9 gap-2.5',
+    icon: 'h-8 w-8'
+  },
+  lg: {
+    container: 'h-12 gap-3 sm:h-14 sm:gap-3.5',
+    icon: 'h-10 w-10 sm:h-12 sm:w-12'
+  }
+} as const
 
 function SyncraInsignia({ className }: { className?: string }) {
   const uid = useId().replace(/:/g, '')
@@ -90,12 +103,14 @@ export default function SyncraBrandLogo({
   to = '/',
   className = '',
   variant = 'light',
+  size = 'default',
   showSubtitle = true
 }: SyncraBrandLogoProps) {
+  const sizing = logoSizeStyles[size]
   const content = (
-    <div className={`flex h-9 items-center gap-2.5 ${className}`}>
-      <SyncraInsignia className="h-8 w-8 shrink-0" />
-      <MaiSocietyWordmark variant={variant} showSociety={showSubtitle} />
+    <div className={`flex items-center ${sizing.container} ${className}`}>
+      <SyncraInsignia className={`${sizing.icon} shrink-0`} />
+      <MaiSocietyWordmark variant={variant} size={size} showSociety={showSubtitle} />
     </div>
   )
 
