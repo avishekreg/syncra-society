@@ -215,7 +215,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://syncra-society.vercel.app/api/automation/inbound",
+        "url": "https://maisociety.vercel.app/api/automation/inbound",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [

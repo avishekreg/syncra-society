@@ -14,7 +14,7 @@ const ENV_FALLBACKS: Record<string, string> = {
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET ?? '',
   PLATFORM_PAYMENTS_WEBHOOK_URL:
     process.env.PLATFORM_PAYMENTS_WEBHOOK_URL ??
-    'https://syncra-society.vercel.app/api/webhooks/payments'
+    'https://maisociety.vercel.app/api/webhooks/payments'
 }
 
 let cache: Map<string, string> | null = null

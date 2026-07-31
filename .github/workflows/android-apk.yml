@@ -19,7 +19,7 @@ jobs:
       VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
       NEXT_PUBLIC_SUPABASE_URL: https://bueejfndiiprdzraxtfc.supabase.co
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-      VITE_SYNCRA_APP_ORIGIN: https://syncra-society.vercel.app
+      VITE_SYNCRA_APP_ORIGIN: https://maisociety.vercel.app
       VITE_APP_VERSION: v1.0.0
       PROD_SUPABASE_REF: bueejfndiiprdzraxtfc
       SYNCRA_UPLOAD_STORE_FILE: syncra-society-release.keystore
@@ -63,6 +63,10 @@ jobs:
         run: |
           grep -q "appName: 'mAI Society'" capacitor.config.ts || {
             echo "capacitor.config.ts must set appName to mAI Society for Android launcher label."
+            exit 1
+          }
+          grep -q "maisociety.vercel.app" capacitor.config.ts || {
+            echo "capacitor.config.ts must point server.url at https://maisociety.vercel.app"
             exit 1
           }
 

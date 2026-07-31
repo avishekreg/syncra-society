@@ -265,7 +265,7 @@ values
   ),
   (
     'PLATFORM_PAYMENTS_WEBHOOK_URL',
-    'https://syncra-society.vercel.app/api/webhooks/payments',
+    'https://maisociety.vercel.app/api/webhooks/payments',
     'Public URL for Razorpay/Stripe module-purchase webhooks',
     now()
   )

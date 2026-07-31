@@ -67,7 +67,7 @@ Inbound payloads POST to the Syncra automation API (or via n8n `WhatsApp Inbound
 Configure your BSP in n8n to POST inbound messages to:
 
 ```
-POST https://syncra-society.vercel.app/api/automation/inbound
+POST https://maisociety.vercel.app/api/automation/inbound
 Header: x-syncra-automation-secret: <SYNCRA_AUTOMATION_SECRET>
 Header: x-syncra-response-format: twiml
 ```
@@ -77,7 +77,7 @@ Header: x-syncra-response-format: twiml
 Trigger automated maintenance reminders based on each society's billing policy:
 
 ```
-GET https://syncra-society.vercel.app/api/automation/reminders
+GET https://maisociety.vercel.app/api/automation/reminders
 Header: x-syncra-automation-secret: <SYNCRA_AUTOMATION_SECRET>
 ```
 
@@ -125,7 +125,7 @@ When moving to production:
 1. Production n8n is hosted at Hugging Face Spaces (`avishekreg-syncra-society.hf.space`)
 2. Set `N8N_WEBHOOK_URL=https://avishekreg-syncra-society.hf.space/webhook/syncra-society` in Vercel env
 3. Use HTTPS and rotate `SYNCRA_AUTOMATION_SECRET`
-4. Point inbound n8n HTTP nodes at `https://syncra-society.vercel.app/api/automation/inbound`
+4. Point inbound n8n HTTP nodes at `https://maisociety.vercel.app/api/automation/inbound`
 
 ## Event types
 

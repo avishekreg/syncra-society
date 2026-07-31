@@ -10,10 +10,10 @@ const config: CapacitorConfig = {
     }
   },
   server: {
-    url: 'https://syncra-society.vercel.app',
+    url: 'https://maisociety.vercel.app',
     cleartext: false,
     androidScheme: 'https',
-    allowNavigation: ['syncra-society.vercel.app', '*.vercel.app']
+    allowNavigation: ['maisociety.vercel.app', 'syncra-society.vercel.app', '*.vercel.app']
   }
 }
 

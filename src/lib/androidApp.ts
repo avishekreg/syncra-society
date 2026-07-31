@@ -1,7 +1,9 @@
 /** mAI Society Android app — download paths and Capacitor shell config. */
 
+import { MAI_PRODUCTION_ORIGIN } from './brandConstants'
+
 export const SYNCRA_ANDROID_APP_ORIGIN =
-  import.meta.env.VITE_SYNCRA_APP_ORIGIN || 'https://syncra-society.vercel.app'
+  import.meta.env.VITE_SYNCRA_APP_ORIGIN || MAI_PRODUCTION_ORIGIN
 
 export const SYNCRA_ANDROID_APK_FILENAME = 'syncra-society-latest.apk'
 
@@ -9,7 +11,8 @@ export const SYNCRA_ANDROID_APK_PATH = `/downloads/${SYNCRA_ANDROID_APK_FILENAME
 
 export const SYNCRA_ANDROID_APK_URL = `${SYNCRA_ANDROID_APP_ORIGIN}${SYNCRA_ANDROID_APK_PATH}`
 
-export const SYNCRA_ANDROID_LANDING_PATH = '/downloads/android.html'
+/** Public marketing entry point (home). Legacy /downloads/android.html redirects here. */
+export const SYNCRA_ANDROID_LANDING_PATH = '/'
 
 export const SYNCRA_ANDROID_DOWNLOAD_API = '/api/android-download'
 

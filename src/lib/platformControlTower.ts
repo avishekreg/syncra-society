@@ -5,6 +5,7 @@ import { shouldUseLocalFallback } from '../api/apiErrors'
 import type { BillingStatus } from '../lib/pricing'
 import { resolveMonthlyRatePerFlat } from '../lib/pricing'
 import { listRegisteredSocieties, ensureSocietyJoinCode } from '../lib/societyRegistry'
+import { MAI_PRODUCTION_ORIGIN } from './brandConstants'
 
 export type PlatformRegistrationRow = {
   id: string
@@ -36,10 +37,8 @@ export type PlatformControlTowerData = {
   financial: PlatformFinancialSummary
 }
 
-const PRODUCTION_ORIGIN = 'https://syncra-society.vercel.app'
-
 export function buildSocietyRegistrationUrl(societyId: string): string {
-  const origin = typeof window !== 'undefined' ? window.location.origin : PRODUCTION_ORIGIN
+  const origin = typeof window !== 'undefined' ? window.location.origin : MAI_PRODUCTION_ORIGIN
   return `${origin}/register?society_id=${encodeURIComponent(societyId)}`
 }
 

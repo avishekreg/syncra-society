@@ -36,7 +36,7 @@ export default function HeroDashboardMockup() {
           </div>
           <div className="ml-2 flex flex-1 items-center gap-2 rounded-lg border border-slate-200/80 bg-white px-3 py-1.5">
             <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
-            <span className="truncate text-[11px] font-medium text-slate-500">app.syncrasociety.com/dashboard</span>
+            <span className="truncate text-[11px] font-medium text-slate-500">maisociety.vercel.app/dashboard</span>
           </div>
         </div>
 

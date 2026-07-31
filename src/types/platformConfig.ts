@@ -76,7 +76,7 @@ export type PlatformConfig = {
 }
 
 export const DEFAULT_PAYMENTS_WEBHOOK_RECEPTION_URL =
-  'https://syncra-society.vercel.app/api/webhooks/payments'
+  'https://maisociety.vercel.app/api/webhooks/payments'
 
 export const VOICE_MODEL_OPTIONS = [
   { value: 'openai/whisper-large-v3', label: 'openai/whisper-large-v3 (default)' },
