@@ -49,13 +49,6 @@
       ]
     }
   ],
-  "redirects": [
-    {
-      "source": "/downloads/android.html",
-      "destination": "/",
-      "permanent": true
-    }
-  ],
   "rewrites": [
     {
       "source": "/downloads/syncra-society-android.apk",

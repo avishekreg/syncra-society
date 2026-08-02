@@ -11,8 +11,8 @@ export const SYNCRA_ANDROID_APK_PATH = `/downloads/${SYNCRA_ANDROID_APK_FILENAME
 
 export const SYNCRA_ANDROID_APK_URL = `${SYNCRA_ANDROID_APP_ORIGIN}${SYNCRA_ANDROID_APK_PATH}`
 
-/** Public marketing entry point (home). Legacy /downloads/android.html redirects here. */
-export const SYNCRA_ANDROID_LANDING_PATH = '/'
+/** Android install / download landing page. */
+export const SYNCRA_ANDROID_LANDING_PATH = '/downloads/android.html'
 
 export const SYNCRA_ANDROID_DOWNLOAD_API = '/api/android-download'
 
