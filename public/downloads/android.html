@@ -56,13 +56,16 @@
       .brand-text strong {
         display: block;
         font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1;
       }
-      .brand-text span {
-        font-size: 11px;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
+      .brand-text .m,
+      .brand-text .society {
         color: var(--blue);
-        font-weight: 600;
+      }
+      .brand-text .ai {
+        color: #e67e00;
       }
       .card {
         background: var(--surface);
@@ -145,7 +148,9 @@
           alt="mAI Society logo"
         />
         <div class="brand-text">
-          <strong>mAI Society</strong>
+          <strong aria-label="mAI Society">
+            <span class="m">m</span><span class="ai">AI</span><span class="society">Society</span>
+          </strong>
         </div>
       </div>
 
@@ -154,7 +159,7 @@
         <h1>Download mAI Society</h1>
         <p>
           Install the official Android app for gatekeeper alerts, resident helpdesk, notices, and society
-          management — powered by the same Syncra backend and Supabase Realtime as the web platform.
+          management — powered by the same mAI Society platform and Supabase Realtime as the web app.
         </p>
 
         <div class="actions">
