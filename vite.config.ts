@@ -30,6 +30,24 @@ export default defineConfig({
           `${JSON.stringify({ appVersion, buildSha, builtAt }, null, 2)}\n`
         )
       }
+    },
+    {
+      /**
+       * Capacitor packages `dist` into the APK. Hosted download APKs under
+       * public/downloads must never be embedded — that nested the previous
+       * ~100MB installer inside every new build.
+       */
+      name: 'strip-apks-for-capacitor',
+      closeBundle() {
+        if (process.env.CAPACITOR_BUILD !== '1') return
+        const downloadsDir = path.resolve(__dirname, 'dist/downloads')
+        if (!fs.existsSync(downloadsDir)) return
+        for (const entry of fs.readdirSync(downloadsDir)) {
+          if (entry.endsWith('.apk')) {
+            fs.unlinkSync(path.join(downloadsDir, entry))
+          }
+        }
+      }
     }
   ],
   resolve: {
