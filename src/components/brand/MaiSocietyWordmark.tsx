@@ -3,7 +3,7 @@ import { MAI_BRAND_BLUE, MAI_BRAND_ORANGE } from '../../lib/brandConstants'
 
 type Props = {
   variant?: 'light' | 'dark'
-  size?: 'default' | 'lg'
+  size?: 'default' | 'lg' | 'xl'
   className?: string
   /** Hide “Society” and show only mAI */
   showSociety?: boolean
@@ -17,6 +17,10 @@ const sizeStyles = {
   lg: {
     main: 'text-[18px] sm:text-[20px]',
     m: 'text-[14px] sm:text-[16px]'
+  },
+  xl: {
+    main: 'text-3xl sm:text-4xl',
+    m: 'text-[1.65rem] sm:text-[2.1rem]'
   }
 } as const
 

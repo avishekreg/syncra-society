@@ -42,8 +42,8 @@ export default function AuthPage() {
   return (
     <AuthLayout title="Welcome Back">
       <div className="mx-auto max-w-md">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="space-y-3">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-5">
+          <div className="space-y-2">
             <label className={ui.label}>Email or username</label>
             <input
               {...register('email')}
@@ -54,7 +54,7 @@ export default function AuthPage() {
             {errors.email && <div className="text-sm text-syncra-action-alt">{errors.email.message}</div>}
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             <label className={ui.label}>Password</label>
             <input
               type="password"
@@ -75,7 +75,7 @@ export default function AuthPage() {
           </button>
         </form>
 
-        <div className="mt-6 border-t border-slate-200 pt-6 text-center text-sm text-slate-600">
+        <div className="mt-5 border-t border-slate-200 pt-5 text-center text-sm text-slate-600">
           Don&apos;t have an account?{' '}
           <Link to="/auth/signup" className="font-semibold text-syncra-blue hover:text-syncra-accent">
             Create one
