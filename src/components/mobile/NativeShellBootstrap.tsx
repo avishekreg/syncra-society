@@ -9,7 +9,8 @@ type NativeShellBootstrapProps = {
 /**
  * Native Android shell bootstrap:
  * - Skip public marketing homepage and land on login.
- * - Keep OTA refresh hooks active while the webview is foregrounded.
+ * - Silent OTA live updates on launch/resume (build-stamp compare → soft reload).
+ * - Auth tokens in localStorage persist across OTA reloads.
  */
 export default function NativeShellBootstrap({ children }: NativeShellBootstrapProps) {
   const location = useLocation()

@@ -30,3 +30,6 @@ export const SYNCRA_CAPACITOR_APP_NAME = 'mAI Society'
 
 /** Runtime deployment manifest emitted at build time for native OTA refresh checks. */
 export const SYNCRA_APP_VERSION_MANIFEST = '/app-version.json'
+
+/** Live Vercel build stamp used by the Capacitor OTA controller (maiRide-style). */
+export const SYNCRA_APP_VERSION_API = '/api/version'

@@ -1,55 +1,12 @@
 import { Capacitor } from '@capacitor/core'
 import { App } from '@capacitor/app'
-import { SYNCRA_ANDROID_APP_ORIGIN, SYNCRA_APP_VERSION_MANIFEST } from './androidApp'
-
-const OTA_BUILD_SHA_KEY = 'syncra_ota_build_sha'
+import { startOtaLiveUpdateController, syncOtaLiveUpdate } from './otaLiveUpdate'
 
 export function isNativeShell(): boolean {
   return Capacitor.isNativePlatform()
 }
 
 export const NATIVE_LOGIN_PATH = '/auth/login'
-
-type AppVersionManifest = {
-  buildSha?: string
-  builtAt?: string
-  appVersion?: string
-}
-
-function productionOrigin(): string {
-  return isNativeShell() ? SYNCRA_ANDROID_APP_ORIGIN : window.location.origin
-}
-
-/** Compare deployed manifest against cached build SHA; reload when production moved ahead. */
-export async function validateRemoteDeployment(forceReloadOnChange = true): Promise<boolean> {
-  if (!navigator.onLine) return false
-
-  const manifestUrl = `${productionOrigin()}${SYNCRA_APP_VERSION_MANIFEST}?t=${Date.now()}`
-
-  try {
-    const response = await fetch(manifestUrl, {
-      cache: 'no-store',
-      headers: { Accept: 'application/json' }
-    })
-    if (!response.ok) return false
-
-    const manifest = (await response.json()) as AppVersionManifest
-    const remoteSha = manifest.buildSha?.trim()
-    if (!remoteSha) return false
-
-    const cachedSha = sessionStorage.getItem(OTA_BUILD_SHA_KEY)
-    sessionStorage.setItem(OTA_BUILD_SHA_KEY, remoteSha)
-
-    if (cachedSha && cachedSha !== remoteSha && forceReloadOnChange) {
-      window.location.reload()
-      return true
-    }
-
-    return false
-  } catch {
-    return false
-  }
-}
 
 const DOUBLE_BACK_MS = 2000
 const EXIT_HINT_TOAST_ID = 'mai-android-exit-hint'
@@ -121,28 +78,31 @@ function startAndroidDoubleBackToBackground(): () => void {
   }
 }
 
-/** Native-only foreground OTA sync: validate deployment when app resumes. */
+/**
+ * Native shell lifecycle:
+ * - Silent OTA live updates on launch / resume / visibility (maiRide-style)
+ * - Double-back minimizes the Android task
+ */
 export function startNativeShellLifecycle(): () => void {
   if (!isNativeShell()) return () => undefined
 
   const teardown: Array<() => void> = []
 
-  void validateRemoteDeployment(false)
+  teardown.push(startOtaLiveUpdateController())
   teardown.push(startAndroidDoubleBackToBackground())
-
-  const onVisibilityChange = () => {
-    if (document.visibilityState === 'visible') {
-      void validateRemoteDeployment(true)
-    }
-  }
-
-  document.addEventListener('visibilitychange', onVisibilityChange)
-  teardown.push(() => document.removeEventListener('visibilitychange', onVisibilityChange))
 
   void App.addListener('appStateChange', ({ isActive }) => {
     if (isActive) {
-      void validateRemoteDeployment(true)
+      void syncOtaLiveUpdate({ allowReload: true })
     }
+  }).then((listener) => {
+    teardown.push(() => {
+      void listener.remove()
+    })
+  })
+
+  void App.addListener('resume', () => {
+    void syncOtaLiveUpdate({ allowReload: true })
   }).then((listener) => {
     teardown.push(() => {
       void listener.remove()
@@ -152,4 +112,9 @@ export function startNativeShellLifecycle(): () => void {
   return () => {
     teardown.forEach((dispose) => dispose())
   }
+}
+
+/** @deprecated Use syncOtaLiveUpdate — kept for any residual imports. */
+export async function validateRemoteDeployment(forceReloadOnChange = true): Promise<boolean> {
+  return syncOtaLiveUpdate({ allowReload: forceReloadOnChange })
 }
