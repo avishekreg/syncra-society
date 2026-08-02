@@ -232,13 +232,13 @@ jobs:
             echo "No APK produced."
             exit 1
           fi
-          cp "$APK_PATH" release/syncra-society-latest.apk
-          VERSIONED_APK="syncra-society-android-${GITHUB_RUN_NUMBER}.apk"
+          cp "$APK_PATH" release/mai-society-latest.apk
+          VERSIONED_APK="mai-society-android-${GITHUB_RUN_NUMBER}.apk"
           cp "$APK_PATH" "public/downloads/${VERSIONED_APK}"
-          cp "$APK_PATH" "public/downloads/syncra-society-latest.apk"
+          cp "$APK_PATH" "public/downloads/mai-society-latest.apk"
           APP_VERSION="${VITE_APP_VERSION}+build.${GITHUB_RUN_NUMBER}"
           NOW_UTC=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          APK_PUBLIC_URL="/downloads/syncra-society-latest.apk"
+          APK_PUBLIC_URL="/downloads/mai-society-latest.apk"
           cat > public/downloads/android-update.json <<EOF
           {
             "appVersion": "${APP_VERSION}",
@@ -258,14 +258,14 @@ jobs:
             echo "Cloudflare R2 credentials not configured. Skipping CDN upload."
             exit 0
           fi
-          npx --yes wrangler@3 r2 object put "$R2_BUCKET/syncra-society-latest.apk" --file release/syncra-society-latest.apk --content-type application/vnd.android.package-archive
-          npx --yes wrangler@3 r2 object put "$R2_BUCKET/syncra-society-android-${GITHUB_RUN_NUMBER}.apk" --file release/syncra-society-latest.apk --content-type application/vnd.android.package-archive
+          npx --yes wrangler@3 r2 object put "$R2_BUCKET/mai-society-latest.apk" --file release/mai-society-latest.apk --content-type application/vnd.android.package-archive
+          npx --yes wrangler@3 r2 object put "$R2_BUCKET/mai-society-android-${GITHUB_RUN_NUMBER}.apk" --file release/mai-society-latest.apk --content-type application/vnd.android.package-archive
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: syncra-society-android-apk
-          path: release/syncra-society-latest.apk
+          name: mai-society-android-apk
+          path: release/mai-society-latest.apk
 
       - name: Publish APK to GitHub Release (android-latest)
         uses: softprops/action-gh-release@v2
@@ -276,14 +276,14 @@ jobs:
             Auto-published APK from CI run #${{ github.run_number }}.
           prerelease: true
           make_latest: false
-          files: release/syncra-society-latest.apk
+          files: release/mai-society-latest.apk
           overwrite_files: true
 
       - name: Commit APK metadata into repository
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -f public/downloads/android-update.json public/downloads/syncra-society-latest.apk
+          git add -f public/downloads/android-update.json public/downloads/mai-society-latest.apk
           if git diff --staged --quiet; then
             echo "No release artifacts to commit."
             exit 0

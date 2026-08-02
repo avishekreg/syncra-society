@@ -33,7 +33,7 @@ export default function SignupDownloadSuccess({ fullName, dashboardPath = '/auth
         <div className="flex flex-col gap-3 pt-2">
           <a
             href={apkHref}
-            download="syncra-society-latest.apk"
+            download="mai-society-latest.apk"
             className={`${ui.btnPrimary} w-full justify-center px-6 py-4 text-base`}
           >
             Download mAI Society App

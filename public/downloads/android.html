@@ -166,8 +166,8 @@
           <a
             id="apk-download"
             class="btn btn-primary"
-            href="/downloads/syncra-society-latest.apk"
-            download="syncra-society-latest.apk"
+            href="/downloads/mai-society-latest.apk"
+            download="mai-society-latest.apk"
           >
             Download APK
           </a>
@@ -188,7 +188,7 @@
 
     <script>
       ;(function () {
-        var LATEST_APK = '/downloads/syncra-society-latest.apk'
+        var LATEST_APK = '/downloads/mai-society-latest.apk'
         var API_APK = '/api/android-download'
         var apkDownload = document.getElementById('apk-download')
         var apkChrome = document.getElementById('apk-chrome')
@@ -210,7 +210,7 @@
           var apkPath = normalizeApkUrl(url)
           if (apkDownload) {
             apkDownload.setAttribute('href', apkPath)
-            apkDownload.setAttribute('download', 'syncra-society-latest.apk')
+            apkDownload.setAttribute('download', 'mai-society-latest.apk')
           }
           if (apkChrome) {
             var absoluteUrl = window.location.origin + apkPath

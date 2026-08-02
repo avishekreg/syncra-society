@@ -5,7 +5,7 @@ import { MAI_PRODUCTION_ORIGIN } from './brandConstants'
 export const SYNCRA_ANDROID_APP_ORIGIN =
   import.meta.env.VITE_SYNCRA_APP_ORIGIN || MAI_PRODUCTION_ORIGIN
 
-export const SYNCRA_ANDROID_APK_FILENAME = 'syncra-society-latest.apk'
+export const SYNCRA_ANDROID_APK_FILENAME = 'mai-society-latest.apk'
 
 export const SYNCRA_ANDROID_APK_PATH = `/downloads/${SYNCRA_ANDROID_APK_FILENAME}`
 

@@ -1,4 +1,4 @@
-const DEFAULT_APK_PATH = '/downloads/syncra-society-latest.apk'
+const DEFAULT_APK_PATH = '/downloads/mai-society-latest.apk'
 
 function resolveApkPath() {
   const fromEnv = process.env.SYNCRA_ANDROID_APK_URL || process.env.VITE_SYNCRA_ANDROID_APK_URL

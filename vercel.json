@@ -23,7 +23,7 @@
       ]
     },
     {
-      "source": "/downloads/syncra-society-latest.apk",
+      "source": "/downloads/mai-society-latest.apk",
       "headers": [
         {
           "key": "Cache-Control",
@@ -31,7 +31,7 @@
         },
         {
           "key": "Content-Disposition",
-          "value": "attachment; filename=\"syncra-society-latest.apk\""
+          "value": "attachment; filename=\"mai-society-latest.apk\""
         },
         {
           "key": "Content-Type",
@@ -51,12 +51,24 @@
   ],
   "rewrites": [
     {
+      "source": "/downloads/syncra-society-latest.apk",
+      "destination": "/downloads/mai-society-latest.apk"
+    },
+    {
       "source": "/downloads/syncra-society-android.apk",
-      "destination": "/downloads/syncra-society-latest.apk"
+      "destination": "/downloads/mai-society-latest.apk"
     },
     {
       "source": "/downloads/syncra-society-android-:build.apk",
-      "destination": "/downloads/syncra-society-latest.apk"
+      "destination": "/downloads/mai-society-latest.apk"
+    },
+    {
+      "source": "/downloads/mai-society-android.apk",
+      "destination": "/downloads/mai-society-latest.apk"
+    },
+    {
+      "source": "/downloads/mai-society-android-:build.apk",
+      "destination": "/downloads/mai-society-latest.apk"
     },
     {
       "source": "/((?!api(?:/|$)|downloads(?:/|$)).*)",
