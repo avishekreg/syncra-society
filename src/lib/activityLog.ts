@@ -57,6 +57,50 @@ export function logActivity(input: Omit<ActivityEntry, 'id' | 'occurredAt'> & { 
     void dispatchFromActivity(entry, societyName ?? 'Your Society')
   })
 
+  // System-wide push / lock-screen / banner fan-out (non-blocking)
+  void import('./pushNotifications').then(({ dispatchPushNotification }) => {
+    const pushMap: Record<string, { type: import('./pushNotifications').PushEventType; title: string; url?: string }> =
+      {
+        notice_published: { type: 'notice.published', title: 'New notice', url: '/resident/notices' },
+        ticket_opened: { type: 'complaint.updated', title: 'New complaint', url: '/resident/helpdesk' },
+        ticket_resolved: { type: 'complaint.updated', title: 'Complaint update', url: '/resident/helpdesk' },
+        ticket_status_updated: {
+          type: 'complaint.updated',
+          title: 'Complaint update',
+          url: '/resident/helpdesk'
+        },
+        maintenance_paid: { type: 'payment.receipt', title: 'Payment receipt', url: '/resident' },
+        payment_approved: { type: 'payment.approved', title: 'Payment approved', url: '/resident' },
+        payment_reminder: { type: 'maintenance.due', title: 'Maintenance due', url: '/resident' },
+        election_opened: { type: 'election.open', title: 'Voting is open', url: '/resident/elections' },
+        election_published: {
+          type: 'election.published',
+          title: 'Election results published',
+          url: '/resident/elections'
+        }
+      }
+    const mapped = pushMap[entry.action]
+    if (!mapped) return
+    // Dedicated emitters already cover these — avoid duplicate banners.
+    if (
+      entry.action === 'election_opened' ||
+      entry.action === 'election_published' ||
+      entry.action === 'notice_published' ||
+      entry.action === 'payment_approved'
+    ) {
+      return
+    }
+    void dispatchPushNotification({
+      societyId: entry.societyId,
+      type: mapped.type,
+      title: mapped.title,
+      body: entry.summary,
+      url: mapped.url,
+      flatId: entry.flatNumber ?? undefined,
+      metadata: entry.metadata
+    })
+  })
+
   return entry
 }
 

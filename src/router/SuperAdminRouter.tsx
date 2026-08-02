@@ -5,6 +5,7 @@ import SuperAdminDashboard from '../pages/super-admin/Dashboard'
 import SuperAdminSocieties from '../pages/super-admin/Societies'
 import SuperAdminAccessManagement from '../pages/super-admin/AccessManagement'
 import SuperAdminAuditLogs from '../pages/super-admin/AuditLogs'
+import SuperAdminElectionAuditPage from '../pages/super-admin/ElectionAudit'
 import SuperAdminMasterConfig from '../pages/super-admin/MasterConfig'
 import { SUPER_ADMIN_HOME } from '../lib/superAdminNav'
 
@@ -17,6 +18,7 @@ export default function SuperAdminRouter() {
         <Route path="societies" element={<SuperAdminSocieties />} />
         <Route path="access" element={<SuperAdminAccessManagement />} />
         <Route path="audit-logs" element={<SuperAdminAuditLogs />} />
+        <Route path="election-audit" element={<SuperAdminElectionAuditPage />} />
         <Route path="settings" element={<SuperAdminMasterConfig />} />
         <Route path="master-config" element={<Navigate to="/super-admin/settings" replace />} />
         <Route path="pricing" element={<Navigate to="/super-admin/settings" replace />} />

@@ -10,6 +10,7 @@ import ResidentActivityPage from '../pages/resident/Activity'
 import ResidentSurveysPage from '../pages/resident/Surveys'
 import ResidentGalleryPage from '../pages/resident/Gallery'
 import ResidentElectionsPage from '../pages/resident/Elections'
+import ResidentElectionResultsPage from '../pages/resident/ElectionResults'
 import ResidentRewardsPage from '../pages/resident/RewardsRecognition'
 import ResidentRulesGuidebookPage from '../pages/resident/RulesGuidebookPage'
 import NoticesList from '../components/NoticesList'
@@ -51,6 +52,7 @@ export default function ResidentRouter() {
         <Route path="surveys" element={<ResidentSurveysPage />} />
         <Route path="gallery" element={<ResidentGalleryPage />} />
         <Route path="elections" element={<ResidentElectionsPage />} />
+        <Route path="elections/:electionId/results" element={<ResidentElectionResultsPage />} />
         <Route path="rewards" element={<ResidentRewardsPage />} />
         <Route path="*" element={<Navigate to="/resident" replace />} />
       </Route>

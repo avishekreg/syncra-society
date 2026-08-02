@@ -88,9 +88,13 @@ export function activityToEventType(entry: ActivityEntry): string {
     survey_created: 'survey.created',
     survey_response: 'survey.open',
     election_created: 'election.open',
-    vote_cast: 'election.open',
+    election_opened: 'election.open',
+    election_published: 'election.published',
+    vote_cast: 'election.vote',
     ticket_opened: 'helpdesk.ticket',
-    ticket_resolved: 'helpdesk.resolved'
+    ticket_resolved: 'helpdesk.resolved',
+    ticket_status_updated: 'helpdesk.resolved',
+    payment_approved: 'payment.received'
   }
   return map[entry.action] ?? `${entry.category}.${entry.action}`
 }

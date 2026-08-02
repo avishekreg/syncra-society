@@ -1,4 +1,4 @@
-/** Web Crypto helpers for anonymous, irreversible society elections. */
+/** Web Crypto helpers for absolute ballot secrecy + one-flat-one-vote seals. */
 
 export type ElectionKeyPair = {
   publicKey: JsonWebKey
@@ -14,6 +14,16 @@ function fromBase64(value: string) {
   const bytes = new Uint8Array(binary.length)
   for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i)
   return bytes.buffer
+}
+
+/** Canonical flat identity used for 1-flat = 1-vote binding. */
+export function normalizeFlatId(societyId: string, flatNumberOrId: string) {
+  const flat = flatNumberOrId.trim().toUpperCase()
+  if (!flat) throw new Error('Flat identity is required to vote.')
+  if (flat.includes('|') || flat.startsWith(`${societyId.trim().toUpperCase()}:`)) {
+    return flat
+  }
+  return `${societyId.trim().toUpperCase()}:${flat}`
 }
 
 export async function generateElectionKeyPair(): Promise<ElectionKeyPair> {
@@ -52,13 +62,15 @@ export async function decryptVote(privateKeyJwk: JsonWebKey, encryptedBallot: st
   return new TextDecoder().decode(decrypted)
 }
 
-/** One-way voter seal — prevents double voting without storing identity on ballot. */
-export async function createVoterSeal(
+/**
+ * Participation seal for Flat X × position.
+ * Used only to prevent double-voting / compute turnout — NEVER stored on anonymous ballots.
+ */
+export async function createParticipationSeal(
   electionId: string,
-  societyId: string,
-  flatNumber: string,
-  pepper: string,
-  positionId?: string
+  positionId: string,
+  flatId: string,
+  pepper: string
 ) {
   const key = await crypto.subtle.importKey(
     'raw',
@@ -67,12 +79,21 @@ export async function createVoterSeal(
     false,
     ['sign']
   )
-  const flat = flatNumber.trim().toUpperCase()
-  const payload = positionId
-    ? `${electionId}|${positionId}|${societyId}|${flat}`
-    : `${electionId}|${societyId}|${flat}`
+  const payload = `${electionId}|${positionId}|${flatId}`
   const signature = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(payload))
   return toBase64(signature)
+}
+
+/** @deprecated Use createParticipationSeal */
+export async function createVoterSeal(
+  electionId: string,
+  societyId: string,
+  flatNumber: string,
+  pepper: string,
+  positionId?: string
+) {
+  const flatId = normalizeFlatId(societyId, flatNumber)
+  return createParticipationSeal(electionId, positionId ?? 'pos-general', flatId, pepper)
 }
 
 export function generateElectionPepper() {

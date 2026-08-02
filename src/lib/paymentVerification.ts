@@ -104,6 +104,31 @@ export function reviewPendingPayment(
     return updated
   })
   persist(societyId, next)
+  if (updated) {
+    const payment = updated as PendingOfflinePayment
+    void import('./activityLog').then(({ logActivity }) => {
+      logActivity({
+        societyId,
+        flatNumber: payment.flatNumber,
+        category: 'payment',
+        action: decision === 'approved' ? 'payment_approved' : 'payment_rejected',
+        summary:
+          decision === 'approved'
+            ? `Payment approved for flat ${payment.flatNumber}`
+            : `Payment rejected for flat ${payment.flatNumber}`,
+        metadata: { paymentId }
+      })
+    })
+    if (decision === 'approved') {
+      void import('./pushNotifications').then(({ notifyPaymentApproved }) => {
+        void notifyPaymentApproved(
+          societyId,
+          `Payment approved for flat ${payment.flatNumber}`,
+          payment.flatNumber
+        )
+      })
+    }
+  }
   return updated
 }
 

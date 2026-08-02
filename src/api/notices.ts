@@ -16,6 +16,7 @@ import {
   incrementWhatsAppAlertCounter
 } from './subscriptions'
 import { publishAdminAlert } from '../lib/adminAlerts'
+import { notifyNoticePublished } from '../lib/pushNotifications'
 import { shouldSimulateWhatsApp, TRIAL_WHATSAPP_SIMULATION_MESSAGE } from '../lib/saasBilling'
 
 export type NoticeViewReceipt = {
@@ -247,6 +248,7 @@ export async function createNotice(payload: Partial<Notice>, file?: File) {
       summary: `Notice published: ${body.title}`,
       metadata: { noticeId: body.id, publishedAt: body.created_at }
     })
+    void notifyNoticePublished(body.society_id, body.title)
     await postNoticePublishedToN8n(body)
     return body
   }
@@ -265,6 +267,7 @@ export async function createNotice(payload: Partial<Notice>, file?: File) {
       summary: `Notice published: ${body.title}`,
       metadata: { noticeId: notice.id, publishedAt: notice.created_at ?? body.created_at }
     })
+    void notifyNoticePublished(body.society_id, notice.title)
     await postNoticePublishedToN8n(notice)
     return notice
   } catch {

@@ -6,6 +6,11 @@ export const SUPER_ADMIN_NAV = [
   { path: '/super-admin/societies', label: 'Society Onboarding', description: 'Add & manage registered societies' },
   { path: '/super-admin/access', label: 'Global Access Management', description: 'Admin & staff role assignment' },
   { path: '/super-admin/audit-logs', label: 'Platform Audit Logs', description: 'Cross-society activity trail' },
+  {
+    path: '/super-admin/election-audit',
+    label: 'Election Integrity',
+    description: 'Ballot counts, turnout & tie alerts (no voter choices)'
+  },
   { path: '/super-admin/settings', label: 'System Settings', description: 'Infrastructure & integrations' }
 ] as const
 
