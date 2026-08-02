@@ -23,6 +23,13 @@ import { shouldUseLocalFallback } from './apiErrors'
 
 export type ElectionStatus = 'draft' | 'open' | 'closed' | 'published'
 
+/** Resident/admin UX states (mapped from persisted status + schedule). */
+export type ElectionViewState =
+  | 'VOTING_ACTIVE'
+  | 'VOTING_CLOSED_PENDING_RESULT'
+  | 'RESULT_PUBLISHED'
+  | 'DRAFT'
+
 export type ElectionCandidate = { id: string; name: string }
 
 export type ElectionPosition = {
@@ -50,9 +57,15 @@ export type Election = {
   closedAt?: string | null
   publishedAt?: string | null
   closesAt?: string | null
+  /** Voting window length in hours (12 / 24 / 48 …) */
+  votingDurationHours?: number | null
+  /** Hours after close before results reveal; 0 = immediate */
+  resultRevealDelayHours?: number
+  /** When results become visible / auto-publish */
+  resultsRevealAt?: string | null
 }
 
-/** Anonymous ballot — NO flat/voter identity */
+/** Anonymous ballot_data — NO flat/voter identity */
 export type AnonymousBallot = {
   id: string
   electionId: string
@@ -62,7 +75,7 @@ export type AnonymousBallot = {
   castAt: string
 }
 
-/** Participation seal — flat-bound, never linked to candidate choice */
+/** votes_log / participation seal — flat-bound, never linked to candidate choice */
 export type ParticipationSeal = {
   id: string
   electionId: string
@@ -71,6 +84,32 @@ export type ParticipationSeal = {
   flatId: string
   sealHash: string
   castAt: string
+}
+
+export const VOTING_DURATION_OPTIONS = [
+  { hours: 12, label: '12 hours' },
+  { hours: 24, label: '24 hours' },
+  { hours: 48, label: '48 hours' },
+  { hours: 72, label: '72 hours' }
+] as const
+
+export const RESULT_DELAY_OPTIONS = [
+  { hours: 0, label: 'Immediately upon close' },
+  { hours: 1, label: '1 hour after close' },
+  { hours: 6, label: '6 hours after close' },
+  { hours: 12, label: '12 hours after close' },
+  { hours: 24, label: '24 hours after close' }
+] as const
+
+export function addHoursIso(baseIso: string, hours: number) {
+  return new Date(new Date(baseIso).getTime() + hours * 60 * 60 * 1000).toISOString()
+}
+
+export function getElectionViewState(election: Election): ElectionViewState {
+  if (election.status === 'published') return 'RESULT_PUBLISHED'
+  if (election.status === 'closed') return 'VOTING_CLOSED_PENDING_RESULT'
+  if (election.status === 'open') return 'VOTING_ACTIVE'
+  return 'DRAFT'
 }
 
 export type PositionBulletinResult = {
@@ -228,7 +267,10 @@ function normalizeElection(raw: Election): Election {
     publicKey: raw.publicKey ?? null,
     lockedPrivateKey: raw.lockedPrivateKey ?? null,
     eligibleFlatCount: raw.eligibleFlatCount ?? 0,
-    eligibleFlatIds: raw.eligibleFlatIds ?? []
+    eligibleFlatIds: raw.eligibleFlatIds ?? [],
+    votingDurationHours: raw.votingDurationHours ?? null,
+    resultRevealDelayHours: raw.resultRevealDelayHours ?? 0,
+    resultsRevealAt: raw.resultsRevealAt ?? null
   }
 }
 
@@ -272,6 +314,9 @@ type RemoteElectionRow = {
   closed_at: string | null
   published_at: string | null
   closes_at: string | null
+  voting_duration_hours?: number | null
+  result_reveal_delay_hours?: number | null
+  results_reveal_at?: string | null
 }
 
 function fromRemoteElection(row: RemoteElectionRow): Election {
@@ -292,7 +337,10 @@ function fromRemoteElection(row: RemoteElectionRow): Election {
     openedAt: row.opened_at,
     closedAt: row.closed_at,
     publishedAt: row.published_at,
-    closesAt: row.closes_at
+    closesAt: row.closes_at,
+    votingDurationHours: row.voting_duration_hours ?? null,
+    resultRevealDelayHours: row.result_reveal_delay_hours ?? 0,
+    resultsRevealAt: row.results_reveal_at ?? null
   })
 }
 
@@ -328,7 +376,10 @@ async function remoteUpsertElection(election: Election) {
       opened_at: election.openedAt ?? null,
       closed_at: election.closedAt ?? null,
       published_at: election.publishedAt ?? null,
-      closes_at: election.closesAt ?? null
+      closes_at: election.closesAt ?? null,
+      voting_duration_hours: election.votingDurationHours ?? null,
+      result_reveal_delay_hours: election.resultRevealDelayHours ?? 0,
+      results_reveal_at: election.resultsRevealAt ?? null
     })
   } catch (err) {
     // Prefer upsert via patch if conflict
@@ -346,7 +397,10 @@ async function remoteUpsertElection(election: Election) {
         opened_at: election.openedAt ?? null,
         closed_at: election.closedAt ?? null,
         published_at: election.publishedAt ?? null,
-        closes_at: election.closesAt ?? null
+        closes_at: election.closesAt ?? null,
+        voting_duration_hours: election.votingDurationHours ?? null,
+        result_reveal_delay_hours: election.resultRevealDelayHours ?? 0,
+        results_reveal_at: election.resultsRevealAt ?? null
       })
     } catch (err2) {
       if (!shouldUseLocalFallback(err2) && !shouldUseLocalFallback(err)) {
@@ -365,13 +419,52 @@ export function listElections(societyId: string) {
 }
 
 export async function hydrateElections(societyId: string) {
-  if (!isRemoteSocietyId(societyId)) return listElections(societyId)
-  const remote = await remoteListElections(societyId)
-  if (remote) {
-    saveElections(societyId, remote)
-    return remote
+  if (isRemoteSocietyId(societyId)) {
+    const remote = await remoteListElections(societyId)
+    if (remote) saveElections(societyId, remote)
   }
+  await syncElectionLifecycle(societyId)
   return listElections(societyId)
+}
+
+/**
+ * Auto-close when voting window ends; auto-publish when reveal time is reached.
+ * Candidate tallies stay hidden until RESULT_PUBLISHED.
+ */
+export async function syncElectionLifecycle(societyId: string) {
+  const now = Date.now()
+  const elections = loadElections(societyId)
+  let changed = false
+
+  for (const election of elections) {
+    if (election.status === 'open' && election.closesAt) {
+      const closes = new Date(election.closesAt).getTime()
+      if (!Number.isNaN(closes) && now >= closes) {
+        await closeElection(societyId, election.id, { scheduled: true })
+        changed = true
+      }
+    }
+  }
+
+  const afterClose = loadElections(societyId)
+  for (const election of afterClose) {
+    if (election.status !== 'closed') continue
+    const revealAt = election.resultsRevealAt
+      ? new Date(election.resultsRevealAt).getTime()
+      : election.closedAt
+        ? new Date(election.closedAt).getTime()
+        : null
+    if (revealAt != null && !Number.isNaN(revealAt) && now >= revealAt) {
+      try {
+        await publishElectionResults(societyId, election.id)
+        changed = true
+      } catch (err) {
+        console.warn('[elections] scheduled publish failed', err)
+      }
+    }
+  }
+
+  return changed ? listElections(societyId) : afterClose
 }
 
 export function getElection(societyId: string, electionId: string) {
@@ -382,8 +475,17 @@ export function getOpenElections(societyId: string) {
   return listElections(societyId).filter((e) => e.status === 'open')
 }
 
+export function getPendingResultElections(societyId: string) {
+  return listElections(societyId).filter((e) => e.status === 'closed')
+}
+
 export function getPublishedElections(societyId: string) {
   return listElections(societyId).filter((e) => e.status === 'published')
+}
+
+/** Elections residents should see on the voting home (active + pending + published). */
+export function getResidentVisibleElections(societyId: string) {
+  return listElections(societyId).filter((e) => e.status !== 'draft')
 }
 
 export function resolveEligibleFlatCount(societyId: string, explicit?: number) {
@@ -417,6 +519,10 @@ export async function createElection(input: {
   positions: { title: string; candidates: string[] }[]
   closesAt?: string | null
   eligibleFlatCount?: number
+  /** Voting window length in hours (default 24) */
+  votingDurationHours?: number
+  /** Hours after close before results reveal (default 0 = immediate) */
+  resultRevealDelayHours?: number
   /** When true, opens immediately after create */
   openImmediately?: boolean
 }) {
@@ -453,6 +559,13 @@ export async function createElection(input: {
   const now = new Date().toISOString()
   const openImmediately = input.openImmediately !== false
   const eligibleFlatCount = resolveEligibleFlatCount(input.societyId, input.eligibleFlatCount)
+  const votingDurationHours = input.votingDurationHours && input.votingDurationHours > 0 ? input.votingDurationHours : 24
+  const resultRevealDelayHours =
+    typeof input.resultRevealDelayHours === 'number' && input.resultRevealDelayHours >= 0
+      ? input.resultRevealDelayHours
+      : 0
+  const closesAt =
+    input.closesAt ?? (openImmediately ? addHoursIso(now, votingDurationHours) : null)
 
   const election: Election = {
     id: newId('election'),
@@ -471,7 +584,10 @@ export async function createElection(input: {
     openedAt: openImmediately ? now : null,
     closedAt: null,
     publishedAt: null,
-    closesAt: input.closesAt ?? null
+    closesAt,
+    votingDurationHours,
+    resultRevealDelayHours,
+    resultsRevealAt: null
   }
 
   const elections = loadElections(input.societyId)
@@ -504,10 +620,13 @@ export async function openElection(societyId: string, electionId: string) {
   if (election.status !== 'draft') throw new Error('Only draft elections can be opened.')
 
   const now = new Date().toISOString()
+  const duration = election.votingDurationHours && election.votingDurationHours > 0 ? election.votingDurationHours : 24
   const next: Election = {
     ...election,
     status: 'open',
     openedAt: now,
+    closesAt: election.closesAt ?? addHoursIso(now, duration),
+    votingDurationHours: duration,
     eligibleFlatCount: election.eligibleFlatCount || resolveEligibleFlatCount(societyId)
   }
   elections[idx] = next
@@ -519,13 +638,17 @@ export async function openElection(societyId: string, electionId: string) {
     category: 'election',
     action: 'election_opened',
     summary: `Voting opened: ${next.title}`,
-    metadata: { electionId }
+    metadata: { electionId, closesAt: next.closesAt }
   })
   void notifyElectionOpen(societyId, next.title, electionId)
   return next
 }
 
-export async function closeElection(societyId: string, electionId: string) {
+export async function closeElection(
+  societyId: string,
+  electionId: string,
+  options?: { scheduled?: boolean }
+) {
   const elections = loadElections(societyId)
   const idx = elections.findIndex((e) => e.id === electionId)
   if (idx < 0) throw new Error('Election not found.')
@@ -533,7 +656,19 @@ export async function closeElection(societyId: string, electionId: string) {
   if (election.status !== 'open') throw new Error('Only open elections can be closed.')
 
   const now = new Date().toISOString()
-  const next: Election = { ...election, status: 'closed', closedAt: now }
+  const delay =
+    typeof election.resultRevealDelayHours === 'number' && election.resultRevealDelayHours >= 0
+      ? election.resultRevealDelayHours
+      : 0
+  const resultsRevealAt = addHoursIso(now, delay)
+
+  const next: Election = {
+    ...election,
+    status: 'closed',
+    closedAt: now,
+    resultsRevealAt,
+    resultRevealDelayHours: delay
+  }
   elections[idx] = next
   saveElections(societyId, elections)
   await remoteUpsertElection(next)
@@ -542,9 +677,18 @@ export async function closeElection(societyId: string, electionId: string) {
     societyId,
     category: 'election',
     action: 'election_closed',
-    summary: `Voting closed: ${next.title}`,
-    metadata: { electionId }
+    summary: options?.scheduled
+      ? `Voting window ended: ${next.title}`
+      : `Voting closed: ${next.title}`,
+    metadata: { electionId, resultsRevealAt, scheduled: Boolean(options?.scheduled) }
   })
+
+  // Immediate reveal path
+  if (delay === 0) {
+    await publishElectionResults(societyId, electionId)
+    return getElection(societyId, electionId) ?? next
+  }
+
   return next
 }
 
@@ -561,9 +705,13 @@ export async function castEncryptedVote(input: {
   flatId?: string
   candidateId: string
 }) {
+  await syncElectionLifecycle(input.societyId)
   const election = getElection(input.societyId, input.electionId)
   if (!election || election.status !== 'open') {
     throw new Error('Election is not open for voting.')
+  }
+  if (election.closesAt && Date.now() >= new Date(election.closesAt).getTime()) {
+    throw new Error('Voting window has closed.')
   }
   if (!election.publicKey) throw new Error('Election encryption keys are unavailable.')
 

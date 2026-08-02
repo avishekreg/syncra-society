@@ -86,6 +86,33 @@ export default function ResidentElectionResultsPage() {
               </div>
             )}
 
+            <div className="mt-6 space-y-3">
+              {bulletin.positionResults.map((row) => {
+                const winners = row.candidates.filter((c) => row.winnerCandidateIds.includes(c.candidateId))
+                if (!winners.length) return null
+                return (
+                  <div
+                    key={`banner-${row.positionId}`}
+                    className="rounded-2xl border border-syncra-accent/30 bg-gradient-to-r from-syncra-accent/15 via-white to-white px-4 py-3"
+                  >
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-syncra-blue">
+                      Winner · {row.title}
+                    </p>
+                    <p className="mt-1 text-lg font-semibold text-syncra-primary">
+                      {row.isTie
+                        ? `Tie between ${winners.map((w) => w.name).join(' & ')}`
+                        : winners[0]?.name}
+                    </p>
+                    {!row.isTie && winners[0] && (
+                      <p className="text-sm text-slate-600">
+                        {winners[0].votes} votes · {winners[0].percent}%
+                      </p>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
             <div className="mt-8 space-y-6">
               {bulletin.positionResults.map((row) => (
                 <div key={row.positionId} className="rounded-2xl border border-slate-200 p-4">

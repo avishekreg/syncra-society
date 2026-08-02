@@ -3,9 +3,12 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../../providers/AuthProvider'
 import { usePlatformConfig } from '../../providers/PlatformConfigProvider'
 import {
+  RESULT_DELAY_OPTIONS,
+  VOTING_DURATION_OPTIONS,
   closeElection,
   createElection,
   getElectionTurnout,
+  getElectionViewState,
   getPublishedBulletin,
   hydrateElections,
   openElection,
@@ -14,6 +17,7 @@ import {
   type ElectionTurnout,
   type PublishedBulletin
 } from '../../api/elections'
+import { ElectionCountdown, ElectionTurnoutBar } from '../../components/elections/ElectionLiveWidgets'
 import { ui } from '../../lib/ui'
 
 type PositionDraft = {
@@ -38,6 +42,8 @@ export default function ElectionsManager() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [eligibleFlatCount, setEligibleFlatCount] = useState('')
+  const [votingDurationHours, setVotingDurationHours] = useState(24)
+  const [resultRevealDelayHours, setResultRevealDelayHours] = useState(0)
   const [positions, setPositions] = useState<PositionDraft[]>(templatePositions)
   const [elections, setElections] = useState<Election[]>([])
   const [turnouts, setTurnouts] = useState<Record<string, ElectionTurnout | null>>({})
@@ -67,6 +73,8 @@ export default function ElectionsManager() {
 
   useEffect(() => {
     void refresh()
+    const id = window.setInterval(() => void refresh(), 15000)
+    return () => window.clearInterval(id)
   }, [currentSocietyId])
 
   function updatePosition(index: number, patch: Partial<PositionDraft>) {
@@ -92,6 +100,8 @@ export default function ElectionsManager() {
         title,
         description,
         openImmediately: true,
+        votingDurationHours,
+        resultRevealDelayHours,
         eligibleFlatCount: eligibleFlatCount ? Number(eligibleFlatCount) : undefined,
         positions: positions.map((position) => ({
           title: position.title,
@@ -105,7 +115,11 @@ export default function ElectionsManager() {
       setDescription('')
       setEligibleFlatCount('')
       setPositions(templatePositions)
-      setMessage('Election opened. Candidate tallies stay hidden until you publish results.')
+      setMessage(
+        resultRevealDelayHours === 0
+          ? 'Election opened. Results will publish immediately when voting closes.'
+          : `Election opened. Results will reveal ${resultRevealDelayHours}h after voting closes.`
+      )
       await refresh()
     } catch (err: unknown) {
       setMessage(err instanceof Error ? err.message : 'Unable to create election')
@@ -149,8 +163,8 @@ export default function ElectionsManager() {
         <p className={ui.eyebrow}>Society elections</p>
         <h2 className={`mt-2 ${ui.headingLg}`}>Encrypted multi-position elections</h2>
         <p className={`mt-2 ${ui.body}`}>
-          Lifecycle: Draft → Open → Closed → Published. During Open, only turnout is visible. Candidate counts appear
-          only after publish. One flat = one vote per position. Who voted for whom is never stored together.
+          Configure voting window and result delay. During active voting only live turnout is visible — never candidate
+          counts. Votes_log (who voted) is decoupled from ballot_data (anonymous choices).
         </p>
         <form onSubmit={(e) => void handleCreate(e)} className="mt-6 space-y-6">
           <input
@@ -176,6 +190,36 @@ export default function ElectionsManager() {
             min={1}
             placeholder="Eligible flats (for turnout %)"
           />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="block space-y-1.5">
+              <span className={ui.label}>Voting window</span>
+              <select
+                className={ui.input}
+                value={votingDurationHours}
+                onChange={(e) => setVotingDurationHours(Number(e.target.value))}
+              >
+                {VOTING_DURATION_OPTIONS.map((opt) => (
+                  <option key={opt.hours} value={opt.hours}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block space-y-1.5">
+              <span className={ui.label}>Result reveal delay</span>
+              <select
+                className={ui.input}
+                value={resultRevealDelayHours}
+                onChange={(e) => setResultRevealDelayHours(Number(e.target.value))}
+              >
+                {RESULT_DELAY_OPTIONS.map((opt) => (
+                  <option key={opt.hours} value={opt.hours}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
 
           <div className="space-y-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
@@ -234,31 +278,40 @@ export default function ElectionsManager() {
           {elections.map((election) => {
             const turnout = turnouts[election.id]
             const bulletin = bulletins[election.id]
+            const view = getElectionViewState(election)
             return (
               <li key={election.id} className={ui.innerItem}>
                 <p className="font-semibold text-syncra-primary">{election.title}</p>
                 <p className={`mt-1 text-sm ${ui.body}`}>{election.description}</p>
                 <p className="mt-2 text-xs text-slate-500">
-                  Status: <span className="font-semibold uppercase">{election.status}</span> ·{' '}
-                  {election.positions.length} positions · {new Date(election.createdAt).toLocaleString('en-IN')}
+                  View: <span className="font-semibold">{view}</span> · DB status: {election.status} · Window:{' '}
+                  {election.votingDurationHours ?? '—'}h · Reveal delay: {election.resultRevealDelayHours ?? 0}h
                 </p>
 
                 {turnout && election.status !== 'draft' && (
-                  <div className="mt-3 rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-700">
-                    <p className="font-semibold text-syncra-blue">
-                      Turnout: {turnout.votedFlatCount}/{turnout.eligibleFlatCount || '—'} flats (
-                      {turnout.turnoutPercent}%)
+                  <div className="mt-3 space-y-3 rounded-xl border border-slate-200 bg-white p-3">
+                    <ElectionTurnoutBar
+                      percent={turnout.turnoutPercent}
+                      voted={turnout.votedFlatCount}
+                      eligible={turnout.eligibleFlatCount || election.eligibleFlatCount}
+                    />
+                    {view === 'VOTING_ACTIVE' && (
+                      <ElectionCountdown
+                        targetIso={election.closesAt}
+                        prefix="Voting closes in"
+                        onComplete={() => void refresh()}
+                      />
+                    )}
+                    {view === 'VOTING_CLOSED_PENDING_RESULT' && (
+                      <ElectionCountdown
+                        targetIso={election.resultsRevealAt}
+                        prefix="Results announce in"
+                        onComplete={() => void refresh()}
+                      />
+                    )}
+                    <p className="text-xs text-slate-500">
+                      Candidate counts stay hidden until RESULT_PUBLISHED. Super Admin cannot see who voted for whom.
                     </p>
-                    <p className="mt-1 text-xs text-slate-500">
-                      Candidate vote counts stay hidden until results are published.
-                    </p>
-                    <ul className="mt-2 space-y-1 text-xs text-slate-600">
-                      {turnout.byPosition.map((row) => (
-                        <li key={row.positionId}>
-                          {row.title}: {row.votedFlatCount} flats · {row.turnoutPercent}%
-                        </li>
-                      ))}
-                    </ul>
                   </div>
                 )}
 
@@ -280,7 +333,7 @@ export default function ElectionsManager() {
                       onClick={() => void runAction(election.id, 'close')}
                       className={ui.btnSecondary}
                     >
-                      Close Voting
+                      Close Voting Now
                     </button>
                   )}
                   {election.status === 'closed' && (
@@ -290,7 +343,7 @@ export default function ElectionsManager() {
                       onClick={() => void runAction(election.id, 'publish')}
                       className={ui.btnPrimary}
                     >
-                      Publish Results Bulletin
+                      Publish Results Now
                     </button>
                   )}
                   {election.status === 'published' && (
