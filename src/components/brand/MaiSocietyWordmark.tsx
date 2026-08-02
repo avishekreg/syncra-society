@@ -20,7 +20,7 @@ const sizeStyles = {
   },
   xl: {
     main: 'text-3xl sm:text-4xl',
-    m: 'text-[1.65rem] sm:text-[2.1rem]'
+    m: 'text-[1.7rem] sm:text-[2.15rem]'
   }
 } as const
 
@@ -38,23 +38,26 @@ export default function MaiSocietyWordmark({
   const aiColor = isDark ? 'text-[#FFB347]' : 'text-[#E67E00]'
   const societyColor = isDark ? 'text-cyan-300/90' : 'text-syncra-blue'
   const { main: mainSize, m: mSize } = sizeStyles[size]
+  const isHero = size === 'xl'
 
   return (
     <span
       aria-label={showSociety ? 'mAI Society' : 'mAI'}
-      className={`inline-flex items-baseline whitespace-nowrap font-bold leading-none tracking-tight ${mainSize} ${className}`}
+      className={`inline-flex items-baseline whitespace-nowrap font-bold leading-none tracking-tight ${mainSize} ${
+        isHero ? 'tracking-[-0.02em]' : ''
+      } ${className}`}
     >
       <span
-        className={`${mSize} ${societyColor} relative top-[0.5px]`}
+        className={`${mSize} ${societyColor} relative top-[0.5px] font-bold`}
         style={{ color: isDark ? undefined : MAI_BRAND_BLUE }}
       >
         m
       </span>
-      <span className={aiColor} style={{ color: MAI_BRAND_ORANGE }}>
+      <span className={`${aiColor} font-extrabold`} style={{ color: MAI_BRAND_ORANGE }}>
         AI
       </span>
       {showSociety ? (
-        <span className={societyColor} style={{ color: isDark ? undefined : MAI_BRAND_BLUE }}>
+        <span className={`${societyColor} font-bold`} style={{ color: isDark ? undefined : MAI_BRAND_BLUE }}>
           Society
         </span>
       ) : null}

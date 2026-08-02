@@ -41,7 +41,7 @@ export default function AuthPage() {
 
   return (
     <AuthLayout title="Welcome Back">
-      <div className="mx-auto max-w-md">
+      <div className="mx-auto w-full max-w-md">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-5">
           <div className="space-y-2">
             <label className={ui.label}>Email or username</label>
