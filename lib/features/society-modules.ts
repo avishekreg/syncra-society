@@ -6,6 +6,31 @@ import {
   type SocietyModuleKey
 } from '@/types/society-modules'
 
+/** Map legacy society_module_configs keys → feature_toggles.module_name */
+const MODULE_TO_FEATURE_TOGGLE: Partial<Record<SocietyModuleKey, string>> = {
+  whatsapp_alerts: 'whatsapp_automation',
+  election_engine: 'election_module'
+}
+
+async function activateFeatureToggleForSociety(societyId: string, purchasedModuleRaw: string) {
+  const supabase = createAdminClient()
+  const module = normalizePurchasedModule(purchasedModuleRaw)
+  const featureName = module ? MODULE_TO_FEATURE_TOGGLE[module] ?? purchasedModuleRaw : purchasedModuleRaw
+
+  const { error } = await supabase.rpc('activate_society_addons', {
+    p_society_id: societyId,
+    p_modules: [featureName]
+  })
+
+  if (error) {
+    console.error('[society-modules] feature_toggles activation failed', {
+      societyId,
+      featureName,
+      error: error.message
+    })
+  }
+}
+
 const DEFAULT_MODULE_CONFIG: Omit<SocietyModuleConfig, 'society_id'> = {
   whatsapp_alerts: false,
   election_engine: false,
@@ -43,14 +68,22 @@ export async function isSocietyModuleActive(
 export async function activateSocietyModule(
   societyId: string,
   purchasedModuleRaw: string
-): Promise<{ activated: SocietyModuleKey | null; config: SocietyModuleConfig | null }> {
+): Promise<{ activated: SocietyModuleKey | string | null; config: SocietyModuleConfig | null }> {
+  if (!societyId) {
+    return { activated: null, config: null }
+  }
+
+  // Always bind feature_toggles to this society_id (supports new premium modules).
+  await activateFeatureToggleForSociety(societyId, purchasedModuleRaw)
+
   const module = normalizePurchasedModule(purchasedModuleRaw)
   if (!module) {
-    console.error('[society-modules] unknown purchased module', {
+    // Newer licensed modules (smart_parking, ai_rwa_audit, etc.) live only in feature_toggles.
+    console.info('[society-modules] feature_toggles activated (no legacy column)', {
       societyId,
       purchasedModule: purchasedModuleRaw
     })
-    return { activated: null, config: null }
+    return { activated: purchasedModuleRaw, config: null }
   }
 
   const supabase = createAdminClient()

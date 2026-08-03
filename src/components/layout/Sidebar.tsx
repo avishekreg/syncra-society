@@ -168,11 +168,13 @@ export default function Sidebar({ children, title }: SidebarProps) {
   const societyScope = currentSocietyId
   const moduleEnabled = (key: Parameters<typeof isModuleEnabled>[0]) =>
     isModuleEnabled(key, societyScope)
-  const electionFeatureOn = moduleEnabled('elections') && featureEnabled('election_module')
+  // Licensed modules: feature_toggles for the active society only (no global platform overrides).
+  const electionFeatureOn = featureEnabled('election_module')
   const smartParkingOn = featureEnabled('smart_parking')
   const vendorSlaOn = featureEnabled('vendor_sla')
   const aiAuditOn = featureEnabled('ai_rwa_audit')
   const marketplaceOn = featureEnabled('resident_marketplace')
+  const whatsappFeatureOn = featureEnabled('whatsapp_automation')
 
   useEffect(() => {
     setMobileOpen(false)
@@ -652,7 +654,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
               </AccordionNavLink>
             )}
 
-            {canAccessWhatsappAutomation(user) && moduleEnabled('whatsappAutomation') && (
+            {canAccessWhatsappAutomation(user) && whatsappFeatureOn && (
               <AccordionNavLink to="/rwa/whatsapp" className={navLinkClass}>
                 WhatsApp Automation
               </AccordionNavLink>

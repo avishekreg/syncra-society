@@ -129,5 +129,13 @@ export async function mockActivateWhatsAppAddon(societyId: string): Promise<Usag
     .single()
 
   if (error) throw new Error(error.message)
+
+  try {
+    const { activateSocietyAddons } = await import('./featureToggles')
+    await activateSocietyAddons(societyId, ['whatsapp_automation'])
+  } catch (activationError) {
+    console.warn('[subscriptions] feature toggle sync failed', activationError)
+  }
+
   return data as UsageCounter
 }

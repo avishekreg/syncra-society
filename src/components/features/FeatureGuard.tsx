@@ -29,6 +29,9 @@ export function FeatureUnavailableCard({ module }: { module: FeatureModuleName }
         <a href="mailto:hello@syncrasystems.com" className={ui.btnPrimary}>
           Contact Super Admin
         </a>
+        <Link to="/admin/configuration" className={ui.btnGhost}>
+          Plan manager
+        </Link>
       </div>
     </section>
   )

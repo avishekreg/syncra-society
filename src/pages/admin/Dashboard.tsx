@@ -4,6 +4,7 @@ import { useAuth } from '../../providers/AuthProvider'
 import { isGlobalSuperAdmin } from '../../lib/roles'
 import { listComplaintsForSociety } from '../../api/complaints'
 import { listVisitorLogs } from '../../api/visitorLogs'
+import SocietyFeatureCards from '../../components/features/SocietyFeatureCards'
 import { ui } from '../../lib/ui'
 
 function StatCard({ label, value, hint }: { label: string; value: string | number; hint: string }) {
@@ -77,6 +78,8 @@ export default function AdminDashboard() {
           hint="Visitor entry requests waiting for resident or guard approval."
         />
       </section>
+
+      <SocietyFeatureCards audience="rwa" showLocked />
     </div>
   )
 }

@@ -12,6 +12,7 @@ import { fetchSocietyBillingRules } from '../../api/societyBillingRules'
 import { buildSuggestiveNotifications } from '../../lib/suggestiveNotifications'
 import type { SuggestiveNotification } from '../../lib/suggestiveNotifications'
 import { restGet } from '../../api/supabaseClient'
+import SocietyFeatureCards from '../../components/features/SocietyFeatureCards'
 import { ui } from '../../lib/ui'
 
 const DEFAULT_EMERGENCY_DIRECTORY = [
@@ -148,6 +149,8 @@ export default function ResidentDashboard() {
         paymentStatus={accountSummary.paymentStatus}
         flatNumber={flatNumber}
       />
+
+      <SocietyFeatureCards audience="resident" showLocked />
 
       <section className={ui.card}>
         <header className={`${ui.cardHeader} flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between`}>

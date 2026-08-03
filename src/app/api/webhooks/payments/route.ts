@@ -71,8 +71,15 @@ export async function POST(request: Request) {
     const societyId = event.societyId ?? event.metadata?.societyId ?? event.metadata?.society_id
     const purchasedModule =
       event.purchasedModule ?? event.metadata?.purchasedModule ?? event.metadata?.purchased_module
+    const purchasedModulesRaw =
+      event.metadata?.purchasedModules ?? event.metadata?.purchased_modules ?? null
+    const purchasedModuleList: string[] = Array.isArray(purchasedModulesRaw)
+      ? purchasedModulesRaw.map(String)
+      : purchasedModule
+        ? [String(purchasedModule)]
+        : []
 
-    if (!societyId || !purchasedModule) {
+    if (!societyId || purchasedModuleList.length === 0) {
       logWebhook('missing_module_metadata', {
         provider: event.provider,
         eventType: event.eventType,
@@ -86,7 +93,16 @@ export async function POST(request: Request) {
       })
     }
 
-    const { activated, config } = await activateSocietyModule(societyId, purchasedModule)
+    // Activate each purchased module for this society only.
+    let activated: string | null = null
+    let config: unknown = null
+    for (const moduleKey of purchasedModuleList) {
+      const result = await activateSocietyModule(societyId, moduleKey)
+      if (result.activated) {
+        activated = result.activated
+        config = result.config
+      }
+    }
 
     if (!activated) {
       return NextResponse.json({

@@ -132,7 +132,17 @@ export async function insertSociety(payload: {
       total_flats: payload.total_flats ?? null,
       opening_bank_balance: 0
     })
-    return normalizeSocietyRecord(created)
+    const society = normalizeSocietyRecord(created)
+    if (society?.id) {
+      try {
+        const { activateSocietyAddons } = await import('./featureToggles')
+        const { BASE_PLAN_FEATURE_MODULES } = await import('../lib/saasBilling')
+        await activateSocietyAddons(society.id, BASE_PLAN_FEATURE_MODULES)
+      } catch {
+        /* DB trigger seeds defaults when RPC unavailable */
+      }
+    }
+    return society
   } catch {
     return null
   }
@@ -177,6 +187,14 @@ export async function createSociety(payload: {
   }
 
   initializeFoundingPresident(society.id, payload.admin_email)
+
+  try {
+    const { activateSocietyAddons } = await import('./featureToggles')
+    const { BASE_PLAN_FEATURE_MODULES } = await import('../lib/saasBilling')
+    await activateSocietyAddons(society.id, BASE_PLAN_FEATURE_MODULES)
+  } catch {
+    // Trigger-based seed still applies when RPC/local path is unavailable.
+  }
 
   return { society: normalizeSocietyRecord(society)!, profile }
 }

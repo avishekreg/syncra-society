@@ -1,4 +1,28 @@
 import type { SaasPlanType, SaasSubscription, UsageCounter } from '../types/db'
+import type { FeatureModuleName } from './featureModules'
+import {
+  CORE_FEATURE_MODULES,
+  PREMIUM_FEATURE_MODULES,
+  normalizeLicensedModule
+} from './featureModules'
+
+/** Modules included on every base / trial plan (per society). */
+export const BASE_PLAN_FEATURE_MODULES: FeatureModuleName[] = [...CORE_FEATURE_MODULES]
+
+/** Premium add-ons — off unless purchased or Super Admin enabled for that society. */
+export const PREMIUM_ADDON_FEATURE_MODULES: FeatureModuleName[] = [...PREMIUM_FEATURE_MODULES]
+
+/** Resolve checkout cart line-items → feature_toggles.module_name values. */
+export function resolveCheckoutAddonModules(
+  purchasedModules: Array<string | null | undefined> = []
+): FeatureModuleName[] {
+  const resolved = new Set<FeatureModuleName>(BASE_PLAN_FEATURE_MODULES)
+  for (const raw of purchasedModules) {
+    const key = normalizeLicensedModule(raw ?? null)
+    if (key) resolved.add(key)
+  }
+  return Array.from(resolved)
+}
 
 export const WHATSAPP_MONTHLY_ALERT_LIMIT = 3000
 

@@ -199,7 +199,9 @@ export default function RwaRouter() {
           element={
             <RoleGuard allow={['president']}>
               <TierGuard requiredTier="tier2">
-                <WhatsAppAutomation />
+                <FeatureGuard module="whatsapp_automation">
+                  <WhatsAppAutomation />
+                </FeatureGuard>
               </TierGuard>
             </RoleGuard>
           }
