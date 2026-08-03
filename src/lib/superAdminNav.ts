@@ -11,6 +11,11 @@ export const SUPER_ADMIN_NAV = [
     label: 'Election Integrity',
     description: 'Ballot counts, turnout & tie alerts (no voter choices)'
   },
+  {
+    path: '/super-admin/feature-controls',
+    label: 'Feature Controls',
+    description: 'Per-society module toggles & subscription entitlements'
+  },
   { path: '/super-admin/settings', label: 'System Settings', description: 'Infrastructure & integrations' }
 ] as const
 

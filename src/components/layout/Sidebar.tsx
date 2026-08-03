@@ -4,8 +4,10 @@ import { NavLink, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import SyncraBrandLogo from '../brand/SyncraBrandLogo'
 import MaiSocietyWordmark from '../brand/MaiSocietyWordmark'
 import { useAuth } from '../../providers/AuthProvider'
+import { useFeatureFlags } from '../../providers/FeatureFlagsProvider'
 import { usePlatformConfig } from '../../providers/PlatformConfigProvider'
 import { useSocietyBranding } from '../../hooks/useSocietyBranding'
+import { isGlobalSuperAdmin, isRwaStaff } from '../../lib/roles'
 import { AccordionNavLink, NavAccordionProvider, useNavAccordion } from './NavAccordionContext'
 import { MAI_PLATFORM_NAME } from '../../lib/brandConstants'
 import {
@@ -156,6 +158,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
   const { user, signOut, currentSocietyId } = useAuth()
   const { societyName } = useSocietyBranding()
   const { isModuleEnabled } = usePlatformConfig()
+  const { isEnabled: featureEnabled } = useFeatureFlags()
   const navigate = useNavigate()
   const location = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -165,6 +168,11 @@ export default function Sidebar({ children, title }: SidebarProps) {
   const societyScope = currentSocietyId
   const moduleEnabled = (key: Parameters<typeof isModuleEnabled>[0]) =>
     isModuleEnabled(key, societyScope)
+  const electionFeatureOn = moduleEnabled('elections') && featureEnabled('election_module')
+  const smartParkingOn = featureEnabled('smart_parking')
+  const vendorSlaOn = featureEnabled('vendor_sla')
+  const aiAuditOn = featureEnabled('ai_rwa_audit')
+  const marketplaceOn = featureEnabled('resident_marketplace')
 
   useEffect(() => {
     setMobileOpen(false)
@@ -214,15 +222,22 @@ export default function Sidebar({ children, title }: SidebarProps) {
   const residentCommunityPaths = [
     ...(moduleEnabled('surveys') ? ['/resident/surveys'] : []),
     ...(moduleEnabled('gallery') ? ['/resident/gallery'] : []),
-    ...(moduleEnabled('elections') ? ['/resident/elections'] : []),
-    ...(moduleEnabled('rewards') ? ['/resident/rewards'] : [])
+    ...(electionFeatureOn ? ['/resident/elections'] : []),
+    ...(moduleEnabled('rewards') ? ['/resident/rewards'] : []),
+    ...(smartParkingOn ? ['/resident/smart-parking'] : []),
+    ...(vendorSlaOn ? ['/resident/vendor-sla'] : []),
+    ...(aiAuditOn ? ['/resident/society-health'] : []),
+    ...(marketplaceOn ? ['/resident/marketplace'] : [])
   ]
 
   const rwaControlPaths = [
     ...(moduleEnabled('surveys') ? ['/rwa/surveys'] : []),
     ...(moduleEnabled('gallery') ? ['/rwa/gallery'] : []),
-    ...(moduleEnabled('elections') ? ['/rwa/elections'] : []),
-    ...(moduleEnabled('rewards') ? ['/rwa/rewards'] : [])
+    ...(electionFeatureOn ? ['/rwa/elections'] : []),
+    ...(moduleEnabled('rewards') ? ['/rwa/rewards'] : []),
+    ...(aiAuditOn ? ['/rwa/ai-rwa-audit'] : []),
+    ...(vendorSlaOn ? ['/rwa/vendor-sla'] : []),
+    ...(smartParkingOn ? ['/rwa/smart-parking'] : [])
   ]
 
   const workspacePaths = [
@@ -259,8 +274,12 @@ export default function Sidebar({ children, title }: SidebarProps) {
   const showResidentCommunity =
     moduleEnabled('surveys') ||
     moduleEnabled('gallery') ||
-    moduleEnabled('elections') ||
-    moduleEnabled('rewards')
+    electionFeatureOn ||
+    moduleEnabled('rewards') ||
+    smartParkingOn ||
+    vendorSlaOn ||
+    aiAuditOn ||
+    marketplaceOn
 
   const showRwaControls = canAccessRwaControls(user) && rwaControlPaths.length > 0
   const showPresidentConsole = canAccessPresidentConsole(user)
@@ -345,7 +364,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
                     Photo Gallery
                   </SidebarSubNavLink>
                 )}
-                {moduleEnabled('elections') && (
+                {electionFeatureOn && (
                   <SidebarSubNavLink to="/resident/elections" className={subNavLinkClass}>
                     Elections
                   </SidebarSubNavLink>
@@ -353,6 +372,26 @@ export default function Sidebar({ children, title }: SidebarProps) {
                 {moduleEnabled('rewards') && (
                   <SidebarSubNavLink to="/resident/rewards" className={subNavLinkClass}>
                     Rewards & Recognition
+                  </SidebarSubNavLink>
+                )}
+                {smartParkingOn && (
+                  <SidebarSubNavLink to="/resident/smart-parking" className={subNavLinkClass}>
+                    Smart Parking
+                  </SidebarSubNavLink>
+                )}
+                {vendorSlaOn && (
+                  <SidebarSubNavLink to="/resident/vendor-sla" className={subNavLinkClass}>
+                    Vendor SLA
+                  </SidebarSubNavLink>
+                )}
+                {aiAuditOn && (
+                  <SidebarSubNavLink to="/resident/society-health" className={subNavLinkClass}>
+                    Society Health
+                  </SidebarSubNavLink>
+                )}
+                {marketplaceOn && (
+                  <SidebarSubNavLink to="/resident/marketplace" className={subNavLinkClass}>
+                    Marketplace
                   </SidebarSubNavLink>
                 )}
               </NavGroup>
@@ -477,7 +516,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
                     Photo Gallery
                   </SidebarSubNavLink>
                 )}
-                {moduleEnabled('elections') && (
+                {electionFeatureOn && (
                   <SidebarSubNavLink to="/resident/elections" className={subNavLinkClass}>
                     Elections
                   </SidebarSubNavLink>
@@ -485,6 +524,26 @@ export default function Sidebar({ children, title }: SidebarProps) {
                 {moduleEnabled('rewards') && (
                   <SidebarSubNavLink to="/resident/rewards" className={subNavLinkClass}>
                     Rewards & Recognition
+                  </SidebarSubNavLink>
+                )}
+                {smartParkingOn && (
+                  <SidebarSubNavLink to="/resident/smart-parking" className={subNavLinkClass}>
+                    Smart Parking
+                  </SidebarSubNavLink>
+                )}
+                {vendorSlaOn && (
+                  <SidebarSubNavLink to="/resident/vendor-sla" className={subNavLinkClass}>
+                    Vendor SLA
+                  </SidebarSubNavLink>
+                )}
+                {aiAuditOn && (
+                  <SidebarSubNavLink to="/resident/society-health" className={subNavLinkClass}>
+                    Society Health
+                  </SidebarSubNavLink>
+                )}
+                {marketplaceOn && (
+                  <SidebarSubNavLink to="/resident/marketplace" className={subNavLinkClass}>
+                    Marketplace
                   </SidebarSubNavLink>
                 )}
               </NavGroup>
@@ -559,7 +618,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
                     Gallery Management
                   </SidebarSubNavLink>
                 )}
-                {moduleEnabled('elections') && (
+                {electionFeatureOn && (
                   <SidebarSubNavLink to="/rwa/elections" className={subNavLinkClass}>
                     Elections
                   </SidebarSubNavLink>
@@ -567,6 +626,21 @@ export default function Sidebar({ children, title }: SidebarProps) {
                 {moduleEnabled('rewards') && (
                   <SidebarSubNavLink to="/rwa/rewards" className={subNavLinkClass}>
                     Rewards & Governance
+                  </SidebarSubNavLink>
+                )}
+                {aiAuditOn && (
+                  <SidebarSubNavLink to="/rwa/ai-rwa-audit" className={subNavLinkClass}>
+                    AI RWA Audit
+                  </SidebarSubNavLink>
+                )}
+                {vendorSlaOn && (
+                  <SidebarSubNavLink to="/rwa/vendor-sla" className={subNavLinkClass}>
+                    Vendor SLA
+                  </SidebarSubNavLink>
+                )}
+                {smartParkingOn && (
+                  <SidebarSubNavLink to="/rwa/smart-parking" className={subNavLinkClass}>
+                    Smart Parking
                   </SidebarSubNavLink>
                 )}
               </NavGroup>

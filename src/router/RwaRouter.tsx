@@ -20,6 +20,10 @@ import AccountantDashboard from '../pages/rwa/workspace/AccountantDashboard'
 import TierGuard from './TierGuard'
 import RoleGuard from './RoleGuard'
 import WorkspaceIndexRedirect from './WorkspaceIndexRedirect'
+import FeatureGuard from '../components/features/FeatureGuard'
+import SmartParkingPage from '../pages/modules/SmartParkingPage'
+import VendorSlaPage from '../pages/modules/VendorSlaPage'
+import AiRwaAuditPage from '../pages/modules/AiRwaAuditPage'
 
 export default function RwaRouter() {
   return (
@@ -143,8 +147,40 @@ export default function RwaRouter() {
           element={
             <RoleGuard allow={['president', 'secretary']}>
               <TierGuard requiredTier="tier2">
-                <ElectionsManager />
+                <FeatureGuard module="election_module">
+                  <ElectionsManager />
+                </FeatureGuard>
               </TierGuard>
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="smart-parking"
+          element={
+            <RoleGuard allow={['president', 'secretary']}>
+              <FeatureGuard module="smart_parking">
+                <SmartParkingPage />
+              </FeatureGuard>
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="vendor-sla"
+          element={
+            <RoleGuard allow={['president', 'secretary']}>
+              <FeatureGuard module="vendor_sla">
+                <VendorSlaPage />
+              </FeatureGuard>
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="ai-rwa-audit"
+          element={
+            <RoleGuard allow={['president', 'secretary']}>
+              <FeatureGuard module="ai_rwa_audit">
+                <AiRwaAuditPage />
+              </FeatureGuard>
             </RoleGuard>
           }
         />

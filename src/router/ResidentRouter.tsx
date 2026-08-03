@@ -14,6 +14,11 @@ import ResidentElectionResultsPage from '../pages/resident/ElectionResults'
 import ResidentRewardsPage from '../pages/resident/RewardsRecognition'
 import ResidentRulesGuidebookPage from '../pages/resident/RulesGuidebookPage'
 import NoticesList from '../components/NoticesList'
+import FeatureGuard from '../components/features/FeatureGuard'
+import SmartParkingPage from '../pages/modules/SmartParkingPage'
+import VendorSlaPage from '../pages/modules/VendorSlaPage'
+import AiRwaAuditPage from '../pages/modules/AiRwaAuditPage'
+import ResidentMarketplacePage from '../pages/modules/ResidentMarketplacePage'
 import { useAuth } from '../providers/AuthProvider'
 import { ui } from '../lib/ui'
 
@@ -51,8 +56,54 @@ export default function ResidentRouter() {
         <Route path="activity" element={<ResidentActivityPage />} />
         <Route path="surveys" element={<ResidentSurveysPage />} />
         <Route path="gallery" element={<ResidentGalleryPage />} />
-        <Route path="elections" element={<ResidentElectionsPage />} />
-        <Route path="elections/:electionId/results" element={<ResidentElectionResultsPage />} />
+        <Route
+          path="elections"
+          element={
+            <FeatureGuard module="election_module">
+              <ResidentElectionsPage />
+            </FeatureGuard>
+          }
+        />
+        <Route
+          path="elections/:electionId/results"
+          element={
+            <FeatureGuard module="election_module">
+              <ResidentElectionResultsPage />
+            </FeatureGuard>
+          }
+        />
+        <Route
+          path="smart-parking"
+          element={
+            <FeatureGuard module="smart_parking">
+              <SmartParkingPage />
+            </FeatureGuard>
+          }
+        />
+        <Route
+          path="vendor-sla"
+          element={
+            <FeatureGuard module="vendor_sla">
+              <VendorSlaPage />
+            </FeatureGuard>
+          }
+        />
+        <Route
+          path="society-health"
+          element={
+            <FeatureGuard module="ai_rwa_audit">
+              <AiRwaAuditPage />
+            </FeatureGuard>
+          }
+        />
+        <Route
+          path="marketplace"
+          element={
+            <FeatureGuard module="resident_marketplace">
+              <ResidentMarketplacePage />
+            </FeatureGuard>
+          }
+        />
         <Route path="rewards" element={<ResidentRewardsPage />} />
         <Route path="*" element={<Navigate to="/resident" replace />} />
       </Route>
