@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import FooterAndroidQr from '../landing/FooterAndroidQr'
 import FooterAppStoreBadges from '../landing/FooterAppStoreBadges'
 import { SYNCRA_LEGAL_ENTITY } from '../../lib/brandConstants'
 
@@ -54,13 +55,18 @@ export default function SyncraFooter({ className = '', showAppBadges = true }: S
           </div>
 
           {showAppBadges && (
-            <div className="flex w-full flex-col items-start md:w-[20%]">
-              <FooterColumnHeading>Get the app</FooterColumnHeading>
-              <FooterAppStoreBadges variant="store" stacked align="left" hideHeading />
+            <div className="flex w-full flex-col items-start gap-4 md:w-[28%]">
+              <div className="w-full">
+                <FooterColumnHeading>Get the app</FooterColumnHeading>
+                <div className="flex flex-wrap items-start gap-5">
+                  <FooterAndroidQr size={120} />
+                  <FooterAppStoreBadges variant="store" stacked align="left" hideHeading />
+                </div>
+              </div>
             </div>
           )}
 
-          <div className="w-full md:w-[15%]">
+          <div className="w-full md:w-[14%]">
             <FooterColumnHeading>Platform</FooterColumnHeading>
             <nav aria-label="Platform links" className="flex flex-col gap-2">
               {platformLinks.map((link) => (
@@ -69,7 +75,7 @@ export default function SyncraFooter({ className = '', showAppBadges = true }: S
             </nav>
           </div>
 
-          <div className="w-full md:w-[22%]">
+          <div className="w-full md:w-[18%]">
             <FooterColumnHeading>Compliance</FooterColumnHeading>
             <nav aria-label="Legal policies" className="flex flex-col gap-2">
               {complianceLinks.map((link) => (
