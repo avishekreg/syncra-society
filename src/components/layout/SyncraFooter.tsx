@@ -2,6 +2,8 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import FooterAndroidQr from '../landing/FooterAndroidQr'
 import FooterAppStoreBadges from '../landing/FooterAppStoreBadges'
+import MaiSocietyWordmark from '../brand/MaiSocietyWordmark'
+import { SyncraInsignia } from '../brand/SyncraBrandLogo'
 import { SYNCRA_LEGAL_ENTITY } from '../../lib/brandConstants'
 
 const complianceLinks = [
@@ -50,7 +52,11 @@ export default function SyncraFooter({ className = '', showAppBadges = true }: S
     <footer className={`border-t border-slate-200 bg-white pb-6 text-slate-600 ${className}`}>
       <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
         <div className="flex w-full flex-wrap items-start justify-between gap-y-8">
-          <div className="w-full md:w-[35%]">
+          <div className="w-full space-y-3 md:w-[35%]">
+            <div className="flex items-center gap-2.5">
+              <SyncraInsignia className="h-9 w-9 shrink-0" />
+              <MaiSocietyWordmark size="lg" className="font-bold" />
+            </div>
             <p className="text-sm leading-relaxed text-slate-600">{FOOTER_TAGLINE}</p>
           </div>
 

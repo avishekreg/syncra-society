@@ -1,76 +1,37 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import SyncraBrandLogo from '../components/brand/SyncraBrandLogo'
 import AntiDisputeHarmonySection from '../components/landing/AntiDisputeHarmonySection'
 import HeroDashboardMockup from '../components/landing/HeroDashboardMockup'
 import SyncraPromiseSection from '../components/landing/SyncraPromiseSection'
+import EnterpriseModulesSection from '../components/landing/EnterpriseModulesSection'
+import AddonPricingCalculator from '../components/landing/AddonPricingCalculator'
+import ExperienceAiAuditModal from '../components/landing/ExperienceAiAuditModal'
 import SyncraFooter from '../components/layout/SyncraFooter'
 import FooterEnterpriseCta from '../components/layout/FooterEnterpriseCta'
 import { SYNCRA_LEGAL_ENTITY } from '../lib/brandConstants'
 import { usePlatformPricing } from '../hooks/usePlatformPricing'
-import {
-  formatElectionAddonPrice,
-  formatInr,
-  formatVoiceHelpdeskAddonPrice,
-  formatWhatsAppAddonPrice,
-  type PlatformPricingConfig
-} from '../lib/platformPricing'
+import { formatInr } from '../lib/platformPricing'
 import { ui } from '../lib/ui'
 
-const landingFeatures = [
-  { icon: '🏢', title: 'Multi-Society RWA', description: 'Smart workflows for societies, buildings, flats, and resident profiles.' },
-  { icon: '📊', title: 'Ledgers', description: 'Transparent financial records, unified accounting, and audit-ready transaction histories.' },
-  { icon: '📢', title: 'Notice Board', description: 'Publish announcements, approvals, and community reminders instantly.' },
-  { icon: '📝', title: 'Contract Tracking', description: 'Monitor vendor agreements, renewals, and obligations from one control hub.' },
+const coreCapabilities = [
   {
-    icon: '🛂',
+    title: 'Billing & ledgers',
+    description: 'Per-flat dues, receipts, and audit-ready transaction history.'
+  },
+  {
+    title: 'Notices & guidebook',
+    description: 'Broadcast announcements and host your society rulebook digitally.'
+  },
+  {
+    title: 'Digital elections',
+    description: 'Anonymous ballots, live turnout, and scheduled result reveal — included in core.'
+  },
+  {
     title: 'mAI Gatekeeper',
-    description: 'mAI Gate Visitor Log — guard entry, resident approvals, and exit trace.'
-  },
-  {
-    icon: '🛠️',
-    title: 'Helpdesk & Asset Audit',
-    description:
-      'Integrated ticketing infrastructure for resident complaints coupled with scheduled maintenance lifecycle audits for community machinery.'
+    description: 'Visitor entry, resident approvals, and exit trace without hardware locks.'
   }
 ]
-
-type PremiumAddon = {
-  id: 'whatsapp' | 'voice-helpdesk' | 'elections'
-  name: string
-  description: string
-  highlights: string[]
-}
-
-const premiumAddonMeta: PremiumAddon[] = [
-  {
-    id: 'whatsapp',
-    name: 'WhatsApp Automation',
-    description:
-      'Stack automated notice broadcasts and resident alerts on any base plan — fixed monthly add-on or bundled volume packs.',
-    highlights: ['mAI notice relays', 'Opt-in resident contact routing', 'Volume-tier alert packs']
-  },
-  {
-    id: 'voice-helpdesk',
-    name: 'AI Voice Ticketing & Smart Helpdesk',
-    description:
-      'High-fidelity audio transcription with automated AI severity triage and a full resident ticket portal.',
-    highlights: ['Voice complaint capture', 'High-fidelity audio transcription', 'Automated AI severity triage']
-  },
-  {
-    id: 'elections',
-    name: 'Encrypted Election Module',
-    description:
-      'Dynamic multi-position voting, encrypted ballots, and RWA election orchestration — activate per society on demand.',
-    highlights: ['Multi-position ballots', 'Resident & RWA election views', 'Governance-grade audit trail']
-  }
-]
-
-function formatAddonPriceLabel(addonId: PremiumAddon['id'], pricing: PlatformPricingConfig) {
-  if (addonId === 'whatsapp') return formatWhatsAppAddonPrice(pricing.premiumAddons.whatsapp)
-  if (addonId === 'voice-helpdesk') return formatVoiceHelpdeskAddonPrice(pricing.premiumAddons.voiceHelpdesk)
-  return formatElectionAddonPrice(pricing.premiumAddons.elections)
-}
 
 function PricingFeature({ children }: { children: React.ReactNode }) {
   return (
@@ -88,6 +49,7 @@ function PricingFeature({ children }: { children: React.ReactNode }) {
 
 export default function LandingPage() {
   const { pricing } = usePlatformPricing()
+  const [auditDemoOpen, setAuditDemoOpen] = useState(false)
 
   return (
     <div className={`relative overflow-x-hidden ${ui.page}`}>
@@ -97,6 +59,9 @@ export default function LandingPage() {
         <div className="mx-auto flex min-h-16 max-w-7xl flex-col items-stretch justify-between gap-3 px-4 py-3 sm:min-h-[4.25rem] sm:flex-row sm:items-center sm:gap-4 sm:px-6 sm:py-2">
           <SyncraBrandLogo to="/" size="lg" />
           <div className="flex w-full flex-wrap items-stretch gap-3 sm:w-auto sm:items-center">
+            <a href="#enterprise-modules" className={`w-full sm:w-auto ${ui.btnGhost}`}>
+              Modules
+            </a>
             <Link to="/auth/login" className={`w-full sm:w-auto ${ui.btnGhost}`}>
               Login Now
             </Link>
@@ -111,33 +76,34 @@ export default function LandingPage() {
         <section className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-14">
           <div className="space-y-8 text-center lg:text-left">
             <div className="mx-auto max-w-2xl space-y-6 lg:mx-0">
-              <p className={ui.eyebrow}>World-class society management</p>
+              <p className={ui.eyebrow}>Zero-hardware society OS</p>
               <h2 className={`${ui.display} leading-[1.08]`}>
-                Ultra-premium governance for modern communities.
+                Enterprise RWA software that scales with modular add-ons.
               </h2>
               <p className={`text-lg leading-relaxed ${ui.body}`}>
-                mAI Society from {SYNCRA_LEGAL_ENTITY} unifies Multi-Society RWA, Ledgers, Notice Board, Contract
-                Tracking, and mAI Gatekeeper into one elegant, privacy-first platform.
+                mAI Society from {SYNCRA_LEGAL_ENTITY} pairs core governance — billing, notices, elections —
+                with licensed zero-hardware modules like WhatsApp AI, Smart Parking, and AI RWA Audit.
               </p>
             </div>
 
             <div className="flex w-full flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center lg:justify-start">
-              <Link
-                to="/register"
-                className={`inline-flex w-full items-center justify-center sm:w-auto ${ui.btnPrimary} px-8 py-4 transition hover:-translate-y-0.5`}
-              >
-                Start Your Journey
-              </Link>
               <a
                 href="#pricing"
+                className={`inline-flex w-full items-center justify-center sm:w-auto ${ui.btnPrimary} px-8 py-4 transition hover:-translate-y-0.5`}
+              >
+                Build your plan
+              </a>
+              <button
+                type="button"
+                onClick={() => setAuditDemoOpen(true)}
                 className={`inline-flex w-full items-center justify-center sm:w-auto ${ui.btnSecondary} px-8 py-4`}
               >
-                View Pricing
-              </a>
+                Experience AI Audit
+              </button>
             </div>
 
             <div className="mx-auto flex max-w-md flex-wrap items-center justify-center gap-3 lg:mx-0 lg:justify-start">
-              {['No data selling', 'Zero ads', 'Encrypted by design'].map((badge) => (
+              {['Per-society licensing', 'No IoT hardware', 'Encrypted by design'].map((badge) => (
                 <span
                   key={badge}
                   className="rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-600 shadow-sm"
@@ -155,48 +121,35 @@ export default function LandingPage() {
 
         <SyncraPromiseSection />
 
+        <EnterpriseModulesSection onOpenAuditDemo={() => setAuditDemoOpen(true)} />
+
         <section className="space-y-12" id="features">
           <div className="mx-auto max-w-3xl space-y-6 text-center">
-            <p className={ui.eyebrow}>Core Capabilities</p>
+            <p className={ui.eyebrow}>Core base plan</p>
             <h3 className="text-2xl font-semibold leading-tight text-syncra-primary sm:text-3xl md:text-4xl">
-              Everything your society needs, beautifully organized.
+              Everything every RWA needs — before add-ons.
             </h3>
-            <p className={`text-base leading-relaxed ${ui.body}`}>
-              From resident logistics to financial accountability, mAI Society provides clear workflows, fast
-              approvals, and a premium user experience.
-            </p>
           </div>
-
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            {landingFeatures.map((feature) => (
-              <div
-                key={feature.title}
-                className={`flex h-full flex-col text-center transition hover:-translate-y-1 ${ui.innerItem} p-5 sm:p-6 md:p-8`}
-              >
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-syncra-accent/10 text-2xl">
-                  {feature.icon}
-                </div>
-                <h4 className="mt-6 text-lg font-semibold text-syncra-primary">{feature.title}</h4>
-                <p className={`mt-4 text-sm leading-relaxed ${ui.body}`}>{feature.description}</p>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {coreCapabilities.map((feature) => (
+              <div key={feature.title} className={`${ui.innerItem} p-5 sm:p-6`}>
+                <h4 className="text-base font-semibold text-syncra-primary">{feature.title}</h4>
+                <p className={`mt-3 text-sm leading-relaxed ${ui.body}`}>{feature.description}</p>
               </div>
             ))}
           </div>
         </section>
 
         <section className="space-y-16" id="pricing">
-          {/* Core per-flat base plans */}
           <div className="space-y-10">
             <div className="mx-auto max-w-3xl space-y-4 text-center">
-              <p className={ui.eyebrow}>Pricing tiers</p>
+              <p className={ui.eyebrow}>Per-flat base rates</p>
               <h3 className="text-2xl font-semibold leading-tight text-syncra-primary sm:text-3xl md:text-4xl">
-                Simple, premium, and transparent pricing.
+                Transparent core pricing
               </h3>
-              <p className="text-sm font-semibold uppercase tracking-[0.35em] text-syncra-action">
-                All prices are excluding GST (18%).
-              </p>
               <p className={`text-base leading-relaxed ${ui.body}`}>
-                One-time activation {formatInr(pricing.activationFeeInr)}, then tiered pricing for every society
-                size with clear, per-flat monthly costs.
+                One-time activation {formatInr(pricing.activationFeeInr)}, then tiered per-flat rates. Stack
+                enterprise modules in the calculator below.
               </p>
             </div>
 
@@ -222,68 +175,22 @@ export default function LandingPage() {
                       <PricingFeature key={feature}>{feature}</PricingFeature>
                     ))}
                   </ul>
-                  <Link to="/register" className={`mt-8 inline-flex w-full justify-center ${ui.btnPrimary}`}>
-                    Start Your Journey
-                  </Link>
+                  <a href="#pricing-calculator" className={`mt-8 inline-flex w-full justify-center ${ui.btnPrimary}`}>
+                    Configure add-ons
+                  </a>
                 </article>
               ))}
             </div>
           </div>
 
-          {/* Premium modular add-ons */}
-          <div className="space-y-8 rounded-3xl border border-slate-200 bg-syncra-surface-alt p-4 sm:p-6 md:p-10">
-            <div className="mx-auto max-w-3xl space-y-3 text-center">
-              <p className={ui.eyebrowPrimary}>Stack on any base plan</p>
-              <h3 className="text-xl font-semibold leading-tight text-syncra-primary sm:text-2xl md:text-3xl">
-                Premium AI & Communication Add-ons
-              </h3>
-              <p className={`text-base leading-relaxed ${ui.body}`}>
-                Modular automation modules societies can activate on top of Tier 1–3 — zero-touch enablement via
-                secure mAI billing after checkout.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {premiumAddonMeta.map((addon) => (
-                <article
-                  key={addon.id}
-                  className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-card"
-                >
-                  <h4 className="text-lg font-semibold text-syncra-primary">{addon.name}</h4>
-                  <p className="mt-3 text-2xl font-semibold tracking-tight text-syncra-blue">
-                    {formatAddonPriceLabel(addon.id, pricing)}
-                  </p>
-                  {addon.id === 'whatsapp' && (
-                    <p className="mt-1 text-xs text-slate-500">
-                      + {formatInr(pricing.premiumAddons.whatsapp.overageBlockPriceInr)} per additional{' '}
-                      {pricing.premiumAddons.whatsapp.overageBlockSize.toLocaleString('en-IN')} alerts
-                    </p>
-                  )}
-                  <p className={`mt-3 flex-1 text-sm leading-relaxed ${ui.body}`}>{addon.description}</p>
-                  <ul className="mt-5 space-y-2 border-t border-slate-100 pt-5">
-                    {addon.highlights.map((item) => (
-                      <li key={item} className="text-xs font-medium text-slate-600">
-                        · {item}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link
-                    to="/register"
-                    className={`mt-6 inline-flex w-full justify-center ${ui.btnSecondary} py-3 text-sm font-semibold`}
-                  >
-                    Add module
-                  </Link>
-                </article>
-              ))}
-            </div>
-          </div>
-
+          <AddonPricingCalculator pricing={pricing} />
         </section>
       </main>
 
       <FooterEnterpriseCta />
-
       <SyncraFooter />
+
+      <ExperienceAiAuditModal open={auditDemoOpen} onClose={() => setAuditDemoOpen(false)} />
     </div>
   )
 }

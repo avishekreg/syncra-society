@@ -1,18 +1,46 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useMemo, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../providers/AuthProvider'
 import { createSociety } from '../../api/societies'
 import { writeLocalBillingStatus } from '../../api/payments'
+import { activateSocietyAddons } from '../../api/featureToggles'
 import { initializeFoundingPresident } from '../../lib/governanceRoles'
+import {
+  LANDING_ADDONS,
+  clearLandingCheckoutIntent,
+  readLandingCheckoutIntent
+} from '../../lib/landingAddons'
 import { ui } from '../../lib/ui'
 
 export default function OnboardingPage() {
   const { user, setCurrentSocietyId, setUser, setShowcaseData } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [societyName, setSocietyName] = useState('')
   const [address, setAddress] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const checkoutIntent = useMemo(() => {
+    const stored = readLandingCheckoutIntent()
+    if (stored) return stored
+    const addonsParam = searchParams.get('addons')
+    if (!addonsParam) return null
+    return {
+      flats: Number(searchParams.get('flats') || 48),
+      billing: (searchParams.get('billing') === 'annual' ? 'annual' : 'monthly') as 'monthly' | 'annual',
+      tierId: searchParams.get('tier') || 'tier1',
+      addons: addonsParam.split(',').filter(Boolean) as Array<(typeof LANDING_ADDONS)[number]['id']>,
+      createdAt: new Date().toISOString()
+    }
+  }, [searchParams])
+
+  const selectedAddonLabels = useMemo(() => {
+    if (!checkoutIntent?.addons?.length) return []
+    return LANDING_ADDONS.filter((addon) => checkoutIntent.addons.includes(addon.id)).map(
+      (addon) => addon.shortLabel
+    )
+  }, [checkoutIntent])
 
   if (!user) {
     return null
@@ -63,6 +91,15 @@ export default function OnboardingPage() {
         activationStatus: 'pending'
       })
 
+      if (checkoutIntent?.addons?.length) {
+        try {
+          await activateSocietyAddons(society.id, checkoutIntent.addons)
+        } catch {
+          /* Super Admin can still enable modules later */
+        }
+      }
+      clearLandingCheckoutIntent()
+
       navigate('/onboarding/activation', { replace: true })
     } catch {
       const societyId = `society-${Date.now()}`
@@ -98,6 +135,14 @@ export default function OnboardingPage() {
         societyName: societyName.trim(),
         activationStatus: 'pending'
       })
+      if (checkoutIntent?.addons?.length) {
+        try {
+          await activateSocietyAddons(societyId, checkoutIntent.addons)
+        } catch {
+          /* local fallback society — toggles seed on next sync */
+        }
+      }
+      clearLandingCheckoutIntent()
       navigate('/onboarding/activation', { replace: true })
     } finally {
       setSubmitting(false)
@@ -115,6 +160,12 @@ export default function OnboardingPage() {
               Register your society profile first. You will complete platform activation and flat billing
               setup in the next steps.
             </p>
+            {selectedAddonLabels.length > 0 ? (
+              <p className="mt-3 rounded-xl border border-syncra-accent/30 bg-syncra-accent/10 px-3 py-2 text-sm text-syncra-blue">
+                Landing plan add-ons ready to activate:{' '}
+                <span className="font-semibold">{selectedAddonLabels.join(', ')}</span>
+              </p>
+            ) : null}
           </header>
 
           <form onSubmit={handleSubmit} className="space-y-4">
