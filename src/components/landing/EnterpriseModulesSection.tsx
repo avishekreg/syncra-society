@@ -36,6 +36,15 @@ const MODULES = [
     title: 'Hyperlocal Resident Marketplace',
     blurb: 'Peer-to-peer trusted community buy/sell portal.',
     detail: 'Furniture, services, and society exchange — gated to verified residents of your community.'
+  },
+  {
+    id: 'elections',
+    icon: '🗳️',
+    title: 'Secret Digital Elections',
+    blurb:
+      '1-Flat-1-Vote tamper-proof digital voting with absolute ballot secrecy & instant published bulletins.',
+    detail:
+      'Encrypted anonymous ballots, live turnout without candidate leaks, and scheduled result reveal when voting closes.'
   }
 ] as const
 
@@ -59,7 +68,7 @@ export default function EnterpriseModulesSection({ onOpenAuditDemo }: Enterprise
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {MODULES.map((module) => {
           const open = activeId === module.id
           return (
@@ -67,15 +76,15 @@ export default function EnterpriseModulesSection({ onOpenAuditDemo }: Enterprise
               key={module.id}
               type="button"
               onClick={() => setActiveId(open ? null : module.id)}
-              className={`group flex h-full flex-col rounded-2xl border bg-white p-5 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-card sm:p-6 ${
+              className={`group flex min-h-[280px] w-full flex-col rounded-2xl border bg-white p-6 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-card ${
                 open ? 'border-syncra-accent/50 ring-1 ring-syncra-accent/20' : 'border-slate-200'
               }`}
             >
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-syncra-accent/10 text-2xl transition group-hover:scale-105">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-syncra-accent/10 text-2xl transition group-hover:scale-105">
                 {module.icon}
               </span>
-              <h4 className="mt-5 text-lg font-semibold text-syncra-primary">{module.title}</h4>
-              <p className={`mt-3 text-sm leading-relaxed ${ui.body}`}>{module.blurb}</p>
+              <h4 className="mt-5 text-lg font-semibold leading-snug text-syncra-primary">{module.title}</h4>
+              <p className={`mt-3 flex-1 text-sm leading-relaxed ${ui.body}`}>{module.blurb}</p>
               <div
                 className={`grid transition-all duration-300 ${
                   open ? 'mt-4 grid-rows-[1fr] opacity-100' : 'mt-0 grid-rows-[0fr] opacity-0'
