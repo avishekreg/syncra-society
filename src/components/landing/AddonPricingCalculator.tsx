@@ -4,6 +4,7 @@ import { useAuth } from '../../providers/AuthProvider'
 import { formatInr, type PlatformPricingConfig } from '../../lib/platformPricing'
 import {
   LANDING_ADDONS,
+  LANDING_BASE_INCLUSIONS,
   buildOnboardingHref,
   saveLandingCheckoutIntent,
   type LandingAddonId
@@ -21,6 +22,18 @@ function resolveTierForFlats(pricing: PlatformPricingConfig, flats: number) {
   return pricing.tiers.find((t) => t.id === 'tier3') ?? pricing.tiers[pricing.tiers.length - 1]
 }
 
+function resolveAddonPrice(addon: (typeof LANDING_ADDONS)[number], pricing: PlatformPricingConfig) {
+  if (addon.id === 'whatsapp_automation') {
+    return pricing.premiumAddons.whatsapp.baseMonthlyPriceInr
+  }
+  if (addon.id === 'election_module') {
+    return pricing.premiumAddons.elections.billingMode === 'monthly'
+      ? pricing.premiumAddons.elections.monthlyFeeInr
+      : addon.monthlyPriceInr
+  }
+  return addon.monthlyPriceInr
+}
+
 export default function AddonPricingCalculator({ pricing }: AddonPricingCalculatorProps) {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -29,14 +42,22 @@ export default function AddonPricingCalculator({ pricing }: AddonPricingCalculat
   const [selected, setSelected] = useState<LandingAddonId[]>(['whatsapp_automation'])
 
   const tier = useMemo(() => resolveTierForFlats(pricing, flats), [pricing, flats])
-  const billableAddons = LANDING_ADDONS.filter((addon) => !addon.includedInBase)
+
+  const pricedAddons = useMemo(
+    () =>
+      LANDING_ADDONS.map((addon) => ({
+        ...addon,
+        monthlyPriceInr: resolveAddonPrice(addon, pricing)
+      })),
+    [pricing]
+  )
 
   const addonMonthly = useMemo(
     () =>
-      billableAddons
+      pricedAddons
         .filter((addon) => selected.includes(addon.id))
         .reduce((sum, addon) => sum + addon.monthlyPriceInr, 0),
-    [billableAddons, selected]
+    [pricedAddons, selected]
   )
 
   const baseMonthly = tier.price * flats
@@ -63,23 +84,22 @@ export default function AddonPricingCalculator({ pricing }: AddonPricingCalculat
       navigate(href)
       return
     }
-    // Persist intent in sessionStorage; after signup/login, continue into onboarding.
     navigate(`/register?intent=checkout&flats=${flats}`)
   }
 
   return (
     <div className="space-y-10" id="pricing-calculator">
-      <div className="mx-auto max-w-3xl space-y-4 text-center">
+      <div className="mx-auto max-w-2xl space-y-4 text-center whitespace-normal break-words">
         <p className={ui.eyebrow}>Build your stack</p>
-        <h3 className="text-2xl font-semibold leading-tight text-syncra-primary sm:text-3xl md:text-4xl">
+        <h3 className="mx-auto max-w-2xl text-balance text-2xl font-semibold leading-snug text-syncra-primary whitespace-normal break-words sm:text-3xl md:text-4xl md:leading-tight">
           Core plan + modular add-ons
         </h3>
         <p className="text-sm font-semibold uppercase tracking-[0.28em] text-syncra-action">
           All prices exclude GST (18%)
         </p>
-        <p className={`text-base leading-relaxed ${ui.body}`}>
-          Base plan includes billing, maintenance, notices, and digital elections. Stack zero-hardware
-          enterprise modules only for the societies that need them.
+        <p className={`mx-auto max-w-2xl text-pretty whitespace-normal break-words ${ui.body}`}>
+          Base rate covers billing, notices, gatekeeper, and helpdesk. Stack Elections, WhatsApp Bot,
+          Smart Parking, AI Audit, Vendor SLA, and Marketplace only where your society needs them.
         </p>
       </div>
 
@@ -122,19 +142,19 @@ export default function AddonPricingCalculator({ pricing }: AddonPricingCalculat
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-syncra-surface-alt px-4 py-4">
+          <div className="rounded-2xl border border-slate-200 border-t-4 border-t-syncra-blue bg-syncra-surface-alt/80 px-4 py-4">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Core base plan</p>
             <p className="mt-2 text-lg font-semibold text-syncra-primary">
               {tier.label} · {formatInr(tier.price)} / flat / month
             </p>
-            <p className={`mt-1 text-sm ${ui.body}`}>
-              Includes billing, maintenance dues, notices, digital elections, vendor SLA, and marketplace.
+            <p className={`mt-2 text-sm ${ui.body}`}>
+              Includes {LANDING_BASE_INCLUSIONS.join(', ')}.
             </p>
           </div>
 
           <div className="space-y-3">
-            <p className="text-sm font-semibold text-syncra-primary">Modular add-ons</p>
-            {billableAddons.map((addon) => {
+            <p className="text-sm font-semibold text-syncra-primary">Premium add-ons</p>
+            {pricedAddons.map((addon) => {
               const checked = selected.includes(addon.id)
               return (
                 <label
@@ -163,9 +183,6 @@ export default function AddonPricingCalculator({ pricing }: AddonPricingCalculat
                 </label>
               )
             })}
-            <p className="text-xs text-slate-500">
-              Vendor SLA & Marketplace ship with the core plan at no extra monthly fee.
-            </p>
           </div>
         </div>
 
@@ -181,7 +198,9 @@ export default function AddonPricingCalculator({ pricing }: AddonPricingCalculat
 
           <dl className="mt-8 space-y-3 border-t border-slate-200 pt-6 text-sm">
             <div className="flex justify-between gap-3">
-              <dt className="text-slate-600">Base ({flats} × {formatInr(tier.price)})</dt>
+              <dt className="text-slate-600">
+                Base ({flats} × {formatInr(tier.price)})
+              </dt>
               <dd className="font-semibold text-slate-800">{formatInr(baseMonthly)}/mo</dd>
             </div>
             <div className="flex justify-between gap-3">

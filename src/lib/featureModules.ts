@@ -38,9 +38,9 @@ export const FEATURE_MODULE_CATALOG: FeatureModuleMeta[] = [
   {
     key: 'election_module',
     label: 'Election Module',
-    description: 'Secure society elections with anonymous ballots and live turnout.',
-    tier: 'core',
-    defaultEnabled: true,
+    description: 'Secure society elections with anonymous ballots and live turnout (premium add-on).',
+    tier: 'premium',
+    defaultEnabled: false,
     routeHints: ['/resident/elections', '/rwa/elections'],
     dashboardCta: 'Elections'
   },
@@ -65,18 +65,18 @@ export const FEATURE_MODULE_CATALOG: FeatureModuleMeta[] = [
   {
     key: 'vendor_sla',
     label: 'Vendor SLA Tracking',
-    description: 'Daily resident ratings for housekeeping/security with monthly compliance scores.',
-    tier: 'core',
-    defaultEnabled: true,
+    description: 'Daily resident ratings for housekeeping/security with monthly compliance scores (premium add-on).',
+    tier: 'premium',
+    defaultEnabled: false,
     routeHints: ['/resident/vendor-sla', '/rwa/vendor-sla'],
     dashboardCta: 'Vendor SLA'
   },
   {
     key: 'resident_marketplace',
     label: 'Resident Marketplace',
-    description: 'Peer-to-peer resident listings and community exchange board.',
-    tier: 'core',
-    defaultEnabled: true,
+    description: 'Peer-to-peer resident listings and community exchange board (premium add-on).',
+    tier: 'premium',
+    defaultEnabled: false,
     routeHints: ['/resident/marketplace'],
     dashboardCta: 'Marketplace'
   }

@@ -4,6 +4,7 @@ export const LANDING_CHECKOUT_INTENT_KEY = 'mai_landing_checkout_intent'
 
 export type LandingAddonId =
   | 'whatsapp_automation'
+  | 'election_module'
   | 'ai_rwa_audit'
   | 'smart_parking'
   | 'vendor_sla'
@@ -16,25 +17,31 @@ export type LandingAddon = {
   shortLabel: string
   description: string
   monthlyPriceInr: number
-  /** Included in core base plan (shown but locked on by default / not billable extra) */
-  includedInBase?: boolean
 }
 
-/** Modular add-ons for the landing pricing calculator. */
+/** Modular premium add-ons for the landing pricing calculator (not part of base rate). */
 export const LANDING_ADDONS: LandingAddon[] = [
   {
     id: 'whatsapp_automation',
     moduleName: 'whatsapp_automation',
     label: 'WhatsApp AI Bot Automation',
-    shortLabel: 'WhatsApp Automation',
+    shortLabel: 'WhatsApp Bot',
     description: '24/7 resident query resolution & guidebook lookup.',
     monthlyPriceInr: 499
+  },
+  {
+    id: 'election_module',
+    moduleName: 'election_module',
+    label: 'Secret Digital Elections',
+    shortLabel: 'Digital Elections',
+    description: '1-Flat-1-Vote secrecy, live turnout, and scheduled result reveal.',
+    monthlyPriceInr: 599
   },
   {
     id: 'ai_rwa_audit',
     moduleName: 'ai_rwa_audit',
     label: 'AI RWA Audit Engine',
-    shortLabel: 'AI Audit Engine',
+    shortLabel: 'AI Audit',
     description: '0–100 Society Health Index with collection & SLA signals.',
     monthlyPriceInr: 299
   },
@@ -52,8 +59,7 @@ export const LANDING_ADDONS: LandingAddon[] = [
     label: 'Vendor SLA Tracking',
     shortLabel: 'Vendor SLA',
     description: 'Daily service scoring & monthly compliance audits.',
-    monthlyPriceInr: 0,
-    includedInBase: true
+    monthlyPriceInr: 199
   },
   {
     id: 'resident_marketplace',
@@ -61,10 +67,17 @@ export const LANDING_ADDONS: LandingAddon[] = [
     label: 'Hyperlocal Resident Marketplace',
     shortLabel: 'Marketplace',
     description: 'Trusted peer-to-peer community buy/sell portal.',
-    monthlyPriceInr: 0,
-    includedInBase: true
+    monthlyPriceInr: 149
   }
 ]
+
+/** Core base rate inclusions — never billed as modular add-ons. */
+export const LANDING_BASE_INCLUSIONS = [
+  'Billing & ledgers',
+  'Notices & guidebook',
+  'mAI Gatekeeper',
+  'Smart Helpdesk & Complaints'
+] as const
 
 export type LandingCheckoutIntent = {
   flats: number

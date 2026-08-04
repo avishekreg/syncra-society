@@ -57,12 +57,12 @@ export default function EnterpriseModulesSection({ onOpenAuditDemo }: Enterprise
 
   return (
     <section className="space-y-10" id="enterprise-modules">
-      <div className="mx-auto max-w-3xl space-y-4 text-center">
+      <div className="mx-auto max-w-2xl space-y-4 text-center whitespace-normal break-words">
         <p className={ui.eyebrow}>Zero-hardware enterprise</p>
-        <h3 className="text-2xl font-semibold leading-tight text-syncra-primary sm:text-3xl md:text-4xl">
+        <h3 className="mx-auto max-w-2xl text-balance text-2xl font-semibold leading-snug text-syncra-primary whitespace-normal break-words sm:text-3xl md:text-4xl md:leading-tight">
           Enterprise Zero-Hardware Modules
         </h3>
-        <p className={`text-base leading-relaxed ${ui.body}`}>
+        <p className={`mx-auto max-w-2xl text-pretty whitespace-normal break-words ${ui.body}`}>
           Premium society intelligence without sensors, kiosks, or hardware vendors — activate per society as
           licensed add-ons.
         </p>

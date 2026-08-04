@@ -5,6 +5,7 @@ import AntiDisputeHarmonySection from '../components/landing/AntiDisputeHarmonyS
 import HeroDashboardMockup from '../components/landing/HeroDashboardMockup'
 import SyncraPromiseSection from '../components/landing/SyncraPromiseSection'
 import EnterpriseModulesSection from '../components/landing/EnterpriseModulesSection'
+import CoreBasePlanSection from '../components/landing/CoreBasePlanSection'
 import AddonPricingCalculator from '../components/landing/AddonPricingCalculator'
 import ExperienceAiAuditModal from '../components/landing/ExperienceAiAuditModal'
 import SyncraFooter from '../components/layout/SyncraFooter'
@@ -13,25 +14,6 @@ import { SYNCRA_LEGAL_ENTITY } from '../lib/brandConstants'
 import { usePlatformPricing } from '../hooks/usePlatformPricing'
 import { formatInr } from '../lib/platformPricing'
 import { ui } from '../lib/ui'
-
-const coreCapabilities = [
-  {
-    title: 'Billing & ledgers',
-    description: 'Per-flat dues, receipts, and audit-ready transaction history.'
-  },
-  {
-    title: 'Notices & guidebook',
-    description: 'Broadcast announcements and host your society rulebook digitally.'
-  },
-  {
-    title: 'Digital elections',
-    description: 'Anonymous ballots, live turnout, and scheduled result reveal — included in core.'
-  },
-  {
-    title: 'mAI Gatekeeper',
-    description: 'Visitor entry, resident approvals, and exit trace without hardware locks.'
-  }
-]
 
 function PricingFeature({ children }: { children: React.ReactNode }) {
   return (
@@ -80,9 +62,10 @@ export default function LandingPage() {
               <h2 className={`${ui.display} leading-[1.08]`}>
                 Enterprise RWA software that scales with modular add-ons.
               </h2>
-              <p className={`text-lg leading-relaxed ${ui.body}`}>
-                mAI Society from {SYNCRA_LEGAL_ENTITY} pairs core governance — billing, notices, elections —
-                with licensed zero-hardware modules like WhatsApp AI, Smart Parking, and AI RWA Audit.
+              <p className={`mx-auto max-w-2xl text-pretty text-lg leading-relaxed whitespace-normal break-words lg:mx-0 ${ui.body}`}>
+                mAI Society from {SYNCRA_LEGAL_ENTITY} pairs essential RWA operations — billing, notices,
+                gatekeeper, and helpdesk — with licensed zero-hardware add-ons like Elections, WhatsApp AI,
+                Smart Parking, and AI RWA Audit.
               </p>
             </div>
 
@@ -123,31 +106,16 @@ export default function LandingPage() {
 
         <EnterpriseModulesSection onOpenAuditDemo={() => setAuditDemoOpen(true)} />
 
-        <section className="space-y-12" id="features">
-          <div className="mx-auto max-w-3xl space-y-6 text-center">
-            <p className={ui.eyebrow}>Core base plan</p>
-            <h3 className="text-2xl font-semibold leading-tight text-syncra-primary sm:text-3xl md:text-4xl">
-              Everything every RWA needs — before add-ons.
-            </h3>
-          </div>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {coreCapabilities.map((feature) => (
-              <div key={feature.title} className={`${ui.innerItem} p-5 sm:p-6`}>
-                <h4 className="text-base font-semibold text-syncra-primary">{feature.title}</h4>
-                <p className={`mt-3 text-sm leading-relaxed ${ui.body}`}>{feature.description}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        <CoreBasePlanSection />
 
         <section className="space-y-16" id="pricing">
           <div className="space-y-10">
-            <div className="mx-auto max-w-3xl space-y-4 text-center">
+            <div className="mx-auto max-w-2xl space-y-4 text-center whitespace-normal break-words">
               <p className={ui.eyebrow}>Per-flat base rates</p>
-              <h3 className="text-2xl font-semibold leading-tight text-syncra-primary sm:text-3xl md:text-4xl">
+              <h3 className="mx-auto max-w-2xl text-balance text-2xl font-semibold leading-snug text-syncra-primary whitespace-normal break-words sm:text-3xl md:text-4xl md:leading-tight">
                 Transparent core pricing
               </h3>
-              <p className={`text-base leading-relaxed ${ui.body}`}>
+              <p className={`mx-auto max-w-2xl text-pretty whitespace-normal break-words ${ui.body}`}>
                 One-time activation {formatInr(pricing.activationFeeInr)}, then tiered per-flat rates. Stack
                 enterprise modules in the calculator below.
               </p>
