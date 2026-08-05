@@ -47,7 +47,8 @@ const coreCapabilities: CoreCapability[] = [
   },
   {
     title: 'mAI Gatekeeper',
-    description: 'Visitor entry, resident approvals, and exit trace without hardware locks.',
+    description:
+      'Visitor entry plus recurring staff QR passes, delivery pre-clearance, and exit trace — zero hardware locks.',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" className={ICON_CLASS} aria-hidden="true">
         <path

@@ -6,6 +6,11 @@ import AdminNotices from '../pages/admin/Notices'
 import AdminHelpdeskRoute from './AdminHelpdeskRoute'
 import RulesGuidebookPage from '../pages/admin/RulesGuidebookPage'
 import SocietyConfiguration from '../pages/admin/SocietyConfiguration'
+import AdminTenantsPage from '../pages/admin/TenantsPage'
+import AdminGatekeeperPage from '../pages/admin/GatekeeperAuditPage'
+import AdminAmenitiesPage from '../pages/admin/AmenitiesPage'
+import AdminEmergencyLogsPage from '../pages/admin/EmergencyLogsPage'
+import AdminAuditPage from '../pages/admin/AuditPage'
 import TierGuard from './TierGuard'
 import RoleGuard from './RoleGuard'
 
@@ -50,6 +55,56 @@ export default function AdminRouter() {
             <RoleGuard allow={['president', 'secretary']}>
               <TierGuard requiredTier="tier2">
                 <RulesGuidebookPage />
+              </TierGuard>
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="tenants"
+          element={
+            <RoleGuard allow={['president', 'secretary']}>
+              <TierGuard requiredTier="tier2">
+                <AdminTenantsPage />
+              </TierGuard>
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="gatekeeper"
+          element={
+            <RoleGuard allow={['president', 'secretary']}>
+              <TierGuard requiredTier="tier2">
+                <AdminGatekeeperPage />
+              </TierGuard>
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="amenities"
+          element={
+            <RoleGuard allow={['president', 'secretary']}>
+              <TierGuard requiredTier="tier2">
+                <AdminAmenitiesPage />
+              </TierGuard>
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="emergency-logs"
+          element={
+            <RoleGuard allow={['president', 'secretary']}>
+              <TierGuard requiredTier="tier2">
+                <AdminEmergencyLogsPage />
+              </TierGuard>
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="audit"
+          element={
+            <RoleGuard allow={['president', 'secretary', 'accountant']}>
+              <TierGuard requiredTier="tier2">
+                <AdminAuditPage />
               </TierGuard>
             </RoleGuard>
           }

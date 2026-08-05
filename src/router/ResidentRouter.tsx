@@ -13,6 +13,14 @@ import ResidentElectionsPage from '../pages/resident/Elections'
 import ResidentElectionResultsPage from '../pages/resident/ElectionResults'
 import ResidentRewardsPage from '../pages/resident/RewardsRecognition'
 import ResidentRulesGuidebookPage from '../pages/resident/RulesGuidebookPage'
+import ResidentGatekeeperPage from '../pages/resident/GatekeeperPage'
+import ResidentMyFlatPage from '../pages/resident/MyFlatPage'
+import ResidentCarpoolPage from '../pages/resident/CarpoolPage'
+import ResidentAmenitiesPage from '../pages/resident/AmenitiesPage'
+import ResidentKidSafetyPage from '../pages/resident/KidSafetyPage'
+import ResidentSosPage from '../pages/resident/SosPage'
+import ResidentIntelligencePage from '../pages/resident/IntelligencePage'
+import ResidentFindAssetPage from '../pages/resident/FindAssetPage'
 import NoticesList from '../components/NoticesList'
 import FeatureGuard from '../components/features/FeatureGuard'
 import SmartParkingPage from '../pages/modules/SmartParkingPage'
@@ -51,6 +59,14 @@ export default function ResidentRouter() {
         <Route index element={<ResidentDashboard />} />
         <Route path="helpdesk" element={<ResidentHelpdesk />} />
         <Route path="visitor-logs" element={<VisitorLogsPage />} />
+        <Route path="gatekeeper" element={<ResidentGatekeeperPage />} />
+        <Route path="my-flat" element={<ResidentMyFlatPage />} />
+        <Route path="carpool" element={<ResidentCarpoolPage />} />
+        <Route path="amenities" element={<ResidentAmenitiesPage />} />
+        <Route path="kid-safety" element={<ResidentKidSafetyPage />} />
+        <Route path="sos" element={<ResidentSosPage />} />
+        <Route path="intelligence" element={<ResidentIntelligencePage />} />
+        <Route path="find-asset" element={<ResidentFindAssetPage />} />
         <Route path="notices" element={<NoticesPage />} />
         <Route path="rules-guidebook" element={<ResidentRulesGuidebookPage />} />
         <Route path="activity" element={<ResidentActivityPage />} />

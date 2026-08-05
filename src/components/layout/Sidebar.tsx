@@ -257,6 +257,14 @@ export default function Sidebar({ children, title }: SidebarProps) {
 
   const embeddedResidentPaths = [
     '/resident',
+    '/resident/my-flat',
+    '/resident/gatekeeper',
+    '/resident/carpool',
+    '/resident/amenities',
+    '/resident/kid-safety',
+    '/resident/sos',
+    '/resident/intelligence',
+    '/resident/find-asset',
     '/resident/helpdesk',
     '/resident/visitor-logs',
     '/resident/notices',
@@ -269,6 +277,11 @@ export default function Sidebar({ children, title }: SidebarProps) {
     '/admin/notices',
     '/admin/guidebook',
     '/admin/helpdesk',
+    '/admin/tenants',
+    '/admin/gatekeeper',
+    '/admin/amenities',
+    '/admin/emergency-logs',
+    '/admin/audit',
     '/admin/configuration',
     ...workspacePaths
   ]
@@ -327,6 +340,32 @@ export default function Sidebar({ children, title }: SidebarProps) {
             </p>
             <AccordionNavLink to="/resident" end className={navLinkClass}>
               Resident Dashboard
+            </AccordionNavLink>
+            <AccordionNavLink to="/resident/my-flat" className={navLinkClass}>
+              My Flat
+            </AccordionNavLink>
+            {moduleEnabled('visitorLogs') && (
+              <AccordionNavLink to="/resident/gatekeeper" className={navLinkClass}>
+                Staff & Delivery
+              </AccordionNavLink>
+            )}
+            <AccordionNavLink to="/resident/carpool" className={navLinkClass}>
+              maiCommute
+            </AccordionNavLink>
+            <AccordionNavLink to="/resident/amenities" className={navLinkClass}>
+              Amenities
+            </AccordionNavLink>
+            <AccordionNavLink to="/resident/kid-safety" className={navLinkClass}>
+              Kid Safety
+            </AccordionNavLink>
+            <AccordionNavLink to="/resident/sos" className={navLinkClass}>
+              Emergency SOS
+            </AccordionNavLink>
+            <AccordionNavLink to="/resident/intelligence" className={navLinkClass}>
+              Intelligence Hub
+            </AccordionNavLink>
+            <AccordionNavLink to="/resident/find-asset" className={navLinkClass}>
+              Find Asset
             </AccordionNavLink>
             {moduleEnabled('helpdesk') && (
               <AccordionNavLink to="/resident/helpdesk" className={navLinkClass}>
@@ -469,6 +508,23 @@ export default function Sidebar({ children, title }: SidebarProps) {
                     Complaints Dashboard
                   </SidebarSubNavLink>
                 )}
+                <SidebarSubNavLink to="/admin/tenants" className={subNavLinkClass}>
+                  Tenant Verification
+                </SidebarSubNavLink>
+                {moduleEnabled('gatekeeper') && (
+                  <SidebarSubNavLink to="/admin/gatekeeper" className={subNavLinkClass}>
+                    Gatekeeper Audit
+                  </SidebarSubNavLink>
+                )}
+                <SidebarSubNavLink to="/admin/amenities" className={subNavLinkClass}>
+                  Amenity Management
+                </SidebarSubNavLink>
+                <SidebarSubNavLink to="/admin/emergency-logs" className={subNavLinkClass}>
+                  Emergency SOS Logs
+                </SidebarSubNavLink>
+                <SidebarSubNavLink to="/admin/audit" className={subNavLinkClass}>
+                  mAI Auditor
+                </SidebarSubNavLink>
                 {canAccessSocietyConfiguration(user) && (
                   <SidebarSubNavLink to="/admin/configuration" className={subNavLinkClass}>
                     Society Configuration
@@ -486,6 +542,32 @@ export default function Sidebar({ children, title }: SidebarProps) {
               >
                 <SidebarSubNavLink to="/resident" end className={subNavLinkClass}>
                   Resident Dashboard
+                </SidebarSubNavLink>
+                <SidebarSubNavLink to="/resident/my-flat" className={subNavLinkClass}>
+                  My Flat
+                </SidebarSubNavLink>
+                {moduleEnabled('visitorLogs') && (
+                  <SidebarSubNavLink to="/resident/gatekeeper" className={subNavLinkClass}>
+                    Staff & Delivery
+                  </SidebarSubNavLink>
+                )}
+                <SidebarSubNavLink to="/resident/carpool" className={subNavLinkClass}>
+                  maiCommute
+                </SidebarSubNavLink>
+                <SidebarSubNavLink to="/resident/amenities" className={subNavLinkClass}>
+                  Amenities
+                </SidebarSubNavLink>
+                <SidebarSubNavLink to="/resident/kid-safety" className={subNavLinkClass}>
+                  Kid Safety
+                </SidebarSubNavLink>
+                <SidebarSubNavLink to="/resident/sos" className={subNavLinkClass}>
+                  Emergency SOS
+                </SidebarSubNavLink>
+                <SidebarSubNavLink to="/resident/intelligence" className={subNavLinkClass}>
+                  Intelligence Hub
+                </SidebarSubNavLink>
+                <SidebarSubNavLink to="/resident/find-asset" className={subNavLinkClass}>
+                  Find Asset
                 </SidebarSubNavLink>
                 {moduleEnabled('helpdesk') && (
                   <SidebarSubNavLink to="/resident/helpdesk" className={subNavLinkClass}>

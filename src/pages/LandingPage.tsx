@@ -6,6 +6,8 @@ import HeroDashboardMockup from '../components/landing/HeroDashboardMockup'
 import SyncraPromiseSection from '../components/landing/SyncraPromiseSection'
 import EnterpriseModulesSection from '../components/landing/EnterpriseModulesSection'
 import CoreBasePlanSection from '../components/landing/CoreBasePlanSection'
+import OperationalGatekeeperShowcase from '../components/landing/OperationalGatekeeperShowcase'
+import AutonomousIntelligenceShowcase from '../components/landing/AutonomousIntelligenceShowcase'
 import AddonPricingCalculator from '../components/landing/AddonPricingCalculator'
 import ExperienceAiAuditModal from '../components/landing/ExperienceAiAuditModal'
 import SyncraFooter from '../components/layout/SyncraFooter'
@@ -107,6 +109,10 @@ export default function LandingPage() {
         <EnterpriseModulesSection onOpenAuditDemo={() => setAuditDemoOpen(true)} />
 
         <CoreBasePlanSection />
+
+        <OperationalGatekeeperShowcase />
+
+        <AutonomousIntelligenceShowcase />
 
         <section className="space-y-16" id="pricing">
           <div className="space-y-10">

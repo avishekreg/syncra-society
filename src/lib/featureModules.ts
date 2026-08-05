@@ -6,7 +6,17 @@ export const FEATURE_MODULE_KEYS = [
   'ai_rwa_audit',
   'smart_parking',
   'vendor_sla',
-  'resident_marketplace'
+  'resident_marketplace',
+  'mai_commute',
+  'kid_gatekeeper',
+  'amenity_booking',
+  'mai_emergency_sos',
+  'mai_auditor',
+  'mai_energy',
+  'mai_vote_recall',
+  'mai_guardian',
+  'mai_nyaya',
+  'mai_find_asset'
 ] as const
 
 export type FeatureModuleName = (typeof FEATURE_MODULE_KEYS)[number]
@@ -79,6 +89,96 @@ export const FEATURE_MODULE_CATALOG: FeatureModuleMeta[] = [
     defaultEnabled: false,
     routeHints: ['/resident/marketplace'],
     dashboardCta: 'Marketplace'
+  },
+  {
+    key: 'mai_commute',
+    label: 'maiCommute Carpool',
+    description: 'Zero-commission in-society ride sharing with verified neighbors.',
+    tier: 'premium',
+    defaultEnabled: false,
+    routeHints: ['/resident/carpool'],
+    dashboardCta: 'maiCommute'
+  },
+  {
+    key: 'kid_gatekeeper',
+    label: 'Kid Safety Gate Alert',
+    description: 'Parent pre-approvals and loud alerts for unaccompanied minor exits.',
+    tier: 'premium',
+    defaultEnabled: false,
+    routeHints: ['/resident/kid-safety', '/gatekeeper/entry'],
+    dashboardCta: 'Kid Safety'
+  },
+  {
+    key: 'amenity_booking',
+    label: 'Clubhouse & Amenity Booking',
+    description: 'Instant facility slot reservations with double-booking protection.',
+    tier: 'premium',
+    defaultEnabled: false,
+    routeHints: ['/resident/amenities', '/admin/amenities'],
+    dashboardCta: 'Amenities'
+  },
+  {
+    key: 'mai_emergency_sos',
+    label: 'maiEmergency SOS Mesh',
+    description: '1-tap medical & security emergency dispatch to guards and volunteers.',
+    tier: 'premium',
+    defaultEnabled: false,
+    routeHints: ['/resident/sos', '/admin/emergency-logs'],
+    dashboardCta: 'Emergency SOS'
+  },
+  {
+    key: 'mai_auditor',
+    label: 'mAI Auditor',
+    description: 'Predictive financial leakage detection and vendor invoice anomaly scoring.',
+    tier: 'premium',
+    defaultEnabled: false,
+    routeHints: ['/admin/audit'],
+    dashboardCta: 'mAI Auditor'
+  },
+  {
+    key: 'mai_energy',
+    label: 'maiEnergy P2P Trading',
+    description: 'Peer-to-peer energy credit transfers between verified flats.',
+    tier: 'premium',
+    defaultEnabled: false,
+    routeHints: ['/resident/intelligence'],
+    dashboardCta: 'maiEnergy'
+  },
+  {
+    key: 'mai_vote_recall',
+    label: 'mAI Vote Recall',
+    description: 'Cryptographic 1-Flat-1-Vote impeachment / recall motions.',
+    tier: 'premium',
+    defaultEnabled: false,
+    routeHints: ['/resident/intelligence'],
+    dashboardCta: 'Recall Votes'
+  },
+  {
+    key: 'mai_guardian',
+    label: 'mAI Guardian Mesh',
+    description: 'Kid/senior geofence and unauthorized vehicle motion alerts.',
+    tier: 'premium',
+    defaultEnabled: false,
+    routeHints: ['/gatekeeper/intelligence', '/resident/intelligence'],
+    dashboardCta: 'Guardian'
+  },
+  {
+    key: 'mai_nyaya',
+    label: 'mAI Nyaya Mediation',
+    description: 'AI dispute resolution drafts mapped to society bylaws.',
+    tier: 'premium',
+    defaultEnabled: false,
+    routeHints: ['/resident/intelligence'],
+    dashboardCta: 'mAI Nyaya'
+  },
+  {
+    key: 'mai_find_asset',
+    label: 'mAI Find Asset',
+    description: 'Community Bluetooth mesh for lost phones, keys, and vehicles.',
+    tier: 'premium',
+    defaultEnabled: false,
+    routeHints: ['/resident/find-asset'],
+    dashboardCta: 'Find Asset'
   }
 ]
 
@@ -114,7 +214,28 @@ export function normalizeLicensedModule(raw: string | null | undefined): Feature
     vendor_sla: 'vendor_sla',
     vendorSla: 'vendor_sla',
     resident_marketplace: 'resident_marketplace',
-    marketplace: 'resident_marketplace'
+    marketplace: 'resident_marketplace',
+    mai_commute: 'mai_commute',
+    carpool: 'mai_commute',
+    kid_gatekeeper: 'kid_gatekeeper',
+    kid_safety: 'kid_gatekeeper',
+    amenity_booking: 'amenity_booking',
+    amenities: 'amenity_booking',
+    mai_emergency_sos: 'mai_emergency_sos',
+    sos: 'mai_emergency_sos',
+    emergency_sos: 'mai_emergency_sos',
+    mai_auditor: 'mai_auditor',
+    auditor: 'mai_auditor',
+    mai_energy: 'mai_energy',
+    energy: 'mai_energy',
+    mai_vote_recall: 'mai_vote_recall',
+    recall: 'mai_vote_recall',
+    mai_guardian: 'mai_guardian',
+    guardian: 'mai_guardian',
+    mai_nyaya: 'mai_nyaya',
+    nyaya: 'mai_nyaya',
+    mai_find_asset: 'mai_find_asset',
+    find_asset: 'mai_find_asset'
   }
   return aliases[key] ?? (isFeatureModuleName(key) ? key : null)
 }

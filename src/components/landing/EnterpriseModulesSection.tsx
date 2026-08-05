@@ -45,6 +45,34 @@ const MODULES = [
       '1-Flat-1-Vote tamper-proof digital voting with absolute ballot secrecy & instant published bulletins.',
     detail:
       'Encrypted anonymous ballots, live turnout without candidate leaks, and scheduled result reveal when voting closes.'
+  },
+  {
+    id: 'commute',
+    icon: '🚗',
+    title: 'maiCommute (In-Society Carpool)',
+    blurb: 'Zero-commission peer-to-peer ride sharing with verified neighbors.',
+    detail: 'Publish seats to tech parks and schools — request and accept within your society graph only.'
+  },
+  {
+    id: 'kid',
+    icon: '🧒',
+    title: 'Kid Safety Gate Alert',
+    blurb: 'Automated gate checks and parent alerts for unaccompanied minor exits.',
+    detail: 'Parents pre-approve exits with time windows; guards get a loud alert when approval is missing.'
+  },
+  {
+    id: 'sos',
+    icon: '🚨',
+    title: 'maiEmergency SOS Mesh',
+    blurb: '1-tap medical & security emergency dispatch to guards & community volunteers.',
+    detail: 'High-contrast SOS flash with flat location and one-tap call for responders.'
+  },
+  {
+    id: 'amenities',
+    icon: '🏊',
+    title: 'Clubhouse & Amenity Booking',
+    blurb: 'Instant slot reservations & payment collection for society facilities.',
+    detail: 'Calendar slot picker with real-time double-booking protection for clubhouse, pool, and courts.'
   }
 ] as const
 

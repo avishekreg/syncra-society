@@ -6,6 +6,11 @@ const ADMIN_PAGE_TITLES: Record<string, string | null> = {
   '/admin/notices': 'Notices Management',
   '/admin/guidebook': 'Rules & Regulations',
   '/admin/helpdesk': 'Complaints Dashboard',
+  '/admin/tenants': 'Tenant Verification',
+  '/admin/gatekeeper': 'Gatekeeper Audit',
+  '/admin/amenities': 'Amenity Management',
+  '/admin/emergency-logs': 'Emergency SOS Logs',
+  '/admin/audit': 'mAI Auditor',
   '/admin/configuration': null,
   '/admin/society-configuration': null
 }

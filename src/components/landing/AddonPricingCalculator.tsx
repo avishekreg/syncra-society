@@ -98,8 +98,9 @@ export default function AddonPricingCalculator({ pricing }: AddonPricingCalculat
           All prices exclude GST (18%)
         </p>
         <p className={`mx-auto max-w-2xl text-pretty whitespace-normal break-words ${ui.body}`}>
-          Base rate covers billing, notices, gatekeeper, and helpdesk. Stack Elections, WhatsApp Bot,
-          Smart Parking, AI Audit, Vendor SLA, and Marketplace only where your society needs them.
+          Base rate covers billing, notices, gatekeeper (staff passes & delivery pre-approve), helpdesk, and
+          digital tenant onboarding. Stack Elections, WhatsApp Bot, Smart Parking, AI Audit, Vendor SLA, and
+          Marketplace only where your society needs them.
         </p>
       </div>
 

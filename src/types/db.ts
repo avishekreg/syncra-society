@@ -71,6 +71,8 @@ export interface CustomRole {
   permissions: string[]
 }
 
+export type OccupancyUserType = 'OWNER' | 'TENANT'
+
 export interface UserAndFlat {
   id: string
   user_id: string
@@ -83,6 +85,9 @@ export interface UserAndFlat {
   email?: string | null
   avatar_url?: string | null
   role?: string | null
+  user_type?: OccupancyUserType | null
+  linked_flat_id?: string | null
+  notification_primary?: boolean | null
   requires_password_change?: boolean | null
   opening_outstanding_balance?: number | null
   created_at?: string | null
@@ -242,3 +247,286 @@ export type GuidebookSearchHit = {
   score: number
 }
 
+export interface SocietyFlat {
+  id: string
+  society_id: string
+  flat_number: string
+  owner_name: string
+  owner_phone: string
+  created_at?: string
+}
+
+export type DeliveryServiceProvider =
+  | 'Swiggy'
+  | 'Zomato'
+  | 'Blinkit'
+  | 'Zepto'
+  | 'BigBasket'
+  | 'Amazon'
+  | 'Flipkart'
+  | 'Blue Dart'
+  | 'Delhivery'
+  | 'DTDC'
+  | 'Xpressbees'
+  | 'Shadowfax'
+  | 'India Post / Speed Post'
+  | 'Registered Parcel'
+  | 'Generic Courier / Parcel'
+
+export type DeliveryPreApprovalStatus = 'PRE_APPROVED' | 'COMPLETED' | 'EXPIRED'
+
+export type TenantRequestStatus = 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED'
+
+export interface RegularStaff {
+  id: string
+  society_id: string
+  flat_id: string
+  flat_number: string
+  name: string
+  role: string
+  phone?: string | null
+  qr_pass_code: string
+  allowed_time_start: string
+  allowed_time_end: string
+  is_active: boolean
+  created_by_user_id?: string | null
+  created_at: string
+  updated_at?: string
+}
+
+export interface StaffEntryLog {
+  id: string
+  society_id: string
+  staff_id: string
+  scanned_by_user_id?: string | null
+  outside_window: boolean
+  override_used: boolean
+  notes?: string | null
+  created_at: string
+}
+
+export interface DeliveryPreApproval {
+  id: string
+  society_id: string
+  flat_id: string
+  flat_number: string
+  service_provider: DeliveryServiceProvider
+  expected_window_end: string
+  status: DeliveryPreApprovalStatus
+  created_by_user_id?: string | null
+  created_at: string
+}
+
+export interface TenantRequest {
+  id: string
+  society_id: string
+  flat_id: string
+  flat_number: string
+  owner_id: string
+  tenant_name: string
+  tenant_phone: string
+  tenant_email?: string | null
+  occupants_count: number
+  lease_start_date: string
+  lease_end_date: string
+  agreement_doc_url?: string | null
+  status: TenantRequestStatus
+  approved_by?: string | null
+  rejection_reason?: string | null
+  tenant_user_id?: string | null
+  created_at: string
+  updated_at?: string
+}
+
+export type CarpoolRideStatus = 'ACTIVE' | 'COMPLETED' | 'CANCELLED'
+export type CarpoolRequestStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED'
+export type KidExitApprovalStatus = 'APPROVED' | 'EXPIRED' | 'USED'
+export type AmenityPricingType = 'FREE' | 'PAID'
+export type AmenityBookingStatus = 'CONFIRMED' | 'CANCELLED'
+export type SosAlertType = 'MEDICAL' | 'SECURITY' | 'FIRE'
+export type SosAlertStatus = 'ACTIVE' | 'RESOLVED'
+
+export interface CarpoolRide {
+  id: string
+  society_id: string
+  offered_by_flat_id: string
+  offered_by_flat_number: string
+  offered_by_user_id: string
+  destination: string
+  departure_time: string
+  available_seats: number
+  notes?: string | null
+  status: CarpoolRideStatus
+  created_at: string
+}
+
+export interface CarpoolRequest {
+  id: string
+  ride_id: string
+  passenger_user_id: string
+  passenger_flat_id: string
+  passenger_flat_number: string
+  status: CarpoolRequestStatus
+  created_at: string
+}
+
+export interface KidExitApproval {
+  id: string
+  society_id: string
+  flat_id: string
+  flat_number: string
+  kid_name: string
+  accompanied_by: string
+  valid_until: string
+  status: KidExitApprovalStatus
+  created_by_user_id?: string | null
+  created_at: string
+}
+
+export interface Amenity {
+  id: string
+  society_id: string
+  name: string
+  capacity: number
+  slot_duration_mins: number
+  pricing_type: AmenityPricingType
+  price_per_slot: number
+  is_active: boolean
+  created_at?: string
+}
+
+export interface AmenityBooking {
+  id: string
+  society_id: string
+  amenity_id: string
+  flat_id: string
+  flat_number: string
+  user_id: string
+  booking_date: string
+  start_time: string
+  end_time: string
+  amount_paid: number
+  status: AmenityBookingStatus
+  created_at: string
+}
+
+export interface EmergencySosAlert {
+  id: string
+  society_id: string
+  flat_id: string
+  flat_number: string
+  triggered_by_user_id: string
+  alert_type: SosAlertType
+  status: SosAlertStatus
+  resolved_by?: string | null
+  contact_phone?: string | null
+  notes?: string | null
+  created_at: string
+  resolved_at?: string | null
+}
+
+export interface OverstayVisitorAlert {
+  visitorLogId: string
+  societyId: string
+  visitorName: string
+  purpose: string
+  flatNumber: string
+  enteredAt: string
+  minutesInside: number
+  overstayMinutes: number
+}
+
+
+export type AiAuditCategory = 'WATER' | 'ELECTRICITY' | 'VENDOR_INVOICE' | 'REPAIR'
+export type EnergyTradeStatus = 'PENDING' | 'COMPLETED' | 'CANCELLED'
+export type RecallMotionStatus = 'ACTIVE' | 'PASSED' | 'EXPIRED'
+export type DisputeIssueType = 'PARKING' | 'SEEPAGE' | 'PETS' | 'NOISE'
+export type DisputeStatus = 'PENDING_MEDIATION' | 'SETTLED' | 'ESCALATED' | 'DISMISSED'
+export type LostAssetType = 'PHONE' | 'WATCH' | 'VEHICLE' | 'KEYS'
+export type LostAssetStatus = 'LOST' | 'FOUND'
+export type GuardianSubjectType = 'KID' | 'SENIOR' | 'VEHICLE'
+export type GuardianEventType = 'GEOFENCE_EXIT' | 'GEOFENCE_ENTER' | 'UNAUTHORIZED_MOTION'
+export type GuardianAlertStatus = 'ACTIVE' | 'ACKNOWLEDGED' | 'CLEARED'
+
+export interface AiAuditLog {
+  id: string
+  society_id: string
+  category: AiAuditCategory
+  detected_anomaly: string
+  variance_percentage: number
+  ai_recommendation: string
+  health_score?: number | null
+  created_at: string
+}
+
+export interface P2pEnergyTrade {
+  id: string
+  society_id: string
+  seller_flat_id: string
+  seller_flat_number: string
+  buyer_flat_id: string
+  buyer_flat_number: string
+  energy_kwh: number
+  credits_transferred: number
+  status: EnergyTradeStatus
+  created_at: string
+}
+
+export interface RecallMotion {
+  id: string
+  society_id: string
+  target_official_role: string
+  reason: string
+  votes_required_count: number
+  current_votes_count: number
+  status: RecallMotionStatus
+  created_by_user_id?: string | null
+  created_at: string
+}
+
+export interface CommunityDispute {
+  id: string
+  society_id: string
+  plaintiff_flat_id: string
+  plaintiff_flat_number: string
+  respondent_flat_id: string
+  respondent_flat_number: string
+  issue_type: DisputeIssueType
+  description: string
+  ai_mediation_summary?: string | null
+  suggested_fine_amount?: number | null
+  status: DisputeStatus
+  plaintiff_signed_at?: string | null
+  respondent_signed_at?: string | null
+  created_by_user_id?: string | null
+  created_at: string
+}
+
+export interface LostAssetSignal {
+  id: string
+  society_id: string
+  owner_user_id: string
+  owner_flat_number?: string | null
+  asset_name: string
+  asset_type: LostAssetType
+  last_seen_location?: string | null
+  last_seen_at?: string | null
+  detected_by_user_id?: string | null
+  ble_fingerprint?: string | null
+  status: LostAssetStatus
+  created_at: string
+}
+
+export interface GuardianMotionAlert {
+  id: string
+  society_id: string
+  flat_id?: string | null
+  flat_number?: string | null
+  subject_type: GuardianSubjectType
+  subject_label: string
+  event_type: GuardianEventType
+  location_label?: string | null
+  owner_proximity: boolean
+  status: GuardianAlertStatus
+  created_at: string
+}
