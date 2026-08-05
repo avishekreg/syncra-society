@@ -10,6 +10,9 @@ export const MAI_BRAND_BLUE = '#0052CC'
 /** Canonical production web app origin (Vercel). */
 export const MAI_PRODUCTION_ORIGIN = 'https://maisociety.vercel.app'
 export const MAI_PRODUCTION_HOST = 'maisociety.vercel.app'
+/** Investor & enterprise product brochure (static PDF in /public). */
+export const MAI_INVESTOR_BROCHURE_PDF = '/downloads/investor-brochure.pdf'
+export const MAI_INVESTOR_BROCHURE_FILENAME = 'mAI-Society-Investor-Brochure.pdf'
 /** Legacy Vercel hostname — kept for Capacitor allowNavigation during migration. */
 export const LEGACY_PRODUCTION_HOST = 'syncra-society.vercel.app'
 

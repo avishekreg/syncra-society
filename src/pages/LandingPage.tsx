@@ -15,7 +15,7 @@ import AddonPricingCalculator from '../components/landing/AddonPricingCalculator
 import ExperienceAiAuditModal from '../components/landing/ExperienceAiAuditModal'
 import SyncraFooter from '../components/layout/SyncraFooter'
 import FooterEnterpriseCta from '../components/layout/FooterEnterpriseCta'
-import { SYNCRA_LEGAL_ENTITY } from '../lib/brandConstants'
+import { SYNCRA_LEGAL_ENTITY, MAI_INVESTOR_BROCHURE_PDF, MAI_INVESTOR_BROCHURE_FILENAME } from '../lib/brandConstants'
 import { usePlatformPricing } from '../hooks/usePlatformPricing'
 import { formatInr } from '../lib/platformPricing'
 import { ui } from '../lib/ui'
@@ -48,6 +48,13 @@ export default function LandingPage() {
           <div className="flex w-full flex-wrap items-stretch gap-3 sm:w-auto sm:items-center">
             <a href="#enterprise-modules" className={`w-full sm:w-auto ${ui.btnGhost}`}>
               Modules
+            </a>
+            <a
+              href={MAI_INVESTOR_BROCHURE_PDF}
+              download={MAI_INVESTOR_BROCHURE_FILENAME}
+              className={`w-full sm:w-auto ${ui.btnGhost}`}
+            >
+              Download Brochure
             </a>
             <Link to="/auth/login" className={`w-full sm:w-auto ${ui.btnGhost}`}>
               Login Now

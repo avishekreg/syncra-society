@@ -10,6 +10,7 @@ import NativeShellBootstrap from '../components/mobile/NativeShellBootstrap'
 import { ui } from '../lib/ui'
 
 const LandingPage = lazy(() => import('../pages/LandingPage'))
+const InvestorBrochurePage = lazy(() => import('../pages/InvestorBrochurePage'))
 const TermsAndConditions = lazy(() => import('../pages/legal/TermsAndConditions'))
 const PrivacyPolicy = lazy(() => import('../pages/legal/PrivacyPolicy'))
 const RefundPolicy = lazy(() => import('../pages/legal/RefundPolicy'))
@@ -30,6 +31,7 @@ export default function AppRouter() {
         <Suspense fallback={<div className={ui.loading}>Loading...</div>}>
           <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/investor-brochure" element={<InvestorBrochurePage />} />
           <Route path="/legal/terms" element={<TermsAndConditions />} />
           <Route path="/legal/privacy" element={<PrivacyPolicy />} />
           <Route path="/legal/refund" element={<RefundPolicy />} />
