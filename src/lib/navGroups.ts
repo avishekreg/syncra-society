@@ -28,6 +28,7 @@ export function resolveActiveNavGroup(pathname: string): string | null {
   if (
     pathname === '/resident' ||
     pathname.startsWith('/resident/my-flat') ||
+    pathname.startsWith('/resident/rentals-marketplace') ||
     pathname.startsWith('/resident/gatekeeper') ||
     pathname.startsWith('/resident/carpool') ||
     pathname.startsWith('/resident/amenities') ||
@@ -35,6 +36,8 @@ export function resolveActiveNavGroup(pathname: string): string | null {
     pathname.startsWith('/resident/sos') ||
     pathname.startsWith('/resident/intelligence') ||
     pathname.startsWith('/resident/find-asset') ||
+    pathname.startsWith('/resident/green-society') ||
+    pathname.startsWith('/resident/mai-space') ||
     pathname.startsWith('/resident/helpdesk') ||
     pathname.startsWith('/resident/visitor-logs') ||
     pathname.startsWith('/resident/notices') ||

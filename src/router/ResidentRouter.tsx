@@ -21,6 +21,10 @@ import ResidentKidSafetyPage from '../pages/resident/KidSafetyPage'
 import ResidentSosPage from '../pages/resident/SosPage'
 import ResidentIntelligencePage from '../pages/resident/IntelligencePage'
 import ResidentFindAssetPage from '../pages/resident/FindAssetPage'
+import ResidentGreenSocietyPage from '../pages/resident/GreenSocietyPage'
+import ResidentMaiSpacePage from '../pages/resident/MaiSpacePage'
+import ResidentRentOutPage from '../pages/resident/RentOutPage'
+import ResidentRentalsMarketplacePage from '../pages/resident/RentalsMarketplacePage'
 import NoticesList from '../components/NoticesList'
 import FeatureGuard from '../components/features/FeatureGuard'
 import SmartParkingPage from '../pages/modules/SmartParkingPage'
@@ -61,12 +65,16 @@ export default function ResidentRouter() {
         <Route path="visitor-logs" element={<VisitorLogsPage />} />
         <Route path="gatekeeper" element={<ResidentGatekeeperPage />} />
         <Route path="my-flat" element={<ResidentMyFlatPage />} />
+        <Route path="my-flat/rent-out" element={<ResidentRentOutPage />} />
+        <Route path="rentals-marketplace" element={<ResidentRentalsMarketplacePage />} />
         <Route path="carpool" element={<ResidentCarpoolPage />} />
         <Route path="amenities" element={<ResidentAmenitiesPage />} />
         <Route path="kid-safety" element={<ResidentKidSafetyPage />} />
         <Route path="sos" element={<ResidentSosPage />} />
         <Route path="intelligence" element={<ResidentIntelligencePage />} />
         <Route path="find-asset" element={<ResidentFindAssetPage />} />
+        <Route path="green-society" element={<ResidentGreenSocietyPage />} />
+        <Route path="mai-space" element={<ResidentMaiSpacePage />} />
         <Route path="notices" element={<NoticesPage />} />
         <Route path="rules-guidebook" element={<ResidentRulesGuidebookPage />} />
         <Route path="activity" element={<ResidentActivityPage />} />

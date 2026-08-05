@@ -32,7 +32,13 @@ export default function ResidentMyFlatPage() {
           Owner tools for digital lease onboarding, police-ready tenant records, and notification routing.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <Link to="/resident/gatekeeper" className={ui.btnSecondary}>
+          <Link to="/resident/my-flat/rent-out" className={ui.btnPrimary}>
+            maiList · Rent or sell
+          </Link>
+          <Link to="/resident/rentals-marketplace" className={ui.btnSecondary}>
+            Browse marketplace
+          </Link>
+          <Link to="/resident/gatekeeper" className={ui.btnGhost}>
             Staff & delivery gatekeeper
           </Link>
           <Link to="/resident/visitor-logs" className={ui.btnGhost}>

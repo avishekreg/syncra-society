@@ -19,6 +19,9 @@ export type LandingAddonId =
   | 'mai_guardian'
   | 'mai_nyaya'
   | 'mai_find_asset'
+  | 'mai_botanist'
+  | 'mai_space'
+  | 'mai_list'
 
 export type LandingAddon = {
   id: LandingAddonId
@@ -158,6 +161,30 @@ export const LANDING_ADDONS: LandingAddon[] = [
     shortLabel: 'Guardian',
     description: 'Kid/senior geofence and unauthorized vehicle motion alerts.',
     monthlyPriceInr: 229
+  },
+  {
+    id: 'mai_botanist',
+    moduleName: 'mai_botanist',
+    label: 'mAI Botanist & Green Society',
+    shortLabel: 'mAI Botanist',
+    description: 'QR plant tagging, AI plant doctor, compost delivery, and plant swap.',
+    monthlyPriceInr: 249
+  },
+  {
+    id: 'mai_space',
+    moduleName: 'mai_space',
+    label: 'mAI Space Interior Engine',
+    shortLabel: 'mAI Space',
+    description: 'TV sizing, acoustics, furniture fit, and verified interior lead matching.',
+    monthlyPriceInr: 199
+  },
+  {
+    id: 'mai_list',
+    moduleName: 'mai_list',
+    label: 'maiList Rental & Resale Syndication',
+    shortLabel: 'maiList',
+    description: '1-click rent + resale syndication across MagicBricks, 99acres, Housing, NoBroker.',
+    monthlyPriceInr: 299
   }
 ]
 

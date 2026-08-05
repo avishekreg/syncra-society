@@ -11,6 +11,8 @@ const ADMIN_PAGE_TITLES: Record<string, string | null> = {
   '/admin/amenities': 'Amenity Management',
   '/admin/emergency-logs': 'Emergency SOS Logs',
   '/admin/audit': 'mAI Auditor',
+  '/admin/landscape': 'Landscape & Botanist',
+  '/admin/interior-partners': 'Interior Partners',
   '/admin/configuration': null,
   '/admin/society-configuration': null
 }

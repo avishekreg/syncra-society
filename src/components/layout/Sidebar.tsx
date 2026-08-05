@@ -258,6 +258,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
   const embeddedResidentPaths = [
     '/resident',
     '/resident/my-flat',
+    '/resident/rentals-marketplace',
     '/resident/gatekeeper',
     '/resident/carpool',
     '/resident/amenities',
@@ -265,6 +266,8 @@ export default function Sidebar({ children, title }: SidebarProps) {
     '/resident/sos',
     '/resident/intelligence',
     '/resident/find-asset',
+    '/resident/green-society',
+    '/resident/mai-space',
     '/resident/helpdesk',
     '/resident/visitor-logs',
     '/resident/notices',
@@ -282,6 +285,8 @@ export default function Sidebar({ children, title }: SidebarProps) {
     '/admin/amenities',
     '/admin/emergency-logs',
     '/admin/audit',
+    '/admin/landscape',
+    '/admin/interior-partners',
     '/admin/configuration',
     ...workspacePaths
   ]
@@ -344,6 +349,12 @@ export default function Sidebar({ children, title }: SidebarProps) {
             <AccordionNavLink to="/resident/my-flat" className={navLinkClass}>
               My Flat
             </AccordionNavLink>
+            <AccordionNavLink to="/resident/my-flat/rent-out" className={navLinkClass}>
+              maiList Rent / Sell
+            </AccordionNavLink>
+            <AccordionNavLink to="/resident/rentals-marketplace" className={navLinkClass}>
+              Rentals Marketplace
+            </AccordionNavLink>
             {moduleEnabled('visitorLogs') && (
               <AccordionNavLink to="/resident/gatekeeper" className={navLinkClass}>
                 Staff & Delivery
@@ -366,6 +377,12 @@ export default function Sidebar({ children, title }: SidebarProps) {
             </AccordionNavLink>
             <AccordionNavLink to="/resident/find-asset" className={navLinkClass}>
               Find Asset
+            </AccordionNavLink>
+            <AccordionNavLink to="/resident/green-society" className={navLinkClass}>
+              Green Society
+            </AccordionNavLink>
+            <AccordionNavLink to="/resident/mai-space" className={navLinkClass}>
+              mAI Space
             </AccordionNavLink>
             {moduleEnabled('helpdesk') && (
               <AccordionNavLink to="/resident/helpdesk" className={navLinkClass}>
@@ -525,6 +542,12 @@ export default function Sidebar({ children, title }: SidebarProps) {
                 <SidebarSubNavLink to="/admin/audit" className={subNavLinkClass}>
                   mAI Auditor
                 </SidebarSubNavLink>
+                <SidebarSubNavLink to="/admin/landscape" className={subNavLinkClass}>
+                  Landscape & Botanist
+                </SidebarSubNavLink>
+                <SidebarSubNavLink to="/admin/interior-partners" className={subNavLinkClass}>
+                  Interior Partners
+                </SidebarSubNavLink>
                 {canAccessSocietyConfiguration(user) && (
                   <SidebarSubNavLink to="/admin/configuration" className={subNavLinkClass}>
                     Society Configuration
@@ -545,6 +568,12 @@ export default function Sidebar({ children, title }: SidebarProps) {
                 </SidebarSubNavLink>
                 <SidebarSubNavLink to="/resident/my-flat" className={subNavLinkClass}>
                   My Flat
+                </SidebarSubNavLink>
+                <SidebarSubNavLink to="/resident/my-flat/rent-out" className={subNavLinkClass}>
+                  maiList Rent / Sell
+                </SidebarSubNavLink>
+                <SidebarSubNavLink to="/resident/rentals-marketplace" className={subNavLinkClass}>
+                  Rentals Marketplace
                 </SidebarSubNavLink>
                 {moduleEnabled('visitorLogs') && (
                   <SidebarSubNavLink to="/resident/gatekeeper" className={subNavLinkClass}>
@@ -568,6 +597,12 @@ export default function Sidebar({ children, title }: SidebarProps) {
                 </SidebarSubNavLink>
                 <SidebarSubNavLink to="/resident/find-asset" className={subNavLinkClass}>
                   Find Asset
+                </SidebarSubNavLink>
+                <SidebarSubNavLink to="/resident/green-society" className={subNavLinkClass}>
+                  Green Society
+                </SidebarSubNavLink>
+                <SidebarSubNavLink to="/resident/mai-space" className={subNavLinkClass}>
+                  mAI Space
                 </SidebarSubNavLink>
                 {moduleEnabled('helpdesk') && (
                   <SidebarSubNavLink to="/resident/helpdesk" className={subNavLinkClass}>

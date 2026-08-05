@@ -11,6 +11,8 @@ import AdminGatekeeperPage from '../pages/admin/GatekeeperAuditPage'
 import AdminAmenitiesPage from '../pages/admin/AmenitiesPage'
 import AdminEmergencyLogsPage from '../pages/admin/EmergencyLogsPage'
 import AdminAuditPage from '../pages/admin/AuditPage'
+import AdminLandscapePage from '../pages/admin/LandscapePage'
+import AdminInteriorPartnersPage from '../pages/admin/InteriorPartnersPage'
 import TierGuard from './TierGuard'
 import RoleGuard from './RoleGuard'
 
@@ -105,6 +107,26 @@ export default function AdminRouter() {
             <RoleGuard allow={['president', 'secretary', 'accountant']}>
               <TierGuard requiredTier="tier2">
                 <AdminAuditPage />
+              </TierGuard>
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="landscape"
+          element={
+            <RoleGuard allow={['president', 'secretary']}>
+              <TierGuard requiredTier="tier2">
+                <AdminLandscapePage />
+              </TierGuard>
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="interior-partners"
+          element={
+            <RoleGuard allow={['president', 'secretary']}>
+              <TierGuard requiredTier="tier2">
+                <AdminInteriorPartnersPage />
               </TierGuard>
             </RoleGuard>
           }

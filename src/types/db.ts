@@ -530,3 +530,178 @@ export interface GuardianMotionAlert {
   status: GuardianAlertStatus
   created_at: string
 }
+
+export type BotanicalHealthStatus = 'HEALTHY' | 'NEEDS_CARE' | 'TREATED'
+export type GardeningTaskType = 'WATERING' | 'FERTILIZER' | 'PRUNING' | 'PEST_CONTROL'
+export type GardeningTaskStatus = 'PENDING' | 'COMPLETED'
+export type CompostOrderStatus = 'REQUESTED' | 'DELIVERED' | 'CANCELLED'
+export type PlantSwapType = 'CUTTING' | 'POTTED' | 'SEEDS' | 'SAPLING'
+export type PlantSwapStatus = 'AVAILABLE' | 'CLAIMED' | 'CLOSED'
+
+export interface SocietyBotanicalAsset {
+  id: string
+  society_id: string
+  plant_name: string
+  species?: string | null
+  qr_tag_code: string
+  location_zone: string
+  planted_date?: string | null
+  adopted_by_flat_id?: string | null
+  adopted_by_flat_number?: string | null
+  health_status: BotanicalHealthStatus
+  carbon_offset_kg: number
+  photo_url?: string | null
+  last_diagnosis?: string | null
+  care_steps?: string | null
+  created_at: string
+}
+
+export interface GardeningTask {
+  id: string
+  society_id: string
+  botanical_asset_id?: string | null
+  task_type: GardeningTaskType
+  assigned_gardener_name: string
+  scheduled_for: string
+  status: GardeningTaskStatus
+  water_liters?: number | null
+  fertilizer_kg?: number | null
+  weather_note?: string | null
+  notes?: string | null
+  created_at: string
+}
+
+export interface GreenCompostInventory {
+  id: string
+  society_id: string
+  batch_number: string
+  total_weight_kg: number
+  available_for_residents_kg: number
+  price_per_kg: number
+  created_at: string
+}
+
+export interface GreenCompostOrder {
+  id: string
+  society_id: string
+  inventory_id: string
+  flat_id: string
+  flat_number: string
+  requested_by_user_id: string
+  quantity_kg: number
+  status: CompostOrderStatus
+  created_at: string
+}
+
+export interface PlantSwapListing {
+  id: string
+  society_id: string
+  offered_by_flat_id: string
+  offered_by_flat_number: string
+  offered_by_user_id: string
+  title: string
+  plant_type: PlantSwapType
+  description?: string | null
+  status: PlantSwapStatus
+  claimed_by_flat_number?: string | null
+  created_at: string
+}
+
+export type InteriorRoomType = 'LIVING_ROOM' | 'BEDROOM' | 'BALCONY' | 'KITCHEN'
+export type InteriorVendorLeadStatus = 'LEAD_GENERATED' | 'CONNECTED' | 'CLOSED'
+export type InteriorVendorCategory = 'INTERIOR' | 'WOODCRAFT' | 'ELECTRONICS' | 'LIGHTING'
+
+export interface InteriorSpatialScan {
+  id: string
+  society_id: string
+  flat_id: string
+  flat_number: string
+  user_id: string
+  room_type: InteriorRoomType
+  room_photo_url?: string | null
+  viewing_distance_ft: number
+  recommended_tv_size_inches: string
+  recommended_sofa_type: string
+  acoustics_recommendation: string
+  spatial_guidance: string[] | unknown
+  created_at: string
+}
+
+export interface InteriorVendorLead {
+  id: string
+  society_id: string
+  scan_id?: string | null
+  flat_id: string
+  flat_number: string
+  vendor_name: string
+  vendor_category: InteriorVendorCategory
+  budget_range: string
+  status: InteriorVendorLeadStatus
+  notes?: string | null
+  created_by_user_id?: string | null
+  created_at: string
+}
+
+export type PropertyListingPurpose = 'RENT' | 'SALE'
+export type PropertyOwnershipType = 'FREEHOLD' | 'LEASEHOLD' | 'COOPERATIVE'
+export type PropertyFurnishing = 'UNFURNISHED' | 'SEMI' | 'FULLY'
+export type PropertyListingStatus = 'DRAFT' | 'PUBLISHED' | 'SYNDICATED' | 'CLOSED'
+export type PropertyInquiryType = 'CONTACT' | 'HOME_LOAN' | 'SITE_VISIT'
+
+export type RwaResaleBadge = {
+  label: string
+  maintenanceDuesClear: boolean
+  societySecurityScore: number
+  nocCleared: boolean
+  zeroBrokerage: boolean
+  issuedAt: string
+}
+
+export interface PropertyMarketListing {
+  id: string
+  society_id: string
+  flat_id: string
+  flat_number: string
+  listed_by_user_id: string
+  listing_purpose: PropertyListingPurpose
+  monthly_rent?: number | null
+  security_deposit?: number | null
+  available_from?: string | null
+  furnishing?: PropertyFurnishing | null
+  expected_sale_price?: number | null
+  carpet_area_sqft?: number | null
+  super_area_sqft?: number | null
+  price_per_sqft?: number | null
+  ownership_type?: PropertyOwnershipType | null
+  society_noc_status: boolean
+  is_negotiable: boolean
+  title_document_url?: string | null
+  bhk?: string | null
+  parking_available: boolean
+  parking_count: number
+  description?: string | null
+  contact_phone?: string | null
+  contact_email?: string | null
+  status: PropertyListingStatus
+  syndication_portals: string[] | unknown
+  syndication_payload?: unknown
+  rwa_resale_badge?: RwaResaleBadge | unknown
+  maintenance_dues_clear: boolean
+  society_security_score?: number | null
+  broadcast_sent_at?: string | null
+  created_at: string
+  updated_at?: string
+}
+
+export interface PropertyListingInquiry {
+  id: string
+  society_id: string
+  listing_id: string
+  inquirer_user_id?: string | null
+  inquirer_name: string
+  inquirer_phone?: string | null
+  inquirer_email?: string | null
+  message?: string | null
+  inquiry_type: PropertyInquiryType
+  created_at: string
+}

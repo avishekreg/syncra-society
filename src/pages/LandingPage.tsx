@@ -8,6 +8,9 @@ import EnterpriseModulesSection from '../components/landing/EnterpriseModulesSec
 import CoreBasePlanSection from '../components/landing/CoreBasePlanSection'
 import OperationalGatekeeperShowcase from '../components/landing/OperationalGatekeeperShowcase'
 import AutonomousIntelligenceShowcase from '../components/landing/AutonomousIntelligenceShowcase'
+import GreenSocietyShowcase from '../components/landing/GreenSocietyShowcase'
+import MaiSpaceShowcase from '../components/landing/MaiSpaceShowcase'
+import MaiListShowcase from '../components/landing/MaiListShowcase'
 import AddonPricingCalculator from '../components/landing/AddonPricingCalculator'
 import ExperienceAiAuditModal from '../components/landing/ExperienceAiAuditModal'
 import SyncraFooter from '../components/layout/SyncraFooter'
@@ -113,6 +116,12 @@ export default function LandingPage() {
         <OperationalGatekeeperShowcase />
 
         <AutonomousIntelligenceShowcase />
+
+        <GreenSocietyShowcase />
+
+        <MaiSpaceShowcase />
+
+        <MaiListShowcase />
 
         <section className="space-y-16" id="pricing">
           <div className="space-y-10">

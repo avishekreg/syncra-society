@@ -16,7 +16,10 @@ export const FEATURE_MODULE_KEYS = [
   'mai_vote_recall',
   'mai_guardian',
   'mai_nyaya',
-  'mai_find_asset'
+  'mai_find_asset',
+  'mai_botanist',
+  'mai_space',
+  'mai_list'
 ] as const
 
 export type FeatureModuleName = (typeof FEATURE_MODULE_KEYS)[number]
@@ -179,6 +182,33 @@ export const FEATURE_MODULE_CATALOG: FeatureModuleMeta[] = [
     defaultEnabled: false,
     routeHints: ['/resident/find-asset'],
     dashboardCta: 'Find Asset'
+  },
+  {
+    key: 'mai_botanist',
+    label: 'mAI Botanist & Green Society',
+    description: 'QR plant tagging, AI plant doctor, compost delivery, and plant swap exchange.',
+    tier: 'premium',
+    defaultEnabled: false,
+    routeHints: ['/resident/green-society', '/admin/landscape'],
+    dashboardCta: 'Green Society'
+  },
+  {
+    key: 'mai_space',
+    label: 'mAI Space Interior Engine',
+    description: 'TV sizing, acoustics, furniture fit, and verified interior vendor matching.',
+    tier: 'premium',
+    defaultEnabled: false,
+    routeHints: ['/resident/mai-space', '/admin/interior-partners'],
+    dashboardCta: 'mAI Space'
+  },
+  {
+    key: 'mai_list',
+    label: 'maiList Rental & Resale',
+    description: '1-click dual-engine syndication for flat rentals and resale across top portals.',
+    tier: 'premium',
+    defaultEnabled: false,
+    routeHints: ['/resident/my-flat/rent-out', '/resident/rentals-marketplace'],
+    dashboardCta: 'maiList'
   }
 ]
 
@@ -235,7 +265,16 @@ export function normalizeLicensedModule(raw: string | null | undefined): Feature
     mai_nyaya: 'mai_nyaya',
     nyaya: 'mai_nyaya',
     mai_find_asset: 'mai_find_asset',
-    find_asset: 'mai_find_asset'
+    find_asset: 'mai_find_asset',
+    mai_botanist: 'mai_botanist',
+    botanist: 'mai_botanist',
+    green_society: 'mai_botanist',
+    mai_space: 'mai_space',
+    space: 'mai_space',
+    interior: 'mai_space',
+    mai_list: 'mai_list',
+    mailist: 'mai_list',
+    rental_syndication: 'mai_list'
   }
   return aliases[key] ?? (isFeatureModuleName(key) ? key : null)
 }

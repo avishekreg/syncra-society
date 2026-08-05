@@ -87,6 +87,69 @@ const MODULES = [
     title: 'mAI Guardian Mesh',
     blurb: 'Kid/senior geofence and unauthorized vehicle motion alerts.',
     detail: 'Phone-based presence signals notify parents and security when a ward leaves a safe zone or a parked vehicle moves.'
+  },
+  {
+    id: 'botanist',
+    icon: '🌿',
+    title: 'mAI Botanist',
+    blurb: 'AI plant health diagnostics, QR-based tree tagging, and adoption drives.',
+    detail: 'Residents scan society trees for carbon metrics and care plans — RWA dispatches weather-aware gardening tasks.'
+  },
+  {
+    id: 'compost',
+    icon: '🍃',
+    title: 'Zero-Waste Compost Distribution',
+    blurb: 'Auto-tracking organic waste composting to resident garden delivery.',
+    detail: 'Publish compost batches from society waste and fulfill flat doorstep orders in kilograms.'
+  },
+  {
+    id: 'plant-swap',
+    icon: '🪴',
+    title: 'Plant & Seed Swap',
+    blurb: 'Hyperlocal community green exchange for cuttings, pots, and seeds.',
+    detail: 'Neighbors list spare cuttings and saplings; claim within your verified society graph only.'
+  },
+  {
+    id: 'tv-sizing',
+    icon: '📐',
+    title: 'Smart TV & Sound Sizing',
+    blurb: 'Photo-based room analysis for optimal display inches & acoustic setup.',
+    detail: 'Viewing-distance formula (distance″ / 1.6) snaps to retail sizes like 43", 55", and 65".'
+  },
+  {
+    id: 'furniture-fit',
+    icon: '🛋️',
+    title: 'Furniture Layout Intelligence',
+    blurb: 'Walkway-aware sofa & decor sizing before buying.',
+    detail: 'L-shaped vs 3-seater guidance with clearance rules for living rooms, bedrooms, and balconies.'
+  },
+  {
+    id: 'interior-leads',
+    icon: '🎨',
+    title: 'Verified Interior Lead Matching',
+    blurb: 'Instant connection with top RWA-approved interior decorators.',
+    detail: '1-tap consultation requests route to verified woodcraft, electronics, and lighting partners.'
+  },
+  {
+    id: 'mailist-rent',
+    icon: '🔑',
+    title: 'maiList Rental Syndication',
+    blurb: '1-click rent listings pushed to MagicBricks, 99acres, Housing.com, and NoBroker.',
+    detail: 'Owners publish once; maiList formats portal payloads and broadcasts to society renter networks.'
+  },
+  {
+    id: 'mailist-resale',
+    icon: '🏠',
+    title: 'maiList Verified Resale',
+    blurb: 'Resale listings with RWA Resale Certificate, ₹/sqft, NOC, and zero brokerage.',
+    detail: 'Attract high-intent buyers with dues clearance and society security score badges.'
+  },
+  {
+    id: 'mailist-emi',
+    icon: '📊',
+    title: 'Buyer EMI & Direct Contact',
+    blurb: 'Marketplace EMI estimates and owner contact without brokerage.',
+    detail: 'Internal residents and verified buyers filter Verified Society Resale and inquire in one tap.'
   }
 ] as const
 
