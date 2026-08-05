@@ -10,7 +10,7 @@ export default function InvestorBrochurePage() {
   const printMode = params.get('print') === '1'
 
   useEffect(() => {
-    document.title = `${MAI_PLATFORM_NAME} · Investor Brochure`
+    document.title = `${MAI_PLATFORM_NAME} · Product Brochure`
     document.documentElement.classList.add('brochure-root')
     if (printMode) document.documentElement.classList.add('brochure-print-mode')
     return () => {
@@ -23,9 +23,9 @@ export default function InvestorBrochurePage() {
       <header className="brochure-toolbar print:hidden">
         <div className="mx-auto flex w-full max-w-[210mm] flex-wrap items-center justify-between gap-3 px-4 py-3">
           <div>
-            <p className={ui.eyebrow}>Premium brief</p>
+            <p className={ui.eyebrow}>Sales brief</p>
             <h1 className="text-sm font-semibold text-syncra-primary sm:text-base">
-              {MAI_PLATFORM_NAME} Investor Brochure
+              {MAI_PLATFORM_NAME} Product Brochure
             </h1>
           </div>
           <div className="flex flex-wrap gap-2">

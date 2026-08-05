@@ -78,7 +78,7 @@ export default function InvestorBrochureDocument() {
           </div>
 
           <div className="mt-8 max-w-2xl">
-            <BrochureEyebrow onDark>Investor & Enterprise Brief</BrochureEyebrow>
+            <BrochureEyebrow onDark>Product & Sales Brochure</BrochureEyebrow>
             <h1 className="mt-3 text-4xl font-semibold tracking-tight text-white sm:text-5xl">{MAI_PLATFORM_NAME}</h1>
             <p className="mt-3 text-base font-medium text-cyan-100 sm:text-lg">
               The smart software platform for apartment societies and housing communities
@@ -528,7 +528,7 @@ export default function InvestorBrochureDocument() {
             'Add rent or expected sale price, parking, area, and documents if selling.',
             'For sale, the listing can show a Verified Society badge when dues are clear and NOC status is recorded.',
             'One-click publish prepares the listing for MagicBricks, 99acres, Housing.com, and NoBroker (rent or resale feeds).',
-            'An alert can go to interested society investors and verified buyer networks.',
+            'An alert can go to interested buyers and verified resident networks inside the society.',
             'Buyers/renters browse the marketplace, estimate loan EMI for sale flats, and contact the owner directly — zero brokerage inside the society board.'
           ]}
         />
@@ -548,7 +548,7 @@ export default function InvestorBrochureDocument() {
         <BrochureEyebrow>12 · Technology (simple view)</BrochureEyebrow>
         <BrochureTitle size="md">Built like modern enterprise software — explained simply</BrochureTitle>
         <BrochureLead>
-          You do not need to know our internal tools. Here is what matters for societies and investors.
+          You do not need to know our internal tools. Here is what matters when a society evaluates mAI Society.
         </BrochureLead>
         <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
           {[
@@ -591,21 +591,21 @@ export default function InvestorBrochureDocument() {
 
       {/* 14. Revenue */}
       <BrochurePage>
-        <BrochureEyebrow>13 · How we earn</BrochureEyebrow>
-        <BrochureTitle size="md">Recurring revenue aligned with society value</BrochureTitle>
+        <BrochureEyebrow>13 · Pricing model for societies</BrochureEyebrow>
+        <BrochureTitle size="md">Clear packages your committee can approve</BrochureTitle>
         <FlowSteps
           steps={[
             'Platform subscription: one-time activation plus monthly per-flat fees based on society size.',
-            'Optional AI / enterprise modules: WhatsApp assistant, elections, auditor, green, interiors, maiList, and more.',
-            'Network services over time: interior partner leads and property listing distribution.',
-            'Future adjacency: society-friendly financial and insurance products when the trust layer is strong.'
+            'Optional modules: WhatsApp assistant, elections, auditor, green, interiors, maiList, and more — add only what you need.',
+            'Partner services over time: interior consultant connections and property listing distribution when you use those modules.',
+            'Future options: society-friendly financial and insurance add-ons once the community already trusts the platform.'
           ]}
         />
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
           {[
-            ['Core', 'Stable SaaS fees'],
-            ['Modules', 'Expand wallet share'],
-            ['Network', 'Lead & listing upside']
+            ['Core plan', 'Essential society ops'],
+            ['Add-on modules', 'Pay as you grow'],
+            ['Partner network', 'Optional extra value']
           ].map(([k, v]) => (
             <div key={k} className="rounded-xl border border-slate-200 bg-white p-4 text-center">
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-syncra-blue">{k}</p>
@@ -618,11 +618,11 @@ export default function InvestorBrochureDocument() {
 
       {/* 15. Competitive */}
       <BrochurePage tone="surface">
-        <BrochureEyebrow>14 · Market position</BrochureEyebrow>
-        <BrochureTitle size="md">Where mAI Society stands out</BrochureTitle>
+        <BrochureEyebrow>14 · Why choose mAI Society</BrochureEyebrow>
+        <BrochureTitle size="md">How we compare when you are buying</BrochureTitle>
         <BrochureLead>
-          Many tools are excellent at one job (billing or visitors). We compete on breadth with clarity: one society
-          picture, optional intelligence modules, and no forced hardware.
+          Many tools are excellent at one job (billing or visitors). When a society shortlists software, mAI Society wins
+          on breadth with clarity: one society picture, optional modules, and no forced hardware.
         </BrochureLead>
         <ComparisonTable
           headers={['Question', 'Single-purpose tools', 'mAI Society']}
@@ -692,12 +692,12 @@ export default function InvestorBrochureDocument() {
         <div className="flex h-full flex-col">
           <SyncraBrandLogo to="" variant="dark" size="lg" showSubtitle />
           <div className="mt-10 max-w-xl">
-            <BrochureEyebrow onDark>Contact</BrochureEyebrow>
+            <BrochureEyebrow onDark>Contact sales</BrochureEyebrow>
             <BrochureTitle onDark size="xl">
-              Let’s modernise your society operations
+              Ready to modernise your society operations?
             </BrochureTitle>
             <BrochureLead onDark>
-              {SYNCRA_LEGAL_ENTITY} · {SYNCRA_REGISTERED_JURISDICTION}
+              Talk to the mAI Society sales team — {SYNCRA_LEGAL_ENTITY} · {SYNCRA_REGISTERED_JURISDICTION}
             </BrochureLead>
             <div className="mt-8 space-y-4 text-sm">
               <p>

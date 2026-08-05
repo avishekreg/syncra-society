@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Export the investor brochure to a high-resolution A4 PDF via Puppeteer.
+ * Export the product brochure to a high-resolution A4 PDF via Puppeteer.
  *
  * Usage:
  *   npm run brochure:pdf

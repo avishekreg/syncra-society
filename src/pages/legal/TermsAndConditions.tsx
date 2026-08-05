@@ -247,7 +247,7 @@ export default function TermsAndConditions() {
       <LegalSection title="14. Governing Law and Dispute Resolution">
         <LegalParagraph>
           These Terms are governed by the laws of India. Subject to applicable mandatory consumer protection or data
-          protection provisions, the courts at Bengaluru, Karnataka shall have exclusive jurisdiction over disputes
+          protection provisions, the courts at Kolkata, West Bengal shall have exclusive jurisdiction over disputes
           arising from or relating to these Terms or the Service.
         </LegalParagraph>
         <LegalParagraph>

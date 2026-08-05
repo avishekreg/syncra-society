@@ -169,7 +169,7 @@ export function BrochureFooterMeta({ page, total, onDark }: { page: number; tota
         onDark ? 'border-white/20 text-slate-300' : 'border-slate-200 text-slate-400'
       }`}
     >
-      <span>mAI Society · Investor Brochure</span>
+      <span>mAI Society · Product Brochure</span>
       <span>
         {page} / {total}
       </span>
