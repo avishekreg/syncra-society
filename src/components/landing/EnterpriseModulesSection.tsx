@@ -73,6 +73,20 @@ const MODULES = [
     title: 'Clubhouse & Amenity Booking',
     blurb: 'Instant slot reservations & payment collection for society facilities.',
     detail: 'Calendar slot picker with real-time double-booking protection for clubhouse, pool, and courts.'
+  },
+  {
+    id: 'energy',
+    icon: '⚡',
+    title: 'maiEnergy P2P Trading',
+    blurb: 'Peer-to-peer energy credit transfers between verified flats.',
+    detail: 'Surplus solar or prepaid credits can be offered to neighbors — settled as ledger credits inside the society.'
+  },
+  {
+    id: 'guardian',
+    icon: '🛡️',
+    title: 'mAI Guardian Mesh',
+    blurb: 'Kid/senior geofence and unauthorized vehicle motion alerts.',
+    detail: 'Phone-based presence signals notify parents and security when a ward leaves a safe zone or a parked vehicle moves.'
   }
 ] as const
 
