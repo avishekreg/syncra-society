@@ -15,7 +15,7 @@ export function DeliveryInterceptorMock() {
       style={{ background: SLATE, border: '1px solid #e2e8f0', borderRadius: 12, padding: 12 }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: BLUE }}>
+        <span style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', color: BLUE }}>
           Universal Delivery Interceptor
         </span>
         <span
@@ -71,7 +71,7 @@ export function AuditorAnomalyMock() {
     <div className="master-mock" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 12 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <p style={{ margin: 0, fontSize: 9, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: BLUE }}>
+          <p style={{ margin: 0, fontSize: 9, fontWeight: 800, textTransform: 'uppercase', color: BLUE }}>
             mAI Auditor
           </p>
           <p style={{ margin: '4px 0 0', fontSize: 12, fontWeight: 800, color: NAVY }}>Water pump expense</p>
@@ -122,7 +122,7 @@ export function ParkingEarningsMock() {
         color: '#fff'
       }}
     >
-      <p style={{ margin: 0, fontSize: 9, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#bfdbfe' }}>
+      <p style={{ margin: 0, fontSize: 9, fontWeight: 800, textTransform: 'uppercase', color: '#bfdbfe' }}>
         Monetized parking · Flat A-101
       </p>
       <p style={{ margin: '6px 0 0', fontSize: 22, fontWeight: 900 }}>₹180</p>
@@ -148,7 +148,7 @@ export function MaiListPipelineMock() {
   const steps = ['maiSociety', 'Major portals', 'Housing sites', 'Zero-brokerage']
   return (
     <div className="master-mock" style={{ background: SLATE, border: '1px solid #e2e8f0', borderRadius: 12, padding: 12 }}>
-      <p style={{ margin: 0, fontSize: 9, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: BLUE }}>
+      <p style={{ margin: 0, fontSize: 9, fontWeight: 800, textTransform: 'uppercase', color: BLUE }}>
         maiList syndication pipeline
       </p>
       <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 10, flexWrap: 'wrap' }}>

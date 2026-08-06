@@ -2,13 +2,17 @@ import React, { useId, useMemo } from 'react'
 import QRCode from 'qrcode'
 import { getExecDeckCopy, type BrochureLocale } from '../../lib/brochureI18n'
 import { MAI_PRODUCTION_ORIGIN, SYNCRA_LEGAL_ENTITY } from '../../lib/brandConstants'
+import {
+  CostComparisonTable,
+  HiddenWasteGrid,
+  NetProfitBanner,
+  PaysForItselfGrid
+} from './BrochureRoiBlocks'
 
 type Props = { locale?: BrochureLocale }
 
 const NAVY = '#0f172a'
 const BLUE = '#2563eb'
-const SLATE = '#f8fafc'
-const EMERALD = '#10b981'
 
 /** Crisp SVG mark — print-safe, no external assets. */
 function MaiLogoMark({ size = 28 }: { size?: number }) {
@@ -121,23 +125,20 @@ function PageShell({
   )
 }
 
-/** Dense, print-safe 4-page Quick Exec Deck. */
+/** Dense, print-safe 4-page Quick Exec Deck with RWA ROI justification. */
 export default function QuickExecDeck({ locale = 'en' }: Props) {
   const copy = getExecDeckCopy(locale)
-  const byline =
-    copy.brandBanner.includes('by Syncra') || copy.brandBanner.includes('·')
-      ? copy.brandBanner
-      : `${copy.brandBanner}`
+  const byline = copy.brandBanner
 
   return (
     <div className="brochure-document exec-deck-document" data-brochure-deck="exec-4" lang={locale}>
-      {/* PAGE 1 */}
+      {/* PAGE 1 — Hero + metrics + executive summary */}
       <PageShell brand={byline} pitchTag={copy.pitchTag} page={1} total={4} pageLabel={copy.pageLabel}>
         <section className="exec-hero">
           <p className="exec-kicker">{copy.cover.eyebrow}</p>
           <h1 className="exec-h1">{copy.cover.title}</h1>
           <p className="exec-lead">{copy.cover.subtitle}</p>
-          <div className="exec-metrics">
+          <div className="exec-metrics exec-metrics--3">
             {copy.cover.metrics.map((m) => (
               <div key={m} className="exec-metric">
                 {m}
@@ -146,39 +147,22 @@ export default function QuickExecDeck({ locale = 'en' }: Props) {
           </div>
         </section>
 
-        <section className="exec-block">
-          <p className="exec-kicker exec-kicker--green">{copy.cover.failTag}</p>
-          <h2 className="exec-h2">{copy.cover.failTitle}</h2>
-          <div className="exec-fail-grid">
-            {copy.cover.failCards.map((card) => (
-              <div key={card.title} className="exec-fail-card">
-                <span className="exec-fail-icon">{card.icon}</span>
-                <p className="exec-fail-title">{card.title}</p>
-                <p className="exec-fail-body">{card.body}</p>
-              </div>
+        <section className="exec-block exec-summary">
+          <p className="exec-kicker exec-kicker--green">{copy.cover.summaryTag}</p>
+          <h2 className="exec-h2">{copy.cover.summaryTitle}</h2>
+          <p className="exec-body-text">{copy.cover.summaryBody}</p>
+          <ul className="exec-summary-list">
+            {copy.cover.summaryBullets.map((b) => (
+              <li key={b}>{b}</li>
             ))}
-          </div>
-        </section>
-
-        <section className="exec-bottom-split">
-          <div className="exec-overview">
-            <p className="exec-kicker">{copy.cover.overviewTag}</p>
-            <h2 className="exec-h2">{copy.cover.overviewTitle}</h2>
-            <p className="exec-body-text">{copy.cover.overviewBody}</p>
-            <p className="exec-hq">{SYNCRA_LEGAL_ENTITY} · Kolkata HQ</p>
-          </div>
-          <div className="exec-arch">
-            <p className="exec-arch-title">{copy.cover.architectureTitle}</p>
-            <ul>
-              {copy.cover.architectureItems.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </div>
+          </ul>
+          <p className="exec-hq">
+            {SYNCRA_LEGAL_ENTITY} · Kolkata HQ · {MAI_PRODUCTION_ORIGIN.replace('https://', '')}
+          </p>
         </section>
       </PageShell>
 
-      {/* PAGE 2 */}
+      {/* PAGE 2 — Competitive matrix + cost comparison */}
       <PageShell brand={byline} pitchTag={copy.pitchTag} page={2} total={4} pageLabel={copy.pageLabel}>
         <p className="exec-kicker">{copy.matrix.eyebrow}</p>
         <h2 className="exec-h2 exec-h2--lg">{copy.matrix.title}</h2>
@@ -203,9 +187,10 @@ export default function QuickExecDeck({ locale = 'en' }: Props) {
             ))}
           </tbody>
         </table>
+        <CostComparisonTable title={copy.matrix.costTitle} headers={copy.matrix.costHeaders} />
       </PageShell>
 
-      {/* PAGE 3 */}
+      {/* PAGE 3 — 2×3 AI module grid */}
       <PageShell brand={byline} pitchTag={copy.pitchTag} page={3} total={4} pageLabel={copy.pageLabel}>
         <p className="exec-kicker">{copy.modules.eyebrow}</p>
         <h2 className="exec-h2 exec-h2--lg">{copy.modules.title}</h2>
@@ -227,22 +212,17 @@ export default function QuickExecDeck({ locale = 'en' }: Props) {
         </div>
       </PageShell>
 
-      {/* PAGE 4 */}
+      {/* PAGE 4 — ₹0 net ROI + onboarding + QR */}
       <PageShell brand={byline} pitchTag={copy.pitchTag} page={4} total={4} pageLabel={copy.pageLabel}>
         <p className="exec-kicker exec-kicker--green">{copy.close.eyebrow}</p>
         <h2 className="exec-h2 exec-h2--lg">{copy.close.title}</h2>
-        <div className="exec-close-grid">
-          <section className="exec-close-col">
-            <h3 className="exec-col-title">{copy.close.monetizationTitle}</h3>
-            {copy.close.monetizationItems.map((item) => (
-              <div key={item.title} className="exec-roi-card">
-                <p className="exec-roi-title">{item.title}</p>
-                <p>{item.body}</p>
-              </div>
-            ))}
-          </section>
 
-          <section className="exec-close-col">
+        <HiddenWasteGrid title={copy.close.wasteTitle} />
+        <PaysForItselfGrid title={copy.close.paysTitle} />
+        <NetProfitBanner title={copy.close.netTitle} />
+
+        <div className="exec-close-bottom">
+          <section>
             <h3 className="exec-col-title">{copy.close.roadmapTitle}</h3>
             <ol className="exec-steps">
               {copy.close.roadmap.map((step) => (
@@ -257,11 +237,9 @@ export default function QuickExecDeck({ locale = 'en' }: Props) {
             </ol>
           </section>
 
-          <section className="exec-close-col exec-close-cta">
-            <div className="exec-cta-box">
-              <h3>{copy.close.ctaTitle}</h3>
-              <p>{copy.close.ctaBody}</p>
-            </div>
+          <section className="exec-cta-box">
+            <h3>{copy.close.ctaTitle}</h3>
+            <p>{copy.close.ctaBody}</p>
             <div className="exec-contact-row">
               <div>
                 <h3 className="exec-col-title">{copy.close.contactTitle}</h3>

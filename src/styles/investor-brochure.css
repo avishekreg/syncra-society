@@ -4,13 +4,29 @@
   background: #f4f5f7;
 }
 
+/* Universal typography lockdown — never stretch glyphs in print/PDF */
+.brochure-document,
+.exec-deck-document,
+.master-document,
+.brochure-document *,
+.exec-deck-document *,
+.master-document * {
+  font-family: Inter, 'Noto Sans', 'Noto Sans Devanagari', 'Noto Sans Bengali', 'Noto Sans Tamil',
+    'Noto Sans Telugu', Roboto, 'Segoe UI', system-ui, sans-serif !important;
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+  font-kerning: normal;
+  -webkit-font-smoothing: antialiased;
+}
+
 .exec-deck-document {
   font-family: Inter, Roboto, 'Noto Sans', 'Noto Sans Devanagari', 'Noto Sans Bengali', 'Noto Sans Tamil',
     'Noto Sans Telugu', 'Segoe UI', system-ui, sans-serif;
   letter-spacing: normal;
   word-spacing: normal;
   font-kerning: normal;
-  -webkit-font-smoothing: antialiased;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
 .brochure-shell {
@@ -95,7 +111,7 @@
   display: inline-flex;
   font-size: 15px;
   font-weight: 800;
-  letter-spacing: -0.01em;
+  letter-spacing: normal;
   line-height: 1.1;
 }
 
@@ -104,7 +120,7 @@
   font-size: 9px;
   font-weight: 600;
   color: #94a3b8;
-  letter-spacing: 0.02em;
+  letter-spacing: normal;
 }
 
 .exec-pill {
@@ -115,7 +131,7 @@
   color: #dbeafe;
   font-size: 8px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: normal;
   text-transform: uppercase;
   padding: 5px 10px;
   white-space: nowrap;
@@ -142,7 +158,7 @@
   font-size: 9px;
   font-weight: 600;
   color: #64748b;
-  letter-spacing: 0.02em;
+  letter-spacing: normal;
   flex-shrink: 0;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
@@ -153,7 +169,7 @@
   display: inline-block;
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: normal;
   text-transform: uppercase;
   color: #2563eb;
 }
@@ -167,7 +183,7 @@
   font-size: 22px;
   font-weight: 900;
   line-height: 1.18;
-  letter-spacing: -0.02em;
+  letter-spacing: normal;
   color: #fff;
 }
 
@@ -176,7 +192,7 @@
   font-size: 15px;
   font-weight: 800;
   line-height: 1.25;
-  letter-spacing: -0.015em;
+  letter-spacing: normal;
   color: #0f172a;
 }
 
@@ -217,16 +233,50 @@
   margin-top: 10px;
 }
 
+.exec-metrics--3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
 .exec-metric {
   text-align: center;
-  font-size: 9.5px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 800;
   line-height: 1.3;
   color: #fff;
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 8px;
-  padding: 8px 4px;
+  padding: 10px 6px;
+}
+
+.exec-summary {
+  flex: 1;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+.exec-summary-list {
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.exec-summary-list li {
+  font-size: 11px;
+  line-height: 1.4;
+  color: #334155;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.exec-close-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 10px;
+  margin-top: 6px;
+  align-items: start;
 }
 
 .exec-fail-grid {
@@ -290,7 +340,7 @@
   margin: 0;
   font-size: 10px;
   font-weight: 800;
-  letter-spacing: 0.04em;
+  letter-spacing: normal;
   text-transform: uppercase;
   color: #93c5fd;
 }
@@ -348,7 +398,7 @@
   text-align: left;
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: normal;
   text-transform: uppercase;
   padding: 8px 9px;
   -webkit-print-color-adjust: exact;
@@ -421,7 +471,7 @@
   font-weight: 800;
   line-height: 1.25;
   color: #0f172a;
-  letter-spacing: -0.01em;
+  letter-spacing: normal;
 }
 
 .exec-mod-card ul {
@@ -450,7 +500,7 @@
   margin: 0 0 6px;
   font-size: 10px;
   font-weight: 800;
-  letter-spacing: 0.05em;
+  letter-spacing: normal;
   text-transform: uppercase;
   color: #2563eb;
 }
@@ -524,7 +574,7 @@
   font-size: 12px;
   font-weight: 800;
   line-height: 1.3;
-  letter-spacing: -0.01em;
+  letter-spacing: normal;
 }
 
 .exec-cta-box p {
@@ -572,7 +622,7 @@
   font-size: 8px;
   font-weight: 700;
   color: #64748b;
-  letter-spacing: 0.02em;
+  letter-spacing: normal;
 }
 
 .brochure-shell--print .brochure-toolbar {
@@ -653,7 +703,7 @@
   }
 
   .exec-deck-document {
-    letter-spacing: normal !important;
+    letter-spacing: normal;
     word-spacing: normal !important;
   }
 
@@ -737,7 +787,7 @@
   margin: 0;
   font-size: 14px;
   font-weight: 800;
-  letter-spacing: -0.01em;
+  letter-spacing: normal;
   line-height: 1.1;
 }
 
@@ -746,7 +796,7 @@
   font-size: 8px;
   font-weight: 600;
   color: #94a3b8;
-  letter-spacing: 0.02em;
+  letter-spacing: normal;
 }
 
 .master-pill {
@@ -757,7 +807,7 @@
   color: #dbeafe;
   font-size: 8px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: normal;
   text-transform: uppercase;
   padding: 5px 9px;
   white-space: nowrap;
@@ -783,7 +833,7 @@
   font-size: 8.5px;
   font-weight: 600;
   color: #64748b;
-  letter-spacing: 0.02em;
+  letter-spacing: normal;
   flex-shrink: 0;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
@@ -799,7 +849,7 @@
   margin: 0;
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: normal;
   text-transform: uppercase;
   color: #2563eb;
 }
@@ -813,7 +863,7 @@
   font-size: 26px;
   font-weight: 900;
   line-height: 1.15;
-  letter-spacing: -0.02em;
+  letter-spacing: normal;
   color: #fff;
 }
 
@@ -822,7 +872,7 @@
   font-size: 17px;
   font-weight: 800;
   line-height: 1.25;
-  letter-spacing: -0.015em;
+  letter-spacing: normal;
   color: #0f172a;
 }
 
@@ -956,7 +1006,7 @@
   font-size: 11px;
   font-weight: 800;
   color: #0f172a;
-  letter-spacing: -0.01em;
+  letter-spacing: normal;
 }
 
 .master-spec-card p {
@@ -1005,7 +1055,7 @@
   text-align: left;
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: normal;
   text-transform: uppercase;
   padding: 8px 9px;
   -webkit-print-color-adjust: exact;
@@ -1064,7 +1114,7 @@
   font-weight: 700;
   border-radius: 999px;
   padding: 3px 8px;
-  letter-spacing: 0.02em;
+  letter-spacing: normal;
 }
 
 .master-flow {
@@ -1121,7 +1171,7 @@
   font-size: 9px;
   font-weight: 700;
   color: #2563eb;
-  letter-spacing: 0.04em;
+  letter-spacing: normal;
   text-transform: uppercase;
 }
 
@@ -1192,7 +1242,7 @@
   margin: 10px 0 0;
   font-size: 8px;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: normal;
   text-transform: uppercase;
   color: #93c5fd;
 }
@@ -1248,7 +1298,7 @@
   font-size: 8px;
   font-weight: 700;
   color: #64748b;
-  letter-spacing: 0.02em;
+  letter-spacing: normal;
 }
 
 .master-mock {
@@ -1289,5 +1339,259 @@
 
   .master-pill {
     display: none;
+  }
+
+  .exec-metrics--3,
+  .exec-close-bottom,
+  .roi-grid-3,
+  .roi-net-flow {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========== Shared RWA ROI blocks ========== */
+.roi-block {
+  margin-top: 6px;
+}
+
+.roi-section-title {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.roi-section-title--green {
+  color: #047857;
+}
+
+.roi-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+}
+
+.roi-waste-card,
+.roi-save-card {
+  border-radius: 8px;
+  padding: 8px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.roi-waste-card {
+  border-top: 3px solid #dc2626;
+  background: #fef2f2;
+}
+
+.roi-save-card {
+  border-top: 3px solid #059669;
+  background: #ecfdf5;
+}
+
+.roi-card-title {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.25;
+}
+
+.roi-card-body {
+  margin: 4px 0 0;
+  font-size: 9.5px;
+  line-height: 1.35;
+  color: #475569;
+}
+
+.roi-net-banner {
+  margin-top: 8px;
+  background: #0f172a;
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px 12px;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.roi-net-kicker {
+  margin: 0;
+  font-size: 9px;
+  font-weight: 700;
+  color: #93c5fd;
+  text-transform: uppercase;
+}
+
+.roi-net-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.roi-net-step {
+  flex: 1 1 90px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  padding: 8px;
+  text-align: center;
+}
+
+.roi-net-step--mid {
+  background: rgba(37, 99, 235, 0.35);
+}
+
+.roi-net-step--win {
+  background: rgba(5, 150, 105, 0.45);
+  border-color: rgba(52, 211, 153, 0.5);
+}
+
+.roi-net-label {
+  display: block;
+  font-size: 8px;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-bottom: 3px;
+  text-transform: uppercase;
+}
+
+.roi-net-step strong {
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.25;
+}
+
+.roi-net-arrow {
+  align-self: center;
+  font-size: 14px;
+  font-weight: 900;
+  color: #60a5fa;
+}
+
+.roi-net-footnote {
+  margin: 8px 0 0;
+  font-size: 9.5px;
+  line-height: 1.35;
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+.roi-table {
+  width: 100%;
+  margin-top: 4px;
+  border-collapse: collapse;
+  border: 1px solid #e2e8f0;
+  font-size: 9.5px;
+}
+
+.roi-table th {
+  background: #0f172a;
+  color: #fff;
+  text-align: left;
+  font-size: 8.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 6px 8px;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.roi-th-win {
+  background: #2563eb !important;
+}
+
+.roi-table td {
+  padding: 5px 8px;
+  vertical-align: top;
+  line-height: 1.3;
+  color: #475569;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.roi-tr-odd td {
+  background: #f1f5f9;
+}
+
+.roi-td-key {
+  font-weight: 800;
+  color: #0f172a !important;
+  width: 22%;
+}
+
+.roi-td-win {
+  font-weight: 700;
+  color: #1d4ed8 !important;
+  background: rgba(37, 99, 235, 0.06) !important;
+}
+
+/* Exec deck page-4 density */
+.exec-a4 .roi-block {
+  margin-top: 4px;
+}
+
+.exec-a4 .roi-section-title {
+  font-size: 10px;
+  margin-bottom: 4px;
+}
+
+.exec-a4 .roi-waste-card,
+.exec-a4 .roi-save-card {
+  padding: 6px 7px;
+}
+
+.exec-a4 .roi-card-title {
+  font-size: 9px;
+}
+
+.exec-a4 .roi-card-body {
+  font-size: 8.5px;
+  margin-top: 3px;
+}
+
+.exec-a4 .roi-net-banner {
+  margin-top: 5px;
+  padding: 8px 10px;
+}
+
+.exec-a4 .roi-net-step strong {
+  font-size: 10px;
+}
+
+.exec-a4 .roi-net-footnote {
+  font-size: 8.5px;
+  margin-top: 6px;
+}
+
+.exec-a4 .exec-steps {
+  margin-top: 4px;
+}
+
+.exec-a4 .exec-steps li {
+  margin-bottom: 4px;
+  padding: 6px;
+}
+
+.exec-a4 .exec-cta-box {
+  padding: 10px;
+}
+
+@media print {
+  .brochure-document,
+  .exec-deck-document,
+  .master-document,
+  .brochure-document *,
+  .exec-deck-document *,
+  .master-document * {
+    letter-spacing: normal !important;
+    word-spacing: normal !important;
+  }
+
+  .master-a4,
+  .exec-a4 {
+    padding: 0 !important;
   }
 }

@@ -56,7 +56,9 @@ export default function InvestorBrochurePage() {
         <div className="mx-auto flex w-full max-w-[210mm] flex-col gap-3 px-4 py-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className={ui.eyebrow}>Sales brief · trademark-safe copy</p>
+              <p className="text-[10px] font-semibold uppercase text-syncra-accent sm:text-[11px]">
+                Sales brief · trademark-safe copy
+              </p>
               <h1 className="text-sm font-semibold text-syncra-primary sm:text-base">
                 {mode === 'exec' ? `${MAI_PLATFORM_NAME} Quick Exec Deck (4-Page)` : `${MAI_PLATFORM_NAME} Product Brochure`}
               </h1>
