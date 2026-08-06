@@ -2,12 +2,7 @@ import React, { useId, useMemo } from 'react'
 import QRCode from 'qrcode'
 import { getExecDeckCopy, type BrochureLocale } from '../../lib/brochureI18n'
 import { MAI_PRODUCTION_ORIGIN, SYNCRA_LEGAL_ENTITY } from '../../lib/brandConstants'
-import {
-  CostComparisonTable,
-  HiddenWasteGrid,
-  NetProfitBanner,
-  PaysForItselfGrid
-} from './BrochureRoiBlocks'
+import { CostComparisonTable, NetProfitBanner, PaysForItselfGrid } from './BrochureRoiBlocks'
 
 type Props = { locale?: BrochureLocale }
 
@@ -212,17 +207,19 @@ export default function QuickExecDeck({ locale = 'en' }: Props) {
         </div>
       </PageShell>
 
-      {/* PAGE 4 — ₹0 net ROI + onboarding + QR */}
+      {/* PAGE 4 — Why RWA pays ₹0 net + onboarding + QR */}
       <PageShell brand={byline} pitchTag={copy.pitchTag} page={4} total={4} pageLabel={copy.pageLabel}>
         <p className="exec-kicker exec-kicker--green">{copy.close.eyebrow}</p>
         <h2 className="exec-h2 exec-h2--lg">{copy.close.title}</h2>
+        <p className="exec-body-text">
+          Board-ready cost justification: subscription is a net-profit line, not another expense.
+        </p>
 
-        <HiddenWasteGrid title={copy.close.wasteTitle} />
         <PaysForItselfGrid title={copy.close.paysTitle} />
         <NetProfitBanner title={copy.close.netTitle} />
 
         <div className="exec-close-bottom">
-          <section>
+          <section className="exec-pad-card">
             <h3 className="exec-col-title">{copy.close.roadmapTitle}</h3>
             <ol className="exec-steps">
               {copy.close.roadmap.map((step) => (
@@ -253,7 +250,7 @@ export default function QuickExecDeck({ locale = 'en' }: Props) {
                 </a>
               </div>
               <div className="exec-qr-wrap">
-                <ExecQr url={MAI_PRODUCTION_ORIGIN} size={88} />
+                <ExecQr url={MAI_PRODUCTION_ORIGIN} size={96} />
                 <p>{copy.close.qrCaption}</p>
               </div>
             </div>

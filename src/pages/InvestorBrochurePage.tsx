@@ -4,6 +4,7 @@ import InvestorBrochureDocument from '../components/brochure/InvestorBrochureDoc
 import QuickExecDeck from '../components/brochure/QuickExecDeck'
 import { MAI_PLATFORM_NAME } from '../lib/brandConstants'
 import { BROCHURE_LOCALES, type BrochureLocale } from '../lib/brochureI18n'
+import { buildLiveBrochurePrintUrl } from '../lib/brochurePrint'
 import { ui } from '../lib/ui'
 import '../styles/investor-brochure.css'
 
@@ -13,6 +14,7 @@ export default function InvestorBrochurePage() {
   const [params, setParams] = useSearchParams()
   const printMode = params.get('print') === '1'
   const autoPrint = params.get('autoprint') === '1'
+  const cacheBust = params.get('t') || params.get('cb') || ''
   const initialLocale = (params.get('lang') as BrochureLocale) || 'en'
   const initialMode = (params.get('deck') as DeckMode) === 'exec' ? 'exec' : 'full'
   const [locale, setLocale] = useState<BrochureLocale>(
@@ -27,6 +29,16 @@ export default function InvestorBrochurePage() {
         : `${MAI_PLATFORM_NAME} · Product Brochure`
     document.documentElement.classList.add('brochure-root')
     if (printMode) document.documentElement.classList.add('brochure-print-mode')
+
+    // Discourage intermediary caches when printing/exporting PDFs
+    let robots: HTMLMetaElement | null = document.querySelector('meta[name="brochure-cache"]')
+    if (!robots) {
+      robots = document.createElement('meta')
+      robots.name = 'brochure-cache'
+      document.head.appendChild(robots)
+    }
+    robots.content = `no-store; t=${Date.now()}`
+
     return () => {
       document.documentElement.classList.remove('brochure-root', 'brochure-print-mode')
     }
@@ -34,11 +46,12 @@ export default function InvestorBrochurePage() {
 
   useEffect(() => {
     if (!autoPrint || !printMode) return
+    // Wait for fonts + layout paint before opening print dialog
     const timer = window.setTimeout(() => {
       window.print()
-    }, 600)
+    }, 900)
     return () => window.clearTimeout(timer)
-  }, [autoPrint, printMode, locale, mode])
+  }, [autoPrint, printMode, locale, mode, cacheBust])
 
   function updateQuery(next: { lang?: BrochureLocale; deck?: DeckMode }) {
     const lang = next.lang ?? locale
@@ -46,9 +59,18 @@ export default function InvestorBrochurePage() {
     const q = new URLSearchParams(params)
     q.set('lang', lang)
     q.set('deck', deck)
-    if (printMode) q.set('print', '1')
+    if (printMode) {
+      q.set('print', '1')
+      q.set('t', String(Date.now()))
+    }
     setParams(q, { replace: true })
   }
+
+  const printLayoutHref = buildLiveBrochurePrintUrl({
+    deck: mode,
+    locale,
+    autoprint: false
+  })
 
   return (
     <div className={`brochure-shell ${printMode ? 'brochure-shell--print' : ''}`}>
@@ -57,10 +79,12 @@ export default function InvestorBrochurePage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-[10px] font-semibold uppercase text-syncra-accent sm:text-[11px]">
-                Sales brief · trademark-safe copy
+                Live brochure engine · not a static PDF
               </p>
               <h1 className="text-sm font-semibold text-syncra-primary sm:text-base">
-                {mode === 'exec' ? `${MAI_PLATFORM_NAME} Quick Exec Deck (4-Page)` : `${MAI_PLATFORM_NAME} Product Brochure`}
+                {mode === 'exec'
+                  ? `${MAI_PLATFORM_NAME} Quick Exec Deck (4-Page)`
+                  : `${MAI_PLATFORM_NAME} Product Brochure (18-Page)`}
               </h1>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -70,10 +94,7 @@ export default function InvestorBrochurePage() {
               <button type="button" className={ui.btnSecondary} onClick={() => window.print()}>
                 Print / Save PDF
               </button>
-              <a
-                href={`/investor-brochure?print=1&deck=${mode}&lang=${locale}`}
-                className={ui.btnPrimary}
-              >
+              <a href={printLayoutHref} className={ui.btnPrimary}>
                 Print layout
               </a>
             </div>
@@ -129,7 +150,7 @@ export default function InvestorBrochurePage() {
           {mode === 'full' && locale !== 'en' ? (
             <p className="text-xs text-slate-500">
               Full 18-page brochure is English. Switch to Quick Exec Deck for Hindi, Bengali, Marathi, Tamil, and
-              Telugu — all use sanitized “Legacy Society Apps” / “Competitive Edge vs Legacy Platforms” wording.
+              Telugu.
             </p>
           ) : null}
         </div>

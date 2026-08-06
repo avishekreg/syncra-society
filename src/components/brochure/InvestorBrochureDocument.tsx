@@ -416,9 +416,46 @@ export default function InvestorBrochureDocument() {
         </div>
       </MasterPage>
 
-      {/* 13 Tech Architecture — unique specs only */}
+      {/* 13 Financial ROI Framework — Part A: Hidden waste */}
       <MasterPage page={13}>
-        <Kicker>12 · Technology architecture</Kicker>
+        <Kicker>12 · RWA financial ROI · Part A</Kicker>
+        <h2 className="master-h2">Traditional RWA financial waste — the hidden money drain</h2>
+        <p className="master-lead">
+          Boards ask why pay ₹5,000–₹20,000/month. Start with what already leaks — then compare to a phone-first OS that
+          turns subscription into net profit.
+        </p>
+        <HiddenWasteGrid />
+        <CostComparisonTable />
+        <div className="master-callout master-tight-top">
+          Hardware AMC alone (₹60k–₹1.2L/year) often exceeds a full year of maiSociety Core — before counting Auditor
+          savings or parking earnings.
+        </div>
+      </MasterPage>
+
+      {/* 14 Financial ROI Framework — Part B: 300% math */}
+      <MasterPage page={14}>
+        <Kicker green>13 · RWA financial ROI · Part B</Kicker>
+        <h2 className="master-h2">How maiSociety pays for itself — the {ROI_MULTIPLIER_PCT}% ROI math</h2>
+        <p className="master-lead">
+          Illustrative mid-size society: subscribe around {formatInr(10000)}/month, recover multiples via leakage control,
+          zero gadget AMC, and parking monetization.
+        </p>
+        <PaysForItselfGrid />
+        <NetProfitBanner />
+        <div className="master-split master-tight-top">
+          <div className="master-roi-math">
+            <p>
+              <strong>Parking illustration:</strong> 20 weekdays × 8 hrs × ₹20 = ₹3,200/bay/month potential · pool idle
+              visitor slots to ₹8k–₹25k society/owner income.
+            </p>
+          </div>
+          <ParkingEarningsMock />
+        </div>
+      </MasterPage>
+
+      {/* 15 Tech Architecture — unique specs only (no filler loops) */}
+      <MasterPage page={15}>
+        <Kicker>14 · Technology architecture</Kicker>
         <h2 className="master-h2">Enterprise stack — precise, not jargon theatre</h2>
         <p className="master-lead">
           Production path: Vite/React client · Supabase Postgres + RLS · Edge/RPC jobs · Capacitor native shell.
@@ -458,9 +495,9 @@ export default function InvestorBrochureDocument() {
         </div>
       </MasterPage>
 
-      {/* 14 Security threat model + privacy */}
-      <MasterPage page={14}>
-        <Kicker>13 · Security threat model & data privacy</Kicker>
+      {/* 16 Security threat model + privacy */}
+      <MasterPage page={16}>
+        <Kicker>15 · Security threat model & data privacy</Kicker>
         <h2 className="master-h2">Trust controls committees can explain</h2>
         <div className="master-grid-2">
           {[
@@ -475,43 +512,6 @@ export default function InvestorBrochureDocument() {
           ].map(([t, d]) => (
             <SpecCard key={t} title={t} body={d} accent={EMERALD} />
           ))}
-        </div>
-      </MasterPage>
-
-      {/* 15 Financial ROI Framework — Part A: Hidden waste */}
-      <MasterPage page={15}>
-        <Kicker>14 · Financial ROI framework · Part A</Kicker>
-        <h2 className="master-h2">Traditional RWA financial waste — the hidden money drain</h2>
-        <p className="master-lead">
-          Boards often ask why pay ₹5,000–₹20,000/month. Start with what already leaks — then compare to a phone-first OS
-          that turns subscription into net profit.
-        </p>
-        <HiddenWasteGrid />
-        <CostComparisonTable />
-        <div className="master-callout master-tight-top">
-          Hardware AMC alone (₹60k–₹1.2L/year) often exceeds a full year of maiSociety Core — before counting Auditor
-          savings or parking earnings.
-        </div>
-      </MasterPage>
-
-      {/* 16 Financial ROI Framework — Part B: 300% math */}
-      <MasterPage page={16}>
-        <Kicker green>15 · Financial ROI framework · Part B</Kicker>
-        <h2 className="master-h2">How maiSociety pays for itself — the {ROI_MULTIPLIER_PCT}% ROI math</h2>
-        <p className="master-lead">
-          Illustrative mid-size society: subscribe around {formatInr(10000)}/month, recover multiples via leakage control,
-          zero gadget AMC, and parking monetization.
-        </p>
-        <PaysForItselfGrid />
-        <NetProfitBanner />
-        <div className="master-split master-tight-top">
-          <div className="master-roi-math">
-            <p>
-              <strong>Parking illustration:</strong> 20 weekdays × 8 hrs × ₹20 = ₹3,200/bay/month potential · pool idle
-              visitor slots to ₹8k–₹25k society/owner income.
-            </p>
-          </div>
-          <ParkingEarningsMock />
         </div>
       </MasterPage>
 

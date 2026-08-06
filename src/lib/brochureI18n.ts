@@ -15,7 +15,7 @@ export const BROCHURE_LOCALES: Array<{ code: BrochureLocale; label: string; nati
 ]
 
 export type ExecFailCard = { icon: string; title: string; body: string }
-export type ExecModuleCard = { icon: string; title: string; bullets: [string, string, string, string] }
+export type ExecModuleCard = { icon: string; title: string; bullets: [string, string, string] }
 
 export type ExecDeckCopy = {
   brandBanner: string
@@ -87,62 +87,32 @@ const MODULE_CARDS_EN: ExecModuleCard[] = [
   {
     icon: '🛡️',
     title: 'Delivery Interceptor',
-    bullets: [
-      'Auto pre-clear courier SMS / push',
-      'Parent time-window kid exits',
-      'Guard loud alert if missing',
-      'HITL override for disputes'
-    ]
+    bullets: ['Auto pre-clear courier SMS / push', 'Parent time-window kid exits', 'Guard loud alert if missing']
   },
   {
     icon: '📊',
     title: 'mAI Auditor',
-    bullets: [
-      'MoM utility & invoice variance',
-      'Flags before dual-sign pay',
-      'Grounded in society ledger',
-      'Human finance gate mandatory'
-    ]
+    bullets: ['MoM utility & invoice variance', 'Flags before dual-sign pay', 'Human finance gate mandatory']
   },
   {
     icon: '🔑',
     title: 'maiList',
-    bullets: [
-      'Publish once · fan-out portals',
-      'Zero-brokerage in-society',
-      'Resale: dues · NOC · ₹/sqft',
-      'No re-typing across sites'
-    ]
+    bullets: ['Publish once · fan-out portals', 'Zero-brokerage in-society', 'Resale: dues · NOC · ₹/sqft']
   },
   {
     icon: '🚗',
     title: 'maiCommute',
-    bullets: [
-      'Flat-verified society rides',
-      'Zero external commission',
-      'Matched departure windows',
-      'Trust via resident identity'
-    ]
+    bullets: ['Flat-verified society rides', 'Zero external commission', 'Matched departure windows']
   },
   {
     icon: '🅿️',
     title: 'Monetized Parking',
-    bullets: [
-      'Hourly vacant-bay listings',
-      'Monthly neighbor leases',
-      'UPI → owner wallet credits',
-      'Vacate reminder 30 min prior'
-    ]
+    bullets: ['Hourly vacant-bay listings', 'Monthly neighbor leases', 'UPI → owner wallet credits']
   },
   {
     icon: '🌿',
     title: 'mAI Botanist',
-    bullets: [
-      'QR plant tags · care plans',
-      'Weather-aware garden tasks',
-      'Compost & neighbor swap',
-      'No nursery hardware lock-in'
-    ]
+    bullets: ['QR plant tags · care plans', 'Weather-aware garden tasks', 'Compost & neighbor swap']
   }
 ]
 
@@ -183,10 +153,10 @@ const EN: ExecDeckCopy = {
   },
   close: {
     eyebrow: 'ROI · Onboarding · CTA',
-    title: 'Why the society pays ₹0 net',
+    title: 'Why RWA pays ₹0 net',
     wasteTitle: 'Traditional RWA financial waste',
-    paysTitle: 'How maiSociety pays for itself (300% ROI)',
-    netTitle: 'Net bottom line for the committee',
+    paysTitle: '300% ROI math — how maiSociety pays for itself',
+    netTitle: '₹10k spend → ₹35k save/earn → Net +₹25k/mo',
     roadmapTitle: '24-Hour Onboarding Roadmap',
     roadmap: [
       { step: '1', title: 'Provision', body: 'Create society · import flats · invite roles — no hardware.' },

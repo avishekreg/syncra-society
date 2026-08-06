@@ -2,9 +2,9 @@ import React, { useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { ui } from '../../lib/ui'
 import { BROCHURE_LOCALES, type BrochureLocale } from '../../lib/brochureI18n'
-import { MAI_PRODUCT_BROCHURE_PDF } from '../../lib/brandConstants'
+import { openLiveBrochurePrint, type BrochureDeck } from '../../lib/brochurePrint'
 
-export type BrochureFormat = 'exec' | 'full'
+export type BrochureFormat = BrochureDeck
 
 type Props = {
   open: boolean
@@ -16,7 +16,7 @@ type Props = {
 
 /**
  * Language + format picker for product collateral.
- * Portaled to document.body so fixed overlay escapes header stacking contexts.
+ * Always opens the live React brochure print engine — never the stale static PDF.
  */
 export default function BrochureDownloadModal({
   open,
@@ -71,7 +71,6 @@ export default function BrochureDownloadModal({
     }
 
     window.addEventListener('keydown', onKeyDown)
-    // Defer focus so the portal node is painted
     const focusTimer = window.setTimeout(() => closeRef.current?.focus(), 0)
 
     return () => {
@@ -84,21 +83,8 @@ export default function BrochureDownloadModal({
   if (!open || !mounted) return null
 
   function downloadSelected() {
-    if (format === 'full') {
-      const a = document.createElement('a')
-      a.href = MAI_PRODUCT_BROCHURE_PDF
-      a.download = 'mAI-Society-Product-Brochure.pdf'
-      a.rel = 'noopener'
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-      window.open(`/investor-brochure?deck=full&lang=en&print=1`, '_blank', 'noopener,noreferrer')
-      onClose()
-      return
-    }
-
-    const url = `/investor-brochure?deck=exec&lang=${locale}&print=1&autoprint=1`
-    window.open(url, '_blank', 'noopener,noreferrer')
+    const deckLocale = format === 'full' ? 'en' : locale
+    openLiveBrochurePrint({ deck: format, locale: deckLocale, autoprint: true })
     onClose()
   }
 
@@ -132,13 +118,13 @@ export default function BrochureDownloadModal({
           </svg>
         </button>
 
-        <p className={ui.eyebrow}>Sales collateral</p>
+        <p className="text-[10px] font-semibold uppercase text-syncra-accent sm:text-[11px]">Sales collateral</p>
         <h2 id={titleId} className={`mt-2 pr-10 ${ui.headingLg}`}>
           Download brochure
         </h2>
         <p className={`mt-2 ${ui.body}`}>
-          Choose language and format. The Quick Exec Deck is a 4-page board brief in your selected language —
-          open the print dialog and choose “Save as PDF”.
+          Opens the live brochure engine (not a cached static file). Use the print dialog → “Save as PDF” for a fresh
+          export every time.
         </p>
 
         <fieldset className="mt-6 space-y-2">
@@ -181,7 +167,7 @@ export default function BrochureDownloadModal({
             <span>
               <span className="block text-sm font-semibold text-syncra-primary">Quick Exec Deck (4 Pages)</span>
               <span className="mt-0.5 block text-xs text-slate-500">
-                Regional board brief — EN / हिंदी / বাংলা / मराठी / தமிழ் / తెలుగు
+                Live board brief — EN / हिंदी / বাংলা / मराठी / தமிழ் / తెలుగు
               </span>
             </span>
           </label>
@@ -194,9 +180,9 @@ export default function BrochureDownloadModal({
               onChange={() => setFormat('full')}
             />
             <span>
-              <span className="block text-sm font-semibold text-syncra-primary">Full Technical Guide</span>
+              <span className="block text-sm font-semibold text-syncra-primary">Full Technical Guide (18 Pages)</span>
               <span className="mt-0.5 block text-xs text-slate-500">
-                Complete English product brochure (PDF + printable web)
+                Live English masterguide — architecture, ROI framework, modules
               </span>
             </span>
           </label>

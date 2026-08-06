@@ -80,7 +80,8 @@ async function main() {
 
     const page = await browser.newPage()
     await page.setViewport({ width: 1200, height: 1600, deviceScaleFactor: 2 })
-    await page.goto(`${BASE}/investor-brochure?print=1`, {
+    const exportUrl = `${BASE}/investor-brochure?deck=full&lang=en&print=1&t=${Date.now()}&cb=${Date.now()}`
+    await page.goto(exportUrl, {
       waitUntil: 'networkidle0',
       timeout: 120000
     })

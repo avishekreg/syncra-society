@@ -10,9 +10,15 @@ export const MAI_BRAND_BLUE = '#0052CC'
 /** Canonical production web app origin (Vercel). */
 export const MAI_PRODUCTION_ORIGIN = 'https://maisociety.vercel.app'
 export const MAI_PRODUCTION_HOST = 'maisociety.vercel.app'
-/** Product / sales brochure (static PDF in /public). */
-export const MAI_PRODUCT_BROCHURE_PDF = '/downloads/investor-brochure.pdf'
+/**
+ * Live brochure print engine (React). Prefer `buildLiveBrochurePrintUrl` from brochurePrint.ts
+ * so every download cache-busts. Do not serve /public/downloads/investor-brochure.pdf for sales CTAs —
+ * that static file goes stale.
+ */
+export const MAI_PRODUCT_BROCHURE_PDF = '/investor-brochure?deck=full&print=1&autoprint=1'
 export const MAI_PRODUCT_BROCHURE_FILENAME = 'mAI-Society-Product-Brochure.pdf'
+/** @deprecated Legacy static path — do not use for downloads. */
+export const MAI_PRODUCT_BROCHURE_STATIC_PDF = '/downloads/investor-brochure.pdf'
 /** @deprecated Use MAI_PRODUCT_BROCHURE_PDF */
 export const MAI_INVESTOR_BROCHURE_PDF = MAI_PRODUCT_BROCHURE_PDF
 /** @deprecated Use MAI_PRODUCT_BROCHURE_FILENAME */
