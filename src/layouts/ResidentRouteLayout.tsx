@@ -25,6 +25,7 @@ const RESIDENT_PAGE_TITLES: Record<string, string> = {
   '/resident/smart-parking': 'Smart Parking',
   '/resident/green-society': 'Green Society',
   '/resident/mai-space': 'mAI Space',
+  '/resident/mai-maintain': 'mAI Maintain',
   '/resident/notices': 'Notices',
   '/resident/activity': 'Activity',
   '/resident/surveys': 'Surveys',

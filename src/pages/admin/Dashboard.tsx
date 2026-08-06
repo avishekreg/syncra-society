@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../../providers/AuthProvider'
 import { isGlobalSuperAdmin } from '../../lib/roles'
 import { listComplaintsForSociety } from '../../api/complaints'
 import { listVisitorLogs } from '../../api/visitorLogs'
 import SocietyFeatureCards from '../../components/features/SocietyFeatureCards'
 import { BrochureDownloadTrigger } from '../../components/brochure/BrochureDownloadModal'
+import { useFeatureFlags } from '../../providers/FeatureFlagsProvider'
+import { ensureDemoInfraIfEmpty, getInfraRadarSummary } from '../../services/maintainService'
 import { ui } from '../../lib/ui'
 
 function StatCard({ label, value, hint }: { label: string; value: string | number; hint: string }) {
@@ -20,8 +22,12 @@ function StatCard({ label, value, hint }: { label: string; value: string | numbe
 
 export default function AdminDashboard() {
   const { user, showcaseData, currentSocietyId } = useAuth()
+  const { isEnabled } = useFeatureFlags()
   const [activeTickets, setActiveTickets] = useState(0)
   const [pendingApprovals, setPendingApprovals] = useState(0)
+  const [maintainRed, setMaintainRed] = useState(0)
+  const [maintainNoc, setMaintainNoc] = useState(0)
+  const maintainOn = isEnabled('mai_maintain')
 
   useEffect(() => {
     if (!currentSocietyId) return
@@ -41,6 +47,25 @@ export default function AdminDashboard() {
       }
     })()
   }, [currentSocietyId])
+
+  useEffect(() => {
+    if (!currentSocietyId || !maintainOn) {
+      setMaintainRed(0)
+      setMaintainNoc(0)
+      return
+    }
+    void (async () => {
+      try {
+        await ensureDemoInfraIfEmpty(currentSocietyId)
+        const summary = await getInfraRadarSummary(currentSocietyId)
+        setMaintainRed(summary.redFlags)
+        setMaintainNoc(summary.nocPressure)
+      } catch {
+        setMaintainRed(0)
+        setMaintainNoc(0)
+      }
+    })()
+  }, [currentSocietyId, maintainOn])
 
   if (!user) {
     return <div className={ui.loading}>Loading mAI Society…</div>
@@ -84,6 +109,24 @@ export default function AdminDashboard() {
           hint="Visitor entry requests waiting for resident or guard approval."
         />
       </section>
+
+      {maintainOn ? (
+        <section className={ui.card}>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className={ui.eyebrow}>mAI Maintain · Infrastructure radar</p>
+              <h2 className={`mt-1 ${ui.heading}`}>Statutory safety pressure</h2>
+              <p className={`mt-1 ${ui.body}`}>
+                {maintainRed} red safety flag{maintainRed === 1 ? '' : 's'} · {maintainNoc} NOC item
+                {maintainNoc === 1 ? '' : 's'} due within 45 days (Lift / DG / Fire).
+              </p>
+            </div>
+            <Link to="/admin/maintain" className={ui.btnPrimary}>
+              Open Maintain Radar
+            </Link>
+          </div>
+        </section>
+      ) : null}
 
       <SocietyFeatureCards audience="rwa" showLocked />
     </div>

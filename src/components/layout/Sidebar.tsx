@@ -5,6 +5,7 @@ import SyncraBrandLogo from '../brand/SyncraBrandLogo'
 import MaiSocietyWordmark from '../brand/MaiSocietyWordmark'
 import { useAuth } from '../../providers/AuthProvider'
 import { useFeatureFlags } from '../../providers/FeatureFlagsProvider'
+import { isPublicFacingModule } from '../../config/moduleRegistry'
 import { usePlatformConfig } from '../../providers/PlatformConfigProvider'
 import { useSocietyBranding } from '../../hooks/useSocietyBranding'
 import { isGlobalSuperAdmin, isRwaStaff } from '../../lib/roles'
@@ -265,10 +266,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
     '/resident/kid-safety',
     '/resident/sos',
     '/resident/intelligence',
-    '/resident/find-asset',
-    '/resident/paired-assets',
-    '/resident/green-society',
-    '/resident/mai-space',
+    '/resident/mai-maintain',
     '/resident/helpdesk',
     '/resident/visitor-logs',
     '/resident/notices',
@@ -286,8 +284,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
     '/admin/amenities',
     '/admin/emergency-logs',
     '/admin/audit',
-    '/admin/landscape',
-    '/admin/interior-partners',
+    '/admin/maintain',
     '/admin/configuration',
     ...workspacePaths
   ]
@@ -376,18 +373,11 @@ export default function Sidebar({ children, title }: SidebarProps) {
             <AccordionNavLink to="/resident/intelligence" className={navLinkClass}>
               Intelligence Hub
             </AccordionNavLink>
-            <AccordionNavLink to="/resident/find-asset" className={navLinkClass}>
-              mAI Find
-            </AccordionNavLink>
-            <AccordionNavLink to="/resident/paired-assets" className={navLinkClass}>
-              Paired devices
-            </AccordionNavLink>
-            <AccordionNavLink to="/resident/green-society" className={navLinkClass}>
-              Green Society
-            </AccordionNavLink>
-            <AccordionNavLink to="/resident/mai-space" className={navLinkClass}>
-              mAI Space
-            </AccordionNavLink>
+            {featureEnabled('mai_maintain') && isPublicFacingModule('mai_maintain') && (
+              <AccordionNavLink to="/resident/mai-maintain" className={navLinkClass}>
+                mAI Maintain
+              </AccordionNavLink>
+            )}
             {moduleEnabled('helpdesk') && (
               <AccordionNavLink to="/resident/helpdesk" className={navLinkClass}>
                 Smart Helpdesk
@@ -551,12 +541,11 @@ export default function Sidebar({ children, title }: SidebarProps) {
                 <SidebarSubNavLink to="/admin/audit" className={subNavLinkClass}>
                   mAI Auditor
                 </SidebarSubNavLink>
-                <SidebarSubNavLink to="/admin/landscape" className={subNavLinkClass}>
-                  Landscape & Botanist
-                </SidebarSubNavLink>
-                <SidebarSubNavLink to="/admin/interior-partners" className={subNavLinkClass}>
-                  Interior Partners
-                </SidebarSubNavLink>
+                {featureEnabled('mai_maintain') && isPublicFacingModule('mai_maintain') && (
+                  <SidebarSubNavLink to="/admin/maintain" className={subNavLinkClass}>
+                    mAI Maintain Radar
+                  </SidebarSubNavLink>
+                )}
                 {canAccessSocietyConfiguration(user) && (
                   <SidebarSubNavLink to="/admin/configuration" className={subNavLinkClass}>
                     Society Configuration
@@ -604,18 +593,11 @@ export default function Sidebar({ children, title }: SidebarProps) {
                 <SidebarSubNavLink to="/resident/intelligence" className={subNavLinkClass}>
                   Intelligence Hub
                 </SidebarSubNavLink>
-                <SidebarSubNavLink to="/resident/find-asset" className={subNavLinkClass}>
-                  mAI Find
-                </SidebarSubNavLink>
-                <SidebarSubNavLink to="/resident/paired-assets" className={subNavLinkClass}>
-                  Paired devices
-                </SidebarSubNavLink>
-                <SidebarSubNavLink to="/resident/green-society" className={subNavLinkClass}>
-                  Green Society
-                </SidebarSubNavLink>
-                <SidebarSubNavLink to="/resident/mai-space" className={subNavLinkClass}>
-                  mAI Space
-                </SidebarSubNavLink>
+                {featureEnabled('mai_maintain') && isPublicFacingModule('mai_maintain') && (
+                  <SidebarSubNavLink to="/resident/mai-maintain" className={subNavLinkClass}>
+                    mAI Maintain
+                  </SidebarSubNavLink>
+                )}
                 {moduleEnabled('helpdesk') && (
                   <SidebarSubNavLink to="/resident/helpdesk" className={subNavLinkClass}>
                     Smart Helpdesk

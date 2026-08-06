@@ -35,12 +35,9 @@ export function resolveActiveNavGroup(pathname: string): string | null {
     pathname.startsWith('/resident/kid-safety') ||
     pathname.startsWith('/resident/sos') ||
     pathname.startsWith('/resident/intelligence') ||
-    pathname.startsWith('/resident/find-asset') ||
-    pathname.startsWith('/resident/paired-assets') ||
+    pathname.startsWith('/resident/mai-maintain') ||
     pathname.startsWith('/resident/parking-marketplace') ||
     pathname.startsWith('/resident/smart-parking') ||
-    pathname.startsWith('/resident/green-society') ||
-    pathname.startsWith('/resident/mai-space') ||
     pathname.startsWith('/resident/helpdesk') ||
     pathname.startsWith('/resident/visitor-logs') ||
     pathname.startsWith('/resident/notices') ||

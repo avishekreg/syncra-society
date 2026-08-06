@@ -90,46 +90,12 @@ const MODULES = [
       'Parents set expected return windows in the app; guards log plate flags by hand. No GPS tags, beacons, or cameras required.'
   },
   {
-    id: 'botanist',
-    icon: '🌿',
-    title: 'mAI Botanist',
-    blurb: 'AI plant health diagnostics, QR-based tree tagging, and adoption drives.',
-    detail: 'Residents scan society trees for carbon metrics and care plans — RWA dispatches weather-aware gardening tasks.'
-  },
-  {
-    id: 'compost',
-    icon: '🍃',
-    title: 'Zero-Waste Compost Distribution',
-    blurb: 'Auto-tracking organic waste composting to resident garden delivery.',
-    detail: 'Publish compost batches from society waste and fulfill flat doorstep orders in kilograms.'
-  },
-  {
-    id: 'plant-swap',
-    icon: '🪴',
-    title: 'Plant & Seed Swap',
-    blurb: 'Hyperlocal community green exchange for cuttings, pots, and seeds.',
-    detail: 'Neighbors list spare cuttings and saplings; claim within your verified society graph only.'
-  },
-  {
-    id: 'tv-sizing',
-    icon: '📐',
-    title: 'Smart TV & Sound Sizing',
-    blurb: 'Enter viewing distance for recommended display inches and speaker tips.',
-    detail: 'Simple distance ÷ 1.6 formula snaps to retail sizes like 43", 55", and 65" — tape measure or phone ruler, no room cameras.'
-  },
-  {
-    id: 'furniture-fit',
-    icon: '🛋️',
-    title: 'Furniture Layout Intelligence',
-    blurb: 'Walkway-aware sofa & decor sizing before buying.',
-    detail: 'L-shaped vs 3-seater guidance with clearance rules for living rooms, bedrooms, and balconies.'
-  },
-  {
-    id: 'interior-leads',
-    icon: '🎨',
-    title: 'Verified Interior Lead Matching',
-    blurb: 'Instant connection with top RWA-approved interior decorators.',
-    detail: '1-tap consultation requests route to verified woodcraft, electronics, and lighting partners.'
+    id: 'maintain',
+    icon: '🔧',
+    title: 'mAI Maintain',
+    blurb: 'Appliance service radar + Lift/DG/Fire NOC infrastructure tracker — zero hardware.',
+    detail:
+      'Residents track RO/AC AMC cycles; RWAs get red safety flags before statutory NOCs expire. Technician referrals monetize the platform.'
   },
   {
     id: 'mailist-rent',

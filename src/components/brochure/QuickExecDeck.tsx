@@ -2,7 +2,12 @@ import React, { useId, useMemo } from 'react'
 import QRCode from 'qrcode'
 import { getExecDeckCopy, type BrochureLocale } from '../../lib/brochureI18n'
 import { MAI_PRODUCTION_ORIGIN, SYNCRA_LEGAL_ENTITY } from '../../lib/brandConstants'
-import { CostComparisonTable, NetProfitBanner, PaysForItselfGrid } from './BrochureRoiBlocks'
+import {
+  CostComparisonTable,
+  HiddenWasteGrid,
+  NetProfitBanner,
+  PaysForItselfGrid
+} from './BrochureRoiBlocks'
 
 type Props = { locale?: BrochureLocale }
 
@@ -98,7 +103,7 @@ function PageShell({
   children: React.ReactNode
 }) {
   return (
-    <article className="brochure-page exec-a4" data-brochure-page>
+    <article className="brochure-page pdf-page exec-a4" data-brochure-page>
       <header className="exec-hdr">
         <div className="exec-hdr-brand">
           <MaiLogoMark size={30} />
@@ -215,6 +220,7 @@ export default function QuickExecDeck({ locale = 'en' }: Props) {
           Board-ready cost justification: subscription is a net-profit line, not another expense.
         </p>
 
+        <HiddenWasteGrid title={copy.close.wasteTitle} />
         <PaysForItselfGrid title={copy.close.paysTitle} />
         <NetProfitBanner title={copy.close.netTitle} />
 

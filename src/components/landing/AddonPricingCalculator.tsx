@@ -3,9 +3,9 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../providers/AuthProvider'
 import { formatInr, type PlatformPricingConfig } from '../../lib/platformPricing'
 import {
-  LANDING_ADDONS,
   LANDING_BASE_INCLUSIONS,
   buildOnboardingHref,
+  getPublicLandingAddons,
   saveLandingCheckoutIntent,
   type LandingAddonId
 } from '../../lib/landingAddons'
@@ -22,7 +22,10 @@ function resolveTierForFlats(pricing: PlatformPricingConfig, flats: number) {
   return pricing.tiers.find((t) => t.id === 'tier3') ?? pricing.tiers[pricing.tiers.length - 1]
 }
 
-function resolveAddonPrice(addon: (typeof LANDING_ADDONS)[number], pricing: PlatformPricingConfig) {
+function resolveAddonPrice(
+  addon: ReturnType<typeof getPublicLandingAddons>[number],
+  pricing: PlatformPricingConfig
+) {
   if (addon.id === 'whatsapp_automation') {
     return pricing.premiumAddons.whatsapp.baseMonthlyPriceInr
   }
@@ -45,7 +48,7 @@ export default function AddonPricingCalculator({ pricing }: AddonPricingCalculat
 
   const pricedAddons = useMemo(
     () =>
-      LANDING_ADDONS.map((addon) => ({
+      getPublicLandingAddons().map((addon) => ({
         ...addon,
         monthlyPriceInr: resolveAddonPrice(addon, pricing)
       })),

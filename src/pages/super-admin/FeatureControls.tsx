@@ -13,6 +13,7 @@ import {
   getFeatureModuleMeta,
   type FeatureModuleName
 } from '../../lib/featureModules'
+import { getModuleRegistryEntry, isDraftAdminOnlyModule } from '../../config/moduleRegistry'
 import type { Society } from '../../types/db'
 import { ui } from '../../lib/ui'
 
@@ -109,7 +110,8 @@ export default function SuperAdminFeatureControlsPage() {
         <h2 className={`mt-2 ${ui.headingLg}`}>Feature controls</h2>
         <p className={`mt-2 max-w-3xl ${ui.body}`}>
           Select a society first. Toggles read and write only that society&apos;s{' '}
-          <code className="text-xs">feature_toggles</code> rows — never a global matrix.
+          <code className="text-xs">feature_toggles</code> rows — never a global matrix. Modules marked{' '}
+          <strong>Draft</strong> stay Super Admin–only and are hidden from resident/RWA nav and landing.
         </p>
       </section>
 
@@ -177,10 +179,16 @@ export default function SuperAdminFeatureControlsPage() {
                   )
                   const checked = Boolean(row?.isEnabled)
                   const busy = savingModule === module.key
+                  const draft = isDraftAdminOnlyModule(module.key)
+                  const draftNote = getModuleRegistryEntry(module.key)?.draftNote
                   return (
                     <div
                       key={module.key}
-                      className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-syncra-surface-alt/60 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
+                      className={`flex flex-col gap-3 rounded-xl border px-4 py-4 sm:flex-row sm:items-center sm:justify-between ${
+                        draft
+                          ? 'border-amber-300 bg-amber-50/70'
+                          : 'border-slate-200 bg-syncra-surface-alt/60'
+                      }`}
                     >
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
@@ -194,6 +202,11 @@ export default function SuperAdminFeatureControlsPage() {
                           >
                             {module.tier}
                           </span>
+                          {draft ? (
+                            <span className="rounded-full bg-amber-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950">
+                              Draft · Admin only
+                            </span>
+                          ) : null}
                           {row?.source ? (
                             <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
                               {row.source.replace('_', ' ')}
@@ -201,6 +214,7 @@ export default function SuperAdminFeatureControlsPage() {
                           ) : null}
                         </div>
                         <p className="mt-1 text-sm text-slate-600">{module.description}</p>
+                        {draftNote ? <p className="mt-1 text-xs text-amber-800">{draftNote}</p> : null}
                         <p className="mt-1 font-mono text-[11px] text-slate-400">{module.key}</p>
                       </div>
                       <div className="flex items-center gap-3">

@@ -5,12 +5,13 @@ import {
   FEATURE_MODULE_CATALOG,
   type FeatureModuleName
 } from '../../lib/featureModules'
+import { isPublicFacingModule } from '../../config/moduleRegistry'
 import { ui } from '../../lib/ui'
 
 const DASHBOARD_MODULES: FeatureModuleName[] = [
+  'mai_maintain',
   'smart_parking',
-  'vendor_sla',
-  'resident_marketplace',
+  'mai_auditor',
   'ai_rwa_audit',
   'whatsapp_automation'
 ]
@@ -46,11 +47,13 @@ export default function SocietyFeatureCards({
     )
   }
 
-  const cards = DASHBOARD_MODULES.map((key) => {
-    const meta = FEATURE_MODULE_CATALOG.find((item) => item.key === key)!
-    const enabled = isEnabled(key)
-    return { meta, enabled, href: resolveHref(key, audience) }
-  }).filter((card) => card.enabled || showLocked)
+  const cards = DASHBOARD_MODULES.filter((key) => isPublicFacingModule(key))
+    .map((key) => {
+      const meta = FEATURE_MODULE_CATALOG.find((item) => item.key === key)!
+      const enabled = isEnabled(key)
+      return { meta, enabled, href: resolveHref(key, audience) }
+    })
+    .filter((card) => card.enabled || showLocked)
 
   if (loading && cards.every((card) => !card.enabled)) {
     return (

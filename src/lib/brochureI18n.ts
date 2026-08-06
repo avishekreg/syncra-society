@@ -110,9 +110,9 @@ const MODULE_CARDS_EN: ExecModuleCard[] = [
     bullets: ['Hourly vacant-bay listings', 'Monthly neighbor leases', 'UPI → owner wallet credits']
   },
   {
-    icon: '🌿',
-    title: 'mAI Botanist',
-    bullets: ['QR plant tags · care plans', 'Weather-aware garden tasks', 'Compost & neighbor swap']
+    icon: '🔧',
+    title: 'mAI Maintain',
+    bullets: ['RO/AC/geyser service radar', 'Lift · DG · Fire NOC tracker', 'Verified technician referrals']
   }
 ]
 

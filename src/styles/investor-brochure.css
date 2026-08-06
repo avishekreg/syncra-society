@@ -53,10 +53,13 @@
   gap: 1.25rem;
 }
 
-.brochure-page {
-  width: 100%;
+.brochure-page,
+.pdf-page {
+  width: 210mm;
   max-width: 210mm;
+  height: 297mm;
   min-height: 297mm;
+  padding: 0;
   box-sizing: border-box;
   border: 1px solid #e2e8f0;
   border-radius: 0.75rem;
@@ -67,14 +70,18 @@
   page-break-after: always;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   overflow: hidden;
-  background: #fff;
+  background: #ffffff;
 }
 
 .brochure-page-inner {
   flex: 1 1 auto;
-  padding: 10mm 11mm 8mm;
+  padding: 18mm 20mm;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 /* —— Exec A4 shell —— */
@@ -141,8 +148,9 @@
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  gap: 5mm;
-  padding: 8mm 16mm 6mm;
+  justify-content: space-between;
+  gap: 4mm;
+  padding: 12mm 20mm 10mm;
   box-sizing: border-box;
   min-height: 0;
   overflow: hidden;
@@ -203,9 +211,9 @@
 .exec-lead,
 .exec-body-text {
   margin: 6px 0 0;
-  font-size: 11.5px;
+  font-size: 12px;
   line-height: 1.45;
-  color: #475569;
+  color: #334155;
   letter-spacing: normal;
 }
 
@@ -253,8 +261,9 @@
   flex: 1;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 14px 18px;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
   box-sizing: border-box;
 }
 
@@ -442,17 +451,19 @@
 .exec-mod-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
-  margin-top: 10px;
+  gap: 18px;
+  margin-top: 12px;
   flex: 1 1 auto;
+  align-content: stretch;
 }
 
 .exec-mod-card {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-left: 4px solid #2563eb;
-  border-radius: 10px;
-  padding: 14px 18px;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 0;
   box-sizing: border-box;
 }
 
@@ -492,8 +503,9 @@
 .exec-pad-card {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 14px 18px;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
   box-sizing: border-box;
 }
 
@@ -690,7 +702,9 @@
   }
 
   .brochure-page,
-  .exec-a4 {
+  .pdf-page,
+  .exec-a4,
+  .master-a4 {
     width: 210mm !important;
     max-width: 210mm !important;
     height: 297mm !important;
@@ -699,6 +713,9 @@
     border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
     overflow: hidden !important;
     break-after: page;
     page-break-after: always;
@@ -827,8 +844,9 @@
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  gap: 5mm;
-  padding: 8mm 16mm 6mm;
+  justify-content: space-between;
+  gap: 4mm;
+  padding: 12mm 20mm 10mm;
   box-sizing: border-box;
   min-height: 0;
   overflow: hidden;
@@ -990,25 +1008,28 @@
 
 .master-grid-2 {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 8px;
-  flex: 1;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  margin-top: 10px;
+  flex: 1 1 auto;
+  align-content: stretch;
 }
 
 .master-grid-3 {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px;
-  margin-top: 8px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 10px;
 }
 
 .master-spec-card {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-left: 4px solid #2563eb;
-  border-radius: 10px;
-  padding: 14px 18px;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 0;
+  box-sizing: border-box;
 }
 
 .master-spec-card h3 {
@@ -1377,14 +1398,15 @@
 
 .roi-grid-3 {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 14px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
 }
 
 .roi-waste-card,
 .roi-save-card {
-  border-radius: 10px;
-  padding: 14px 18px;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
   border: 1px solid #e2e8f0;
   background: #f8fafc;
   box-sizing: border-box;
@@ -1550,8 +1572,13 @@
 
 .exec-a4 .roi-waste-card,
 .exec-a4 .roi-save-card {
-  padding: 14px 18px;
-  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 0;
+  border-radius: 12px;
+}
+
+.exec-a4 .roi-grid-3 {
+  gap: 12px;
 }
 
 .exec-a4 .roi-card-title {

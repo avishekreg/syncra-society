@@ -13,6 +13,8 @@ import AdminEmergencyLogsPage from '../pages/admin/EmergencyLogsPage'
 import AdminAuditPage from '../pages/admin/AuditPage'
 import AdminLandscapePage from '../pages/admin/LandscapePage'
 import AdminInteriorPartnersPage from '../pages/admin/InteriorPartnersPage'
+import AdminMaintainPage from '../pages/admin/MaintainPage'
+import FeatureGuard from '../components/features/FeatureGuard'
 import TierGuard from './TierGuard'
 import RoleGuard from './RoleGuard'
 
@@ -116,7 +118,9 @@ export default function AdminRouter() {
           element={
             <RoleGuard allow={['president', 'secretary']}>
               <TierGuard requiredTier="tier2">
-                <AdminLandscapePage />
+                <FeatureGuard module="mai_botanist">
+                  <AdminLandscapePage />
+                </FeatureGuard>
               </TierGuard>
             </RoleGuard>
           }
@@ -126,7 +130,21 @@ export default function AdminRouter() {
           element={
             <RoleGuard allow={['president', 'secretary']}>
               <TierGuard requiredTier="tier2">
-                <AdminInteriorPartnersPage />
+                <FeatureGuard module="mai_space">
+                  <AdminInteriorPartnersPage />
+                </FeatureGuard>
+              </TierGuard>
+            </RoleGuard>
+          }
+        />
+        <Route
+          path="maintain"
+          element={
+            <RoleGuard allow={['president', 'secretary']}>
+              <TierGuard requiredTier="tier2">
+                <FeatureGuard module="mai_maintain">
+                  <AdminMaintainPage />
+                </FeatureGuard>
               </TierGuard>
             </RoleGuard>
           }

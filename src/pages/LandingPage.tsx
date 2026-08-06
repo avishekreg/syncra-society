@@ -8,8 +8,7 @@ import EnterpriseModulesSection from '../components/landing/EnterpriseModulesSec
 import CoreBasePlanSection from '../components/landing/CoreBasePlanSection'
 import OperationalGatekeeperShowcase from '../components/landing/OperationalGatekeeperShowcase'
 import AutonomousIntelligenceShowcase from '../components/landing/AutonomousIntelligenceShowcase'
-import GreenSocietyShowcase from '../components/landing/GreenSocietyShowcase'
-import MaiSpaceShowcase from '../components/landing/MaiSpaceShowcase'
+import MaiMaintainShowcase from '../components/landing/MaiMaintainShowcase'
 import MaiListShowcase from '../components/landing/MaiListShowcase'
 import AddonPricingCalculator from '../components/landing/AddonPricingCalculator'
 import ExperienceAiAuditModal from '../components/landing/ExperienceAiAuditModal'
@@ -73,8 +72,8 @@ export default function LandingPage() {
               </h2>
               <p className={`mx-auto max-w-2xl text-pretty text-lg leading-relaxed whitespace-normal break-words lg:mx-0 ${ui.body}`}>
                 mAI Society from {SYNCRA_LEGAL_ENTITY} pairs essential RWA operations — billing, notices,
-                gatekeeper, and helpdesk — with licensed zero-hardware add-ons like Elections, WhatsApp AI,
-                Smart Parking, and AI RWA Audit.
+                gatekeeper, and helpdesk — with licensed zero-hardware add-ons like mAI Maintain, mAI Auditor,
+                Smart Parking, Kid Safety, and maiList.
               </p>
             </div>
 
@@ -125,11 +124,9 @@ export default function LandingPage() {
 
         <OperationalGatekeeperShowcase />
 
+        <MaiMaintainShowcase />
+
         <AutonomousIntelligenceShowcase />
-
-        <GreenSocietyShowcase />
-
-        <MaiSpaceShowcase />
 
         <MaiListShowcase />
 

@@ -61,7 +61,10 @@ function MasterPage({
   dark?: boolean
 }) {
   return (
-    <article className={`brochure-page master-a4 ${dark ? 'master-a4--dark' : ''}`} data-brochure-page>
+    <article
+      className={`brochure-page pdf-page master-a4 ${dark ? 'master-a4--dark' : ''}`}
+      data-brochure-page
+    >
       <header className="master-hdr">
         <div className="master-hdr-brand">
           <MaiMark size={26} />
@@ -193,6 +196,7 @@ export default function InvestorBrochureDocument() {
               <li>mAI Auditor flags MoM invoice leakage before dual-sign pay</li>
               <li>Cryptographic 1-Flat-1-Vote + recall motions</li>
               <li>Hourly / monthly parking marketplace with UPI credits</li>
+              <li>mAI Maintain — appliance + Lift/Fire NOC radar</li>
               <li>maiList 1-click syndication to major portals</li>
               <li>Kid safety windows · SOS · WhatsApp rulebook assistant</li>
             </ul>
@@ -361,41 +365,55 @@ export default function InvestorBrochureDocument() {
         </div>
       </MasterPage>
 
-      {/* 10 Botanist */}
+      {/* 10 mAI Maintain — Resident appliances */}
       <MasterPage page={10}>
-        <Kicker>09 · mAI Botanist & Green Society</Kicker>
-        <h2 className="master-h2">Landscape ops without nursery hardware lock-in</h2>
+        <Kicker>09 · mAI Maintain · Resident radar</Kicker>
+        <h2 className="master-h2">Appliance ledger that pays for itself</h2>
+        <p className="master-lead">
+          Zero-hardware service cycles for RO filters, Split ACs, chimneys, and geysers — with push/WhatsApp reminders
+          before due dates or AMC expiry, plus 1-click verified technician referrals.
+        </p>
         <div className="master-grid-2">
-          <SpecCard title="QR plant tags" body="Species, zone, health, adoption — scan on campus walks." accent={EMERALD} />
-          <SpecCard title="Plant doctor" body="Photo / symptom tips → gardener task dispatch." accent={EMERALD} />
-          <SpecCard title="Weather-aware tasks" body="Open-Meteo informed watering / fertilizer schedules." accent={BLUE} />
-          <SpecCard title="Compost & swap" body="Batch publish, doorstep kg orders, neighbor cuttings exchange." accent={BLUE} />
+          <SpecCard title="RO filters · 90-day cycle" body="Auto countdown from last service · AMC expiry alerts." accent={BLUE} />
+          <SpecCard title="Split AC · 180-day cycle" body="Seasonal service windows before summer peak." accent={BLUE} />
+          <SpecCard title="Chimney & geyser" body="Tracked in the flat ledger — no spreadsheets for residents." accent={EMERALD} />
+          <SpecCard
+            title="Technician referrals"
+            body="1-click booking queues local verified AMC partners — resident savings + platform monetization."
+            accent={EMERALD}
+          />
+        </div>
+        <div className="master-callout master-tight-top">
+          Dual benefit: residents avoid emergency breakdowns · societies earn referral revenue without owning a call center.
         </div>
       </MasterPage>
 
-      {/* 11 Space */}
+      {/* 11 mAI Maintain — RWA infrastructure */}
       <MasterPage page={11}>
-        <Kicker>10 · mAI Space Interior Engine</Kicker>
-        <h2 className="master-h2">Buy the right TV and sofa the first time</h2>
+        <Kicker green>10 · mAI Maintain · RWA infrastructure radar</Kicker>
+        <h2 className="master-h2">Zero RWA legal risk on Lift · DG · Fire NOCs</h2>
+        <p className="master-lead">
+          Statutory infrastructure tracking for Presidents — red safety flags before certificates lapse. No IoT sensors.
+        </p>
         <div className="master-grid-2">
           <SpecCard
-            title="TV sizing"
-            body="Viewing distance ÷ 1.6 → retail sizes (43″ / 55″ / 65″). Tape measure only — no room cameras."
+            title="Lift safety audit"
+            body="ARD test logs, wire-rope inspection cycles, Govt Safety NOC expiry warnings."
+            accent="#dc2626"
+          />
+          <SpecCard
+            title="DG set lifecycle"
+            body="Running hours tracker, mobil oil change alerts, battery health logs."
             accent={BLUE}
           />
           <SpecCard
-            title="Acoustics"
-            body="Soundbar vs portable speaker tips by room type — skip surround clutter outdoors."
-            accent={BLUE}
+            title="Fire safety NOC"
+            body="Cylinder refill expiry, hydrant pressure tests, Red Safety Flags on the President dashboard."
+            accent="#dc2626"
           />
           <SpecCard
-            title="Furniture fit"
-            body="L-shape vs 3-seater with walkway clearance to balcony / kitchen."
-            accent={EMERALD}
-          />
-          <SpecCard
-            title="Verified leads"
-            body="1-tap consult to society-approved woodcraft, electronics, and lighting partners."
+            title="Board-ready pressure"
+            body="NOC ≤45-day pressure counters and overdue red flags — explainable in AGM minutes."
             accent={EMERALD}
           />
         </div>
@@ -489,7 +507,7 @@ export default function InvestorBrochureDocument() {
           />
           <SpecCard
             title="Modular feature toggles"
-            body="License elections, auditor, parking, maiList, green, space per society — core stays lean."
+            body="License elections, auditor, parking, maiList, maintain per society — draft modules stay Super Admin only."
             accent={NAVY}
           />
         </div>
@@ -523,7 +541,7 @@ export default function InvestorBrochureDocument() {
           {[
             ['Core', 'Billing · notices · gatekeeper · helpdesk', '₹5k–₹20k/mo band · per-flat + activation'],
             ['Intelligence', 'Auditor · elections · WhatsApp AI · SOS', 'Add-on licenses'],
-            ['Growth', 'Parking · maiList · Botanist · Space · Commute', 'Pay as you enable']
+            ['Growth', 'Parking · maiList · Maintain · Commute', 'Pay as you enable']
           ].map(([t, d, p]) => (
             <div key={t} className="master-price-card">
               <p className="master-price-tier">{t}</p>

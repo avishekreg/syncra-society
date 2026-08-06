@@ -25,6 +25,7 @@ import ResidentPairedAssetsPage from '../pages/resident/PairedAssetsPage'
 import ResidentParkingMarketplacePage from '../pages/resident/ParkingMarketplacePage'
 import ResidentGreenSocietyPage from '../pages/resident/GreenSocietyPage'
 import ResidentMaiSpacePage from '../pages/resident/MaiSpacePage'
+import ResidentMaiMaintainPage from '../pages/resident/MaiMaintainPage'
 import ResidentRentOutPage from '../pages/resident/RentOutPage'
 import ResidentRentalsMarketplacePage from '../pages/resident/RentalsMarketplacePage'
 import NoticesList from '../components/NoticesList'
@@ -74,8 +75,22 @@ export default function ResidentRouter() {
         <Route path="kid-safety" element={<ResidentKidSafetyPage />} />
         <Route path="sos" element={<ResidentSosPage />} />
         <Route path="intelligence" element={<ResidentIntelligencePage />} />
-        <Route path="find-asset" element={<ResidentFindAssetPage />} />
-        <Route path="paired-assets" element={<ResidentPairedAssetsPage />} />
+        <Route
+          path="find-asset"
+          element={
+            <FeatureGuard module="mai_find_asset">
+              <ResidentFindAssetPage />
+            </FeatureGuard>
+          }
+        />
+        <Route
+          path="paired-assets"
+          element={
+            <FeatureGuard module="mai_find_asset">
+              <ResidentPairedAssetsPage />
+            </FeatureGuard>
+          }
+        />
         <Route
           path="parking-marketplace"
           element={
@@ -84,8 +99,30 @@ export default function ResidentRouter() {
             </FeatureGuard>
           }
         />
-        <Route path="green-society" element={<ResidentGreenSocietyPage />} />
-        <Route path="mai-space" element={<ResidentMaiSpacePage />} />
+        <Route
+          path="green-society"
+          element={
+            <FeatureGuard module="mai_botanist">
+              <ResidentGreenSocietyPage />
+            </FeatureGuard>
+          }
+        />
+        <Route
+          path="mai-space"
+          element={
+            <FeatureGuard module="mai_space">
+              <ResidentMaiSpacePage />
+            </FeatureGuard>
+          }
+        />
+        <Route
+          path="mai-maintain"
+          element={
+            <FeatureGuard module="mai_maintain">
+              <ResidentMaiMaintainPage />
+            </FeatureGuard>
+          }
+        />
         <Route path="notices" element={<NoticesPage />} />
         <Route path="rules-guidebook" element={<ResidentRulesGuidebookPage />} />
         <Route path="activity" element={<ResidentActivityPage />} />

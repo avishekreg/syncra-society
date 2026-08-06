@@ -3,10 +3,10 @@ import { ui } from '../../lib/ui'
 
 const ITEMS = [
   {
-    icon: '🕵️',
-    title: 'mAI Find',
+    icon: '🔧',
+    title: 'mAI Maintain',
     description:
-      'Paired Bluetooth wearables with RSSI last-seen + proximity ping, plus a Gate 1 photo Lost & Found for keys and wallets.'
+      'Appliance service radar for residents plus Lift / DG / Fire NOC statutory tracker for the RWA — zero hardware.'
   },
   {
     icon: '📊',
@@ -14,9 +14,9 @@ const ITEMS = [
     description: 'Invoice & utility MoM variance flags from the society expense ledger — before human payment approval.'
   },
   {
-    icon: '⚖️',
-    title: 'mAI Nyaya',
-    description: 'Dispute drafts grounded in your society rulebook, finalized only when both flats digitally sign.'
+    icon: '🅿️',
+    title: 'Smart Parking Monetization',
+    description: 'Hourly visitor bay rent and monthly neighbor leases with UPI owner credits — no sensors.'
   },
   {
     icon: '🗳️',
@@ -37,8 +37,8 @@ export default function AutonomousIntelligenceShowcase() {
           </span>
         </h3>
         <p className={`mx-auto max-w-2xl text-pretty whitespace-normal break-words ${ui.body}`}>
-          Predictive finance flags, peer energy credits, cryptographic recall votes, family check-in watchlists, AI
-          mediation, and a neighbor tip board for lost items — all phone-first, with no gadgets to buy.
+          Infrastructure NOC radar, predictive finance flags, parking earnings, and cryptographic recall votes — all
+          phone-first, with no gadgets to buy.
         </p>
       </div>
 

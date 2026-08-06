@@ -1,4 +1,5 @@
 import type { FeatureModuleName } from './featureModules'
+import { isPublicFacingModule } from '../config/moduleRegistry'
 
 export const LANDING_CHECKOUT_INTENT_KEY = 'mai_landing_checkout_intent'
 
@@ -22,6 +23,7 @@ export type LandingAddonId =
   | 'mai_botanist'
   | 'mai_space'
   | 'mai_list'
+  | 'mai_maintain'
 
 export type LandingAddon = {
   id: LandingAddonId
@@ -121,6 +123,14 @@ export const LANDING_ADDONS: LandingAddon[] = [
     shortLabel: 'mAI Auditor',
     description: 'Predictive financial leakage detection & vendor invoice auditing.',
     monthlyPriceInr: 399
+  },
+  {
+    id: 'mai_maintain',
+    moduleName: 'mai_maintain',
+    label: 'mAI Maintain (Infrastructure & Appliance Radar)',
+    shortLabel: 'mAI Maintain',
+    description: 'Lift/Fire NOC radar + RO/AC service reminders + technician referral monetization.',
+    monthlyPriceInr: 349
   },
   {
     id: 'mai_find_asset',
@@ -230,4 +240,9 @@ export function buildOnboardingHref(intent: LandingCheckoutIntent) {
   params.set('tier', intent.tierId)
   if (intent.addons.length) params.set('addons', intent.addons.join(','))
   return `/onboarding?${params.toString()}`
+}
+
+/** Public calculator / landing — excludes Super Admin draft modules. */
+export function getPublicLandingAddons(): LandingAddon[] {
+  return LANDING_ADDONS.filter((addon) => isPublicFacingModule(addon.moduleName))
 }

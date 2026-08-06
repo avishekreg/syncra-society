@@ -19,7 +19,8 @@ export const FEATURE_MODULE_KEYS = [
   'mai_find_asset',
   'mai_botanist',
   'mai_space',
-  'mai_list'
+  'mai_list',
+  'mai_maintain'
 ] as const
 
 export type FeatureModuleName = (typeof FEATURE_MODULE_KEYS)[number]
@@ -209,6 +210,16 @@ export const FEATURE_MODULE_CATALOG: FeatureModuleMeta[] = [
     defaultEnabled: false,
     routeHints: ['/resident/my-flat/rent-out', '/resident/rentals-marketplace'],
     dashboardCta: 'maiList'
+  },
+  {
+    key: 'mai_maintain',
+    label: 'mAI Maintain',
+    description:
+      'Zero-hardware appliance service radar + RWA lift/DG/fire statutory NOC tracker with technician referrals.',
+    tier: 'premium',
+    defaultEnabled: true,
+    routeHints: ['/resident/mai-maintain', '/admin/maintain'],
+    dashboardCta: 'mAI Maintain'
   }
 ]
 
@@ -274,7 +285,10 @@ export function normalizeLicensedModule(raw: string | null | undefined): Feature
     interior: 'mai_space',
     mai_list: 'mai_list',
     mailist: 'mai_list',
-    rental_syndication: 'mai_list'
+    rental_syndication: 'mai_list',
+    mai_maintain: 'mai_maintain',
+    maintain: 'mai_maintain',
+    maintenance_radar: 'mai_maintain'
   }
   return aliases[key] ?? (isFeatureModuleName(key) ? key : null)
 }

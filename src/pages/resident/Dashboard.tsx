@@ -20,6 +20,7 @@ import {
   getParkingWallet,
   setEarnFromMySlot
 } from '../../api/parkingMonetizationService'
+import { getMaintainDashboardSummary } from '../../services/maintainService'
 import { ui } from '../../lib/ui'
 
 const DEFAULT_EMERGENCY_DIRECTORY = [
@@ -42,9 +43,12 @@ export default function ResidentDashboard() {
   const [suggestiveAlerts, setSuggestiveAlerts] = useState<SuggestiveNotification[]>([])
   const [earnOn, setEarnOn] = useState(false)
   const [parkingEarnings, setParkingEarnings] = useState(0)
+  const [maintainDue, setMaintainDue] = useState(0)
+  const [maintainOverdue, setMaintainOverdue] = useState(0)
   const flatNumber = user?.flatNumber
   const isLoading = entries === null
   const parkingLicensed = isEnabled('smart_parking')
+  const maintainLicensed = isEnabled('mai_maintain')
 
   const myUnit = useMemo(() => {
     if (!showcaseData || !flatNumber) return null
@@ -114,6 +118,23 @@ export default function ResidentDashboard() {
       .then((w) => setParkingEarnings(Number(w?.lifetime_earned_inr || 0)))
       .catch(() => setParkingEarnings(0))
   }, [currentSocietyId, user?.id, parkingLicensed])
+
+  useEffect(() => {
+    if (!currentSocietyId || !flatNumber || !maintainLicensed) {
+      setMaintainDue(0)
+      setMaintainOverdue(0)
+      return
+    }
+    void getMaintainDashboardSummary(currentSocietyId, flatNumber)
+      .then((s) => {
+        setMaintainDue(s.dueSoon)
+        setMaintainOverdue(s.overdue)
+      })
+      .catch(() => {
+        setMaintainDue(0)
+        setMaintainOverdue(0)
+      })
+  }, [currentSocietyId, flatNumber, maintainLicensed])
 
   useEffect(() => {
     if (!currentSocietyId || !user?.id || !flatNumber) {
@@ -213,6 +234,27 @@ export default function ResidentDashboard() {
                 Marketplace
               </Link>
             </div>
+          </div>
+        </section>
+      ) : null}
+
+      {maintainLicensed && flatNumber ? (
+        <section className={ui.card}>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className={ui.eyebrow}>mAI Maintain</p>
+              <h2 className={`mt-1 ${ui.heading}`}>Appliance service radar</h2>
+              <p className={`mt-1 ${ui.body}`}>
+                {maintainOverdue > 0
+                  ? `${maintainOverdue} overdue · ${maintainDue} due soon`
+                  : maintainDue > 0
+                    ? `${maintainDue} service(s) due in the next 14 days`
+                    : 'All registered appliances are on schedule'}
+              </p>
+            </div>
+            <Link to="/resident/mai-maintain" className={ui.btnPrimary}>
+              Open mAI Maintain
+            </Link>
           </div>
         </section>
       ) : null}
