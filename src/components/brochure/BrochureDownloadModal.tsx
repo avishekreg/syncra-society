@@ -1,4 +1,5 @@
-import React, { useEffect, useId, useState } from 'react'
+import React, { useEffect, useId, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { ui } from '../../lib/ui'
 import { BROCHURE_LOCALES, type BrochureLocale } from '../../lib/brochureI18n'
 import { MAI_PRODUCT_BROCHURE_PDF } from '../../lib/brandConstants'
@@ -15,8 +16,7 @@ type Props = {
 
 /**
  * Language + format picker for product collateral.
- * Exec decks open the live multilingual React deck in print layout (Save as PDF).
- * Full guide links the English technical PDF (or opens the English web brochure).
+ * Portaled to document.body so fixed overlay escapes header stacking contexts.
  */
 export default function BrochureDownloadModal({
   open,
@@ -25,8 +25,15 @@ export default function BrochureDownloadModal({
   defaultLocale = 'en'
 }: Props) {
   const titleId = useId()
+  const panelRef = useRef<HTMLDivElement>(null)
+  const closeRef = useRef<HTMLButtonElement>(null)
   const [locale, setLocale] = useState<BrochureLocale>(defaultLocale)
   const [format, setFormat] = useState<BrochureFormat>(defaultFormat)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     if (!open) return
@@ -34,11 +41,50 @@ export default function BrochureDownloadModal({
     setFormat(defaultFormat)
   }, [open, defaultFormat, defaultLocale])
 
-  if (!open) return null
+  useEffect(() => {
+    if (!open) return
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        onClose()
+        return
+      }
+
+      if (event.key !== 'Tab' || !panelRef.current) return
+      const focusable = panelRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+      if (focusable.length === 0) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first.focus()
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    // Defer focus so the portal node is painted
+    const focusTimer = window.setTimeout(() => closeRef.current?.focus(), 0)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', onKeyDown)
+      window.clearTimeout(focusTimer)
+    }
+  }, [open, onClose])
+
+  if (!open || !mounted) return null
 
   function downloadSelected() {
     if (format === 'full') {
-      // Full technical guide: static English PDF + optional web viewer
       const a = document.createElement('a')
       a.href = MAI_PRODUCT_BROCHURE_PDF
       a.download = 'mAI-Society-Product-Brochure.pdf'
@@ -51,17 +97,43 @@ export default function BrochureDownloadModal({
       return
     }
 
-    // Quick Exec Deck — open print-ready multilingual page and auto-trigger Save as PDF
     const url = `/investor-brochure?deck=exec&lang=${locale}&print=1&autoprint=1`
     window.open(url, '_blank', 'noopener,noreferrer')
     onClose()
   }
 
-  return (
-    <div className={ui.overlay} role="dialog" aria-modal="true" aria-labelledby={titleId}>
-      <div className={`${ui.modal} max-w-lg`}>
+  const modal = (
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+      role="presentation"
+      onClick={onClose}
+    >
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="relative z-[10000] max-h-[90vh] w-full max-w-lg transform overflow-y-auto rounded-2xl bg-white/95 p-6 shadow-2xl ring-1 ring-white/40 transition-all backdrop-blur-md"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          ref={closeRef}
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+          aria-label="Close brochure download"
+        >
+          <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
+            <path
+              fillRule="evenodd"
+              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </button>
+
         <p className={ui.eyebrow}>Sales collateral</p>
-        <h2 id={titleId} className={`mt-2 ${ui.headingLg}`}>
+        <h2 id={titleId} className={`mt-2 pr-10 ${ui.headingLg}`}>
           Download brochure
         </h2>
         <p className={`mt-2 ${ui.body}`}>
@@ -90,7 +162,8 @@ export default function BrochureDownloadModal({
           </div>
           {format === 'full' && locale !== 'en' ? (
             <p className="text-xs text-amber-700">
-              Full Technical Guide is English-only. Switch to Quick Exec Deck for {BROCHURE_LOCALES.find((l) => l.code === locale)?.native}.
+              Full Technical Guide is English-only. Switch to Quick Exec Deck for{' '}
+              {BROCHURE_LOCALES.find((l) => l.code === locale)?.native}.
             </p>
           ) : null}
         </fieldset>
@@ -140,6 +213,8 @@ export default function BrochureDownloadModal({
       </div>
     </div>
   )
+
+  return createPortal(modal, document.body)
 }
 
 /** Shared trigger button + modal for landing / footer / admin download CTAs. */

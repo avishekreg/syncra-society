@@ -7,6 +7,7 @@ import { autonomousAuditorSweep } from '../api/aiAuditorService'
 import { processBleSignalQueue } from '../api/assetFinderService'
 import { autonomousBotanistDispatch } from '../api/botanistService'
 import { autonomousExpireKidExits } from '../api/kidSafetyService'
+import { processVacateReminders } from '../api/parkingMonetizationService'
 import { scanOverstayVisitors, getOverstayThresholdMinutes } from '../api/overstayService'
 import { restPost, supabaseRestUrl, getSupabaseRestHeaders } from '../api/supabaseClient'
 import { dispatchPushNotification } from '../lib/pushNotifications'
@@ -20,6 +21,7 @@ type JobName =
   | 'overstay_scan'
   | 'botanist_weather'
   | 'ble_mesh_drain'
+  | 'parking_vacate_remind'
   | 'recall_expire'
 
 type RunMap = Record<string, string>
@@ -161,6 +163,32 @@ export async function runAutonomousSocietyJobs(societyId: string, opts?: { force
         job: 'ble_mesh_drain',
         status: 'ERROR',
         detail: err instanceof Error ? err.message : 'ble drain failed'
+      })
+    }
+  }
+
+  if (force || hoursSince(societyId, 'parking_vacate_remind') >= 0.08) {
+    try {
+      const due = await processVacateReminders(societyId)
+      markRun(societyId, 'parking_vacate_remind')
+      await logJob(societyId, 'parking_vacate_remind', 'OK', `${due.length} reminders`)
+      for (const listing of due) {
+        await dispatchPushNotification({
+          societyId,
+          type: 'system.alert',
+          title: 'Parking vacate reminder',
+          body: `${listing.slot_code} guests should clear the bay — owner returns in ~30 minutes.`,
+          url: '/resident/parking-marketplace',
+          audience: 'society',
+          metadata: { listingId: listing.id }
+        }).catch(() => undefined)
+      }
+      results.push({ job: 'parking_vacate_remind', status: 'OK', detail: `${due.length} reminders` })
+    } catch (err) {
+      results.push({
+        job: 'parking_vacate_remind',
+        status: 'ERROR',
+        detail: err instanceof Error ? err.message : 'vacate remind failed'
       })
     }
   }

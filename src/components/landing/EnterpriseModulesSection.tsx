@@ -12,9 +12,9 @@ const MODULES = [
   {
     id: 'parking',
     icon: '🅿️',
-    title: 'Smart Crowdsourced Parking',
-    blurb: 'Dynamic visitor slot allocation using resident out-of-station status.',
-    detail: 'Zero IoT sensors. When a flat marks out-of-station, their bay becomes a temporary visitor slot.'
+    title: 'Smart Parking Marketplace',
+    blurb: 'Hourly visitor rent while you are at work, or monthly slot leases to neighbors via UPI.',
+    detail: 'Owners list vacant bays in software; renters pay UPI and credits land in the owner wallet. Auto-vacate reminder 30 minutes before return — no sensors.'
   },
   {
     id: 'audit',

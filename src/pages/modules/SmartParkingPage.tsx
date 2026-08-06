@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   allocateVisitorSlot,
   ensureStaticSlotsForFlats,
@@ -10,6 +11,7 @@ import {
   type ParkingPresence,
   type ParkingSlot
 } from '../../api/smartParking'
+import { formatInr, getParkingWallet, setEarnFromMySlot } from '../../api/parkingMonetizationService'
 import { useAuth } from '../../providers/AuthProvider'
 import { ui } from '../../lib/ui'
 
@@ -21,6 +23,8 @@ export default function SmartParkingPage() {
   const [presence, setPresence] = useState<ParkingPresence[]>([])
   const [allocations, setAllocations] = useState<ParkingAllocation[]>([])
   const [visitorLabel, setVisitorLabel] = useState('')
+  const [earnOn, setEarnOn] = useState(false)
+  const [earnings, setEarnings] = useState(0)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -35,11 +39,15 @@ export default function SmartParkingPage() {
     setSlots(nextSlots)
     setPresence(nextPresence)
     setAllocations(nextAlloc)
+    if (user?.id) {
+      const wallet = await getParkingWallet(societyId, user.id)
+      setEarnings(Number(wallet?.lifetime_earned_inr || 0))
+    }
   }
 
   useEffect(() => {
     void reload().catch((err) => setError(err instanceof Error ? err.message : 'Failed to load parking'))
-  }, [societyId, flatNumber])
+  }, [societyId, flatNumber, user?.id])
 
   const myStatus =
     presence.find((row) => row.flatNumber === flatNumber)?.status ?? 'in_station'
@@ -50,9 +58,52 @@ export default function SmartParkingPage() {
         <p className={ui.eyebrow}>Zero-hardware</p>
         <h2 className={`mt-2 ${ui.headingLg}`}>Smart Parking</h2>
         <p className={`mt-2 ${ui.body}`}>
-          Static bays are mapped per flat. When you mark out-of-station, your bay becomes available for
-          temporary visitor allocation — no sensors required.
+          Static bays are mapped per flat. Monetize vacant hours or lease unused slots — software listings and UPI
+          credits, no sensors required.
         </p>
+        <Link to="/resident/parking-marketplace" className={`mt-4 inline-flex ${ui.btnPrimary}`}>
+          Open parking marketplace
+        </Link>
+      </section>
+
+      <section className={ui.card}>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 className={ui.heading}>Earn from my slot</h3>
+            <p className={`mt-1 text-sm ${ui.body}`}>
+              Lifetime rental credits: <span className="font-semibold">{formatInr(earnings)}</span>
+            </p>
+          </div>
+          <label className="flex items-center gap-2 text-sm font-semibold text-syncra-primary">
+            <input
+              type="checkbox"
+              className="h-5 w-5"
+              checked={earnOn}
+              disabled={!user?.id}
+              onChange={(e) => {
+                if (!user?.id) return
+                const enabled = e.target.checked
+                setEarnOn(enabled)
+                void setEarnFromMySlot({
+                  societyId,
+                  ownerUserId: user.id,
+                  ownerFlatNumber: flatNumber,
+                  enabled,
+                  hourlyRateInr: 20
+                })
+                  .then(() => {
+                    setMessage(enabled ? 'Hourly earn listing is live.' : 'Earning paused.')
+                    return reload()
+                  })
+                  .catch((err) => {
+                    setEarnOn(!enabled)
+                    setError(err instanceof Error ? err.message : 'Earn toggle failed')
+                  })
+              }}
+            />
+            {earnOn ? 'Earning ON' : 'Earning OFF'}
+          </label>
+        </div>
       </section>
 
       <section className={ui.card}>
@@ -90,7 +141,7 @@ export default function SmartParkingPage() {
       </section>
 
       <section className={ui.card}>
-        <h3 className={ui.heading}>Allocate visitor slot</h3>
+        <h3 className={ui.heading}>Allocate visitor slot (legacy free pool)</h3>
         <div className="mt-4 flex flex-col gap-3 sm:flex-row">
           <input
             className={ui.input}

@@ -68,12 +68,12 @@ export const FEATURE_MODULE_CATALOG: FeatureModuleMeta[] = [
   },
   {
     key: 'smart_parking',
-    label: 'Smart Parking',
-    description: 'Crowdsourced slot sharing based on out-of-station status — no IoT hardware.',
+    label: 'Smart Parking Marketplace',
+    description: 'Hourly visitor monetization and monthly slot leases with UPI credits — zero IoT.',
     tier: 'premium',
     defaultEnabled: false,
-    routeHints: ['/resident/smart-parking', '/rwa/smart-parking'],
-    dashboardCta: 'Smart Parking'
+    routeHints: ['/resident/parking-marketplace', '/resident/smart-parking', '/rwa/smart-parking'],
+    dashboardCta: 'Parking Marketplace'
   },
   {
     key: 'vendor_sla',
@@ -176,12 +176,12 @@ export const FEATURE_MODULE_CATALOG: FeatureModuleMeta[] = [
   },
   {
     key: 'mai_find_asset',
-    label: 'mAI Find Asset',
-    description: 'Neighbor tip board for lost phones, keys, and vehicles — phones only.',
+    label: 'mAI Find',
+    description: 'Paired Bluetooth wearables (RSSI / proximity ping) plus Gate 1 Lost & Found photos for physical items.',
     tier: 'premium',
     defaultEnabled: false,
-    routeHints: ['/resident/find-asset'],
-    dashboardCta: 'Find Asset'
+    routeHints: ['/resident/find-asset', '/resident/paired-assets'],
+    dashboardCta: 'mAI Find'
   },
   {
     key: 'mai_botanist',

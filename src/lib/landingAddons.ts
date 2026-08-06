@@ -61,9 +61,9 @@ export const LANDING_ADDONS: LandingAddon[] = [
   {
     id: 'smart_parking',
     moduleName: 'smart_parking',
-    label: 'Smart Crowdsourced Parking',
+    label: 'Smart Parking Marketplace',
     shortLabel: 'Smart Parking',
-    description: 'Visitor bay allocation from out-of-station status — zero IoT.',
+    description: 'Hourly slot rent + monthly leases with UPI owner credits — zero IoT.',
     monthlyPriceInr: 199
   },
   {
@@ -125,9 +125,9 @@ export const LANDING_ADDONS: LandingAddon[] = [
   {
     id: 'mai_find_asset',
     moduleName: 'mai_find_asset',
-    label: 'mAI Find Asset',
-    shortLabel: 'Find Asset',
-    description: 'Neighbor tip board to report last-seen spots for lost phones, keys, and vehicles.',
+    label: 'mAI Find',
+    shortLabel: 'mAI Find',
+    description: 'Paired Bluetooth wearables + Gate 1 Lost & Found photo board for physical items.',
     monthlyPriceInr: 149
   },
   {

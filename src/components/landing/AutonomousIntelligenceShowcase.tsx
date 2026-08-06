@@ -4,9 +4,9 @@ import { ui } from '../../lib/ui'
 const ITEMS = [
   {
     icon: '🕵️',
-    title: 'mAI Asset Finder',
+    title: 'mAI Find',
     description:
-      'Community tip board for lost phones, keys, and vehicles — neighbors report last-seen spots in the app (phones only).'
+      'Paired Bluetooth wearables with RSSI last-seen + proximity ping, plus a Gate 1 photo Lost & Found for keys and wallets.'
   },
   {
     icon: '📊',

@@ -3,6 +3,8 @@ import { restGet, restPatch, restPost, supabaseRestUrl, getSupabaseRestHeaders }
 import { shouldUseLocalFallback } from './apiErrors'
 import { dispatchPushNotification } from '../lib/pushNotifications'
 
+/** Legacy tip-queue helpers — prefer pairedAssetsService for product UX. */
+
 let localMode = false
 let localAssets: LostAssetSignal[] = []
 let localQueue: BleSignalQueueItem[] = []

@@ -72,7 +72,7 @@ export default function ResidentIntelligencePage() {
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Link to="/resident/find-asset" className={ui.btnSecondary}>
-            mAI Find Asset
+            mAI Find
           </Link>
           {(
             [

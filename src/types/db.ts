@@ -444,6 +444,115 @@ export type DisputeIssueType = 'PARKING' | 'SEEPAGE' | 'PETS' | 'NOISE'
 export type DisputeStatus = 'PENDING_MEDIATION' | 'SETTLED' | 'ESCALATED' | 'DISMISSED'
 export type LostAssetType = 'PHONE' | 'WATCH' | 'VEHICLE' | 'KEYS'
 export type LostAssetStatus = 'LOST' | 'FOUND'
+
+/** Owner-registered paired accessories (phone OS Bluetooth — no society mesh). */
+export type PairedDeviceType = 'SMARTWATCH' | 'TWS' | 'SECONDARY_PHONE'
+export type PairedSightingEvent = 'DISCONNECT_RSSI' | 'RECONNECT' | 'PROXIMITY_PING' | 'MANUAL_UPDATE'
+
+export interface PairedBluetoothDevice {
+  id: string
+  society_id: string
+  owner_user_id: string
+  owner_flat_number?: string | null
+  device_name: string
+  device_type: PairedDeviceType
+  bluetooth_name?: string | null
+  last_seen_zone?: string | null
+  last_seen_at?: string | null
+  last_rssi?: number | null
+  last_ping_at?: string | null
+  is_active: boolean
+  created_at: string
+  updated_at?: string | null
+}
+
+export interface PairedDeviceSighting {
+  id: string
+  device_id: string
+  society_id: string
+  event_type: PairedSightingEvent
+  rssi?: number | null
+  zone_label?: string | null
+  note?: string | null
+  created_at: string
+}
+
+/** Physical lost & found — photo + Gate 1 claim only (non-electronic). */
+export type LostFoundCategory = 'KEYS' | 'WALLET' | 'BAG' | 'DOCUMENTS' | 'OTHER'
+export type LostFoundStatus = 'OPEN' | 'CLAIMED' | 'CLOSED'
+
+export interface LostFoundPost {
+  id: string
+  society_id: string
+  posted_by_user_id: string
+  posted_by_flat_number?: string | null
+  item_category: LostFoundCategory
+  title: string
+  description?: string | null
+  photo_url?: string | null
+  claim_desk: string
+  status: LostFoundStatus
+  claimed_by_user_id?: string | null
+  claimed_at?: string | null
+  created_at: string
+}
+
+export type ParkingListingMode = 'HOURLY' | 'MONTHLY'
+export type ParkingListingStatus = 'ACTIVE' | 'PAUSED' | 'BOOKED' | 'CLOSED'
+export type ParkingBookingPaymentStatus = 'PENDING_UPI' | 'PAID' | 'CREDITED' | 'CANCELLED' | 'REFUNDED'
+export type ParkingBookingStatus = 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'AUTO_VACATE'
+
+export interface ParkingOwnerWallet {
+  id: string
+  society_id: string
+  owner_user_id: string
+  owner_flat_number: string
+  balance_inr: number
+  lifetime_earned_inr: number
+  upi_id?: string | null
+  updated_at: string
+}
+
+export interface ParkingMarketplaceListing {
+  id: string
+  society_id: string
+  owner_user_id: string
+  owner_flat_number: string
+  slot_code: string
+  mode: ParkingListingMode
+  available_from_local?: string | null
+  available_to_local?: string | null
+  hourly_rate_inr?: number | null
+  owner_return_at?: string | null
+  vacate_reminder_sent_at?: string | null
+  monthly_rate_inr?: number | null
+  lease_available_from?: string | null
+  status: ParkingListingStatus
+  earn_enabled: boolean
+  notes?: string | null
+  created_at: string
+  updated_at?: string | null
+}
+
+export interface ParkingMarketplaceBooking {
+  id: string
+  listing_id: string
+  society_id: string
+  renter_user_id: string
+  renter_flat_number?: string | null
+  renter_label: string
+  vehicle_label?: string | null
+  mode: ParkingListingMode
+  starts_at: string
+  ends_at: string
+  hours_booked?: number | null
+  amount_inr: number
+  payment_method: string
+  upi_reference?: string | null
+  payment_status: ParkingBookingPaymentStatus
+  status: ParkingBookingStatus
+  created_at: string
+}
 export type GuardianSubjectType = 'KID' | 'SENIOR' | 'VEHICLE'
 export type GuardianEventType = 'GEOFENCE_EXIT' | 'GEOFENCE_ENTER' | 'UNAUTHORIZED_MOTION'
 export type GuardianAlertStatus = 'ACTIVE' | 'ACKNOWLEDGED' | 'CLEARED'

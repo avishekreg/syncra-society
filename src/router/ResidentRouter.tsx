@@ -21,6 +21,8 @@ import ResidentKidSafetyPage from '../pages/resident/KidSafetyPage'
 import ResidentSosPage from '../pages/resident/SosPage'
 import ResidentIntelligencePage from '../pages/resident/IntelligencePage'
 import ResidentFindAssetPage from '../pages/resident/FindAssetPage'
+import ResidentPairedAssetsPage from '../pages/resident/PairedAssetsPage'
+import ResidentParkingMarketplacePage from '../pages/resident/ParkingMarketplacePage'
 import ResidentGreenSocietyPage from '../pages/resident/GreenSocietyPage'
 import ResidentMaiSpacePage from '../pages/resident/MaiSpacePage'
 import ResidentRentOutPage from '../pages/resident/RentOutPage'
@@ -73,6 +75,15 @@ export default function ResidentRouter() {
         <Route path="sos" element={<ResidentSosPage />} />
         <Route path="intelligence" element={<ResidentIntelligencePage />} />
         <Route path="find-asset" element={<ResidentFindAssetPage />} />
+        <Route path="paired-assets" element={<ResidentPairedAssetsPage />} />
+        <Route
+          path="parking-marketplace"
+          element={
+            <FeatureGuard module="smart_parking">
+              <ResidentParkingMarketplacePage />
+            </FeatureGuard>
+          }
+        />
         <Route path="green-society" element={<ResidentGreenSocietyPage />} />
         <Route path="mai-space" element={<ResidentMaiSpacePage />} />
         <Route path="notices" element={<NoticesPage />} />

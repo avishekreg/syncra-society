@@ -226,7 +226,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
     ...(moduleEnabled('gallery') ? ['/resident/gallery'] : []),
     ...(electionFeatureOn ? ['/resident/elections'] : []),
     ...(moduleEnabled('rewards') ? ['/resident/rewards'] : []),
-    ...(smartParkingOn ? ['/resident/smart-parking'] : []),
+    ...(smartParkingOn ? ['/resident/smart-parking', '/resident/parking-marketplace'] : []),
     ...(vendorSlaOn ? ['/resident/vendor-sla'] : []),
     ...(aiAuditOn ? ['/resident/society-health'] : []),
     ...(marketplaceOn ? ['/resident/marketplace'] : [])
@@ -266,6 +266,7 @@ export default function Sidebar({ children, title }: SidebarProps) {
     '/resident/sos',
     '/resident/intelligence',
     '/resident/find-asset',
+    '/resident/paired-assets',
     '/resident/green-society',
     '/resident/mai-space',
     '/resident/helpdesk',
@@ -376,7 +377,10 @@ export default function Sidebar({ children, title }: SidebarProps) {
               Intelligence Hub
             </AccordionNavLink>
             <AccordionNavLink to="/resident/find-asset" className={navLinkClass}>
-              Find Asset
+              mAI Find
+            </AccordionNavLink>
+            <AccordionNavLink to="/resident/paired-assets" className={navLinkClass}>
+              Paired devices
             </AccordionNavLink>
             <AccordionNavLink to="/resident/green-society" className={navLinkClass}>
               Green Society
@@ -433,9 +437,14 @@ export default function Sidebar({ children, title }: SidebarProps) {
                   </SidebarSubNavLink>
                 )}
                 {smartParkingOn && (
-                  <SidebarSubNavLink to="/resident/smart-parking" className={subNavLinkClass}>
-                    Smart Parking
-                  </SidebarSubNavLink>
+                  <>
+                    <SidebarSubNavLink to="/resident/parking-marketplace" className={subNavLinkClass}>
+                      Parking Marketplace
+                    </SidebarSubNavLink>
+                    <SidebarSubNavLink to="/resident/smart-parking" className={subNavLinkClass}>
+                      Smart Parking map
+                    </SidebarSubNavLink>
+                  </>
                 )}
                 {vendorSlaOn && (
                   <SidebarSubNavLink to="/resident/vendor-sla" className={subNavLinkClass}>
@@ -596,7 +605,10 @@ export default function Sidebar({ children, title }: SidebarProps) {
                   Intelligence Hub
                 </SidebarSubNavLink>
                 <SidebarSubNavLink to="/resident/find-asset" className={subNavLinkClass}>
-                  Find Asset
+                  mAI Find
+                </SidebarSubNavLink>
+                <SidebarSubNavLink to="/resident/paired-assets" className={subNavLinkClass}>
+                  Paired devices
                 </SidebarSubNavLink>
                 <SidebarSubNavLink to="/resident/green-society" className={subNavLinkClass}>
                   Green Society
@@ -646,9 +658,14 @@ export default function Sidebar({ children, title }: SidebarProps) {
                   </SidebarSubNavLink>
                 )}
                 {smartParkingOn && (
-                  <SidebarSubNavLink to="/resident/smart-parking" className={subNavLinkClass}>
-                    Smart Parking
-                  </SidebarSubNavLink>
+                  <>
+                    <SidebarSubNavLink to="/resident/parking-marketplace" className={subNavLinkClass}>
+                      Parking Marketplace
+                    </SidebarSubNavLink>
+                    <SidebarSubNavLink to="/resident/smart-parking" className={subNavLinkClass}>
+                      Smart Parking map
+                    </SidebarSubNavLink>
+                  </>
                 )}
                 {vendorSlaOn && (
                   <SidebarSubNavLink to="/resident/vendor-sla" className={subNavLinkClass}>

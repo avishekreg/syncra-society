@@ -14,6 +14,12 @@ import type { SuggestiveNotification } from '../../lib/suggestiveNotifications'
 import { restGet } from '../../api/supabaseClient'
 import SocietyFeatureCards from '../../components/features/SocietyFeatureCards'
 import EmergencySosWidget from '../../components/EmergencySosWidget'
+import { useFeatureFlags } from '../../providers/FeatureFlagsProvider'
+import {
+  formatInr,
+  getParkingWallet,
+  setEarnFromMySlot
+} from '../../api/parkingMonetizationService'
 import { ui } from '../../lib/ui'
 
 const DEFAULT_EMERGENCY_DIRECTORY = [
@@ -27,14 +33,18 @@ const DEFAULT_EMERGENCY_DIRECTORY = [
 
 export default function ResidentDashboard() {
   const { currentSocietyId, user, showcaseData } = useAuth()
+  const { isEnabled } = useFeatureFlags()
   const { entries } = useLedger(currentSocietyId)
   const { complaints, loading: complaintsLoading } = useComplaints(currentSocietyId, user?.id ?? null)
   const [alertVisitors, setAlertVisitors] = useState<VisitorLog[]>([])
   const [emergencyContacts, setEmergencyContacts] = useState(DEFAULT_EMERGENCY_DIRECTORY)
   const [speedDialOpen, setSpeedDialOpen] = useState(false)
   const [suggestiveAlerts, setSuggestiveAlerts] = useState<SuggestiveNotification[]>([])
+  const [earnOn, setEarnOn] = useState(false)
+  const [parkingEarnings, setParkingEarnings] = useState(0)
   const flatNumber = user?.flatNumber
   const isLoading = entries === null
+  const parkingLicensed = isEnabled('smart_parking')
 
   const myUnit = useMemo(() => {
     if (!showcaseData || !flatNumber) return null
@@ -96,6 +106,16 @@ export default function ResidentDashboard() {
   }, [currentSocietyId])
 
   useEffect(() => {
+    if (!currentSocietyId || !user?.id || !parkingLicensed) {
+      setParkingEarnings(0)
+      return
+    }
+    void getParkingWallet(currentSocietyId, user.id)
+      .then((w) => setParkingEarnings(Number(w?.lifetime_earned_inr || 0)))
+      .catch(() => setParkingEarnings(0))
+  }, [currentSocietyId, user?.id, parkingLicensed])
+
+  useEffect(() => {
     if (!currentSocietyId || !user?.id || !flatNumber) {
       setSuggestiveAlerts([])
       return
@@ -152,6 +172,50 @@ export default function ResidentDashboard() {
       />
 
       <SocietyFeatureCards audience="resident" showLocked />
+
+      {parkingLicensed && user?.id && flatNumber ? (
+        <section className={ui.card}>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className={ui.eyebrow}>Parking marketplace</p>
+              <h2 className={`mt-1 ${ui.heading}`}>Earn from my slot</h2>
+              <p className={`mt-1 text-sm ${ui.body}`}>
+                Lifetime rental credits: <span className="font-semibold">{formatInr(parkingEarnings)}</span>
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="flex items-center gap-2 text-sm font-semibold text-syncra-primary">
+                <input
+                  type="checkbox"
+                  className="h-5 w-5"
+                  checked={earnOn}
+                  onChange={(e) => {
+                    const enabled = e.target.checked
+                    setEarnOn(enabled)
+                    void setEarnFromMySlot({
+                      societyId: currentSocietyId!,
+                      ownerUserId: user.id,
+                      ownerFlatNumber: flatNumber,
+                      enabled,
+                      hourlyRateInr: 20
+                    })
+                      .then(() =>
+                        getParkingWallet(currentSocietyId!, user.id).then((w) =>
+                          setParkingEarnings(Number(w?.lifetime_earned_inr || 0))
+                        )
+                      )
+                      .catch(() => setEarnOn(!enabled))
+                  }}
+                />
+                {earnOn ? 'Earning ON' : 'Earning OFF'}
+              </label>
+              <Link to="/resident/parking-marketplace" className={ui.btnSecondary}>
+                Marketplace
+              </Link>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <EmergencySosWidget />
 
