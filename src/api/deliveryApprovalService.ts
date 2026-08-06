@@ -362,19 +362,22 @@ export async function interceptDeliveryNotification(input: {
   notificationText: string
   createdByUserId?: string
   autoCreate?: boolean
+  /** Override match-suggested window (OS auto-path uses 2h). */
+  windowHours?: number
 }): Promise<{ match: DeliveryIntentMatch | null; preApproval: DeliveryPreApproval | null }> {
   const match = parseUniversalDeliveryNotification(input.notificationText)
   if (!match) return { match: null, preApproval: null }
   if (!input.autoCreate) return { match, preApproval: null }
 
+  const windowHours = input.windowHours ?? match.suggestedWindowHours
   const preApproval = await createDeliveryPreApproval({
     societyId: input.societyId,
     flatNumber: input.flatNumber,
     serviceProvider: match.provider,
-    windowHours: match.suggestedWindowHours,
+    windowHours,
     createdByUserId: input.createdByUserId
   })
-  return { match, preApproval }
+  return { match: { ...match, suggestedWindowHours: windowHours }, preApproval }
 }
 
 export function filterDeliveriesByProvider(

@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../providers/AuthProvider'
-import { listLostAssets, markAssetFound, markAssetLost, reportAssetSighting, societyMapPins } from '../../api/assetFinderService'
+import {
+  enqueueBleSignal,
+  listLostAssets,
+  markAssetFound,
+  markAssetLost,
+  processBleSignalQueue,
+  reportAssetSighting,
+  societyMapPins
+} from '../../api/assetFinderService'
 import type { LostAssetSignal, LostAssetType } from '../../types/db'
 import { ui } from '../../lib/ui'
 
@@ -23,6 +31,23 @@ export default function ResidentFindAssetPage() {
 
   useEffect(() => {
     void refresh().catch((err) => setError(err instanceof Error ? err.message : 'Load failed'))
+  }, [currentSocietyId])
+
+  useEffect(() => {
+    if (!currentSocietyId) return
+    const tick = () => {
+      void processBleSignalQueue(currentSocietyId)
+        .then((matched) => {
+          if (matched.length) {
+            setMessage(`${matched.length} BLE mesh match(es) updated owner pins.`)
+            return refresh()
+          }
+        })
+        .catch(() => undefined)
+    }
+    tick()
+    const timer = window.setInterval(tick, 30_000)
+    return () => window.clearInterval(timer)
   }, [currentSocietyId])
 
   const pins = societyMapPins(assets)
@@ -135,10 +160,30 @@ export default function ResidentFindAssetPage() {
                   type="button"
                   className={ui.btnSecondary}
                   onClick={() =>
+                    void enqueueBleSignal({
+                      societyId: currentSocietyId,
+                      bleFingerprint: asset.ble_fingerprint || '',
+                      locationLabel: location.trim() || 'Neighbor mesh ping · Clubhouse walkway',
+                      detectedByUserId: user.id
+                    })
+                      .then(() => processBleSignalQueue(currentSocietyId))
+                      .then(() => {
+                        setMessage('BLE signal queued and matched against lost tags.')
+                        return refresh()
+                      })
+                      .catch((err) => setError(err instanceof Error ? err.message : 'Mesh ping failed'))
+                  }
+                >
+                  Log BLE mesh ping
+                </button>
+                <button
+                  type="button"
+                  className={ui.btnGhost}
+                  onClick={() =>
                     void reportAssetSighting({
                       assetId: asset.id,
                       detectedByUserId: user.id,
-                      locationLabel: 'Neighbor mesh ping · Clubhouse walkway'
+                      locationLabel: location.trim() || 'Neighbor mesh ping · Clubhouse walkway'
                     }).then(refresh)
                   }
                 >

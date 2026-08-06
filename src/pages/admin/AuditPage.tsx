@@ -1,26 +1,46 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useAuth } from '../../providers/AuthProvider'
 import {
-  analyzeExpenseAnomalies,
-  listAiAuditLogs,
-  runAiAuditorScan,
-  societyFinancialHealthScore
+  getAuditorDashboard,
+  recordSocietyExpense,
+  runAiAuditorScan
 } from '../../api/aiAuditorService'
-import type { AiAuditLog } from '../../types/db'
+import type { AiAuditCategory, AiAuditLog } from '../../types/db'
 import { formatInr } from '../../lib/platformPricing'
 import { ui } from '../../lib/ui'
 
+type PreviewRow = {
+  category: AiAuditCategory
+  label: string
+  amount: number
+  priorAverage: number
+  variancePercentage: number
+  anomaly: string
+  recommendation: string
+  healthScore: number
+  isLeakageFlag: boolean
+}
+
 export default function AdminAuditPage() {
-  const { currentSocietyId } = useAuth()
+  const { currentSocietyId, user } = useAuth()
   const [logs, setLogs] = useState<AiAuditLog[]>([])
+  const [preview, setPreview] = useState<PreviewRow[]>([])
+  const [health, setHealth] = useState(100)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const preview = useMemo(() => analyzeExpenseAnomalies(), [])
-  const health = societyFinancialHealthScore()
+  const [message, setMessage] = useState<string | null>(null)
+  const [expenseForm, setExpenseForm] = useState({
+    category: 'VENDOR_INVOICE' as AiAuditCategory,
+    label: '',
+    amount: ''
+  })
 
   async function refresh() {
     if (!currentSocietyId) return
-    setLogs(await listAiAuditLogs(currentSocietyId))
+    const dash = await getAuditorDashboard(currentSocietyId)
+    setLogs(dash.logs)
+    setPreview(dash.preview)
+    setHealth(dash.health)
   }
 
   useEffect(() => {
@@ -33,7 +53,8 @@ export default function AdminAuditPage() {
         <p className={ui.eyebrow}>mAI Auditor</p>
         <h2 className={`mt-2 ${ui.headingLg}`}>Predictive financial leakage</h2>
         <p className={`mt-2 ${ui.body}`}>
-          Invoice anomaly detection across water, electricity, vendor bills, and repairs — Financial Health Flag 0–100.
+          Autonomous MoM variance detection on the society expense ledger. Flags ≥20% auto-post to this dashboard —
+          vendor payments remain a human dual-signatory gate.
         </p>
         <div className="mt-6 flex flex-wrap items-end gap-6">
           <div>
@@ -47,8 +68,16 @@ export default function AdminAuditPage() {
             onClick={() => {
               if (!currentSocietyId) return
               setBusy(true)
+              setMessage(null)
               void runAiAuditorScan(currentSocietyId)
-                .then(refresh)
+                .then((created) => {
+                  setMessage(
+                    created.length
+                      ? `Logged ${created.length} autonomous leakage flag(s).`
+                      : 'No new ≥20% variances to flag.'
+                  )
+                  return refresh()
+                })
                 .catch((err) => setError(err instanceof Error ? err.message : 'Scan failed'))
                 .finally(() => setBusy(false))
             }}
@@ -56,13 +85,75 @@ export default function AdminAuditPage() {
             {busy ? 'Scanning…' : 'Run AI auditor scan'}
           </button>
         </div>
+        {message ? <p className="mt-3 text-sm text-emerald-700">{message}</p> : null}
         {error ? <p className="mt-3 text-sm text-rose-600">{error}</p> : null}
+      </section>
+
+      <section className={ui.card}>
+        <h3 className={ui.heading}>Record invoice / utility bill</h3>
+        <p className={`mt-1 text-sm ${ui.body}`}>
+          Deep wire into `society_expense_ledger` — autonomous sweeps compare current vs prior month.
+        </p>
+        <form
+          className="mt-4 grid gap-3 sm:grid-cols-4"
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (!currentSocietyId) return
+            void recordSocietyExpense({
+              societyId: currentSocietyId,
+              category: expenseForm.category,
+              label: expenseForm.label,
+              amount: Number(expenseForm.amount),
+              createdByUserId: user?.id
+            })
+              .then(() => {
+                setExpenseForm({ category: 'VENDOR_INVOICE', label: '', amount: '' })
+                setMessage('Expense recorded to ledger.')
+                return refresh()
+              })
+              .catch((err) => setError(err instanceof Error ? err.message : 'Save failed'))
+          }}
+        >
+          <select
+            className={ui.input}
+            value={expenseForm.category}
+            onChange={(e) =>
+              setExpenseForm((f) => ({ ...f, category: e.target.value as AiAuditCategory }))
+            }
+          >
+            {(['WATER', 'ELECTRICITY', 'VENDOR_INVOICE', 'REPAIR'] as AiAuditCategory[]).map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+          <input
+            className={ui.input}
+            placeholder="Label"
+            value={expenseForm.label}
+            onChange={(e) => setExpenseForm((f) => ({ ...f, label: e.target.value }))}
+            required
+          />
+          <input
+            className={ui.input}
+            type="number"
+            min={0}
+            step="0.01"
+            placeholder="Amount ₹"
+            value={expenseForm.amount}
+            onChange={(e) => setExpenseForm((f) => ({ ...f, amount: e.target.value }))}
+            required
+          />
+          <button type="submit" className={ui.btnSecondary}>
+            Save to ledger
+          </button>
+        </form>
       </section>
 
       <section className="grid gap-4 md:grid-cols-2">
         {preview.map((row) => (
           <article
-            key={row.label}
+            key={`${row.category}-${row.label}`}
             className={`rounded-2xl border p-5 ${
               row.isLeakageFlag ? 'border-rose-200 bg-rose-50' : 'border-slate-200 bg-white'
             }`}
@@ -85,13 +176,13 @@ export default function AdminAuditPage() {
 
       <section className={ui.card}>
         <h3 className={ui.heading}>Logged anomalies</h3>
-        <ul className="mt-4 space-y-3">
-          {logs.length === 0 ? <li className={ui.body}>No audit logs yet — run a scan.</li> : null}
+        <ul className="mt-4 space-y-2">
+          {logs.length === 0 ? <li className={ui.body}>No audit flags yet.</li> : null}
           {logs.map((log) => (
             <li key={log.id} className="rounded-xl border border-slate-200 px-3 py-3 text-sm">
-              <strong>{log.category}</strong> · {log.variance_percentage}% · score {log.health_score ?? '—'}
-              <p className="mt-1 text-slate-600">{log.detected_anomaly}</p>
-              <p className="mt-1 text-syncra-blue">{log.ai_recommendation}</p>
+              <span className="font-semibold text-syncra-primary">{log.category}</span> · {log.detected_anomaly} ·{' '}
+              {log.variance_percentage}%
+              <p className="mt-1 text-slate-600">{log.ai_recommendation}</p>
             </li>
           ))}
         </ul>

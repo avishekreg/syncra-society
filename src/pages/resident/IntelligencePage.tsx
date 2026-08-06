@@ -68,7 +68,7 @@ export default function ResidentIntelligencePage() {
         <p className={ui.eyebrow}>Autonomous intelligence</p>
         <h2 className={`mt-2 ${ui.headingLg}`}>Society intelligence & governance</h2>
         <p className={`mt-2 ${ui.body}`}>
-          maiEnergy, mAI Nyaya mediation, cryptographic recall votes, and guardian mesh — tools competitors don’t ship.
+          maiEnergy, mAI Nyaya mediation, cryptographic recall votes, and guardian mesh — capabilities legacy society apps rarely ship together.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Link to="/resident/find-asset" className={ui.btnSecondary}>
@@ -183,13 +183,40 @@ export default function ResidentIntelligencePage() {
               <p className={`mt-2 text-sm ${ui.body}`}>{d.ai_mediation_summary}</p>
               <p className="mt-2 text-sm font-semibold">Suggested fine: ₹{d.suggested_fine_amount ?? 0} · {d.status}</p>
               <div className="mt-3 flex flex-wrap gap-2">
-                <button type="button" className={ui.btnSecondary} onClick={() => void signDisputeSettlement(d.id, 'plaintiff').then(refresh)}>
-                  Sign as plaintiff
+                <button
+                  type="button"
+                  className={ui.btnSecondary}
+                  disabled={!user.flatNumber}
+                  onClick={() =>
+                    void signDisputeSettlement(d.id, 'plaintiff', user.flatNumber!)
+                      .then(() => {
+                        setMessage('Plaintiff signature recorded.')
+                        return refresh()
+                      })
+                      .catch((err) => setError(err instanceof Error ? err.message : 'Sign failed'))
+                  }
+                >
+                  Sign as plaintiff (my flat)
                 </button>
-                <button type="button" className={ui.btnGhost} onClick={() => void signDisputeSettlement(d.id, 'respondent').then(refresh)}>
-                  Sign as respondent
+                <button
+                  type="button"
+                  className={ui.btnGhost}
+                  disabled={!user.flatNumber}
+                  onClick={() =>
+                    void signDisputeSettlement(d.id, 'respondent', user.flatNumber!)
+                      .then(() => {
+                        setMessage('Respondent signature recorded.')
+                        return refresh()
+                      })
+                      .catch((err) => setError(err instanceof Error ? err.message : 'Sign failed'))
+                  }
+                >
+                  Sign as respondent (my flat)
                 </button>
               </div>
+              <p className="mt-2 text-xs text-slate-500">
+                Dual signature required — your flat must match plaintiff or respondent. Settlement finalizes only when both sides sign.
+              </p>
             </article>
           ))}
         </section>

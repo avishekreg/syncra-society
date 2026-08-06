@@ -19,12 +19,17 @@ function rid(prefix: string) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`
 }
 
-const RENT_PORTALS = ['MagicBricks Rent', '99acres Rent', 'Housing.com Rent', 'NoBroker Rent'] as const
+const RENT_PORTALS = [
+  'National Rent Network',
+  'Metro Rent Classifieds',
+  'Housing Rent Feed',
+  'Zero-Brokerage Rent Network'
+] as const
 const SALE_PORTALS = [
-  'MagicBricks Resale',
-  '99acres Resale',
-  'Housing.com Resale',
-  'NoBroker Seller'
+  'National Resale Network',
+  'Metro Resale Classifieds',
+  'Housing Resale Feed',
+  'Zero-Brokerage Seller Network'
 ] as const
 
 /** Prefer carpet area; fall back to super area for ₹/sqft. */
@@ -311,10 +316,11 @@ export async function createPropertyListing(input: CreateListingInput): Promise<
   }
 }
 
-/** 1-click publish + multi-portal syndication + investor broadcast. */
+/** 1-click publish + multi-portal syndication + investor broadcast via n8n webhook. */
 export async function publishAndSyndicateListing(listingId: string): Promise<{
   listing: PropertyMarketListing
   broadcast: ReturnType<typeof buildInvestorBroadcast>
+  delivery: Array<{ portal: string; ok: boolean; status?: number }>
 }> {
   const listing = await getListingById(listingId)
   if (!listing) throw new Error('Listing not found')
@@ -334,10 +340,13 @@ export async function publishAndSyndicateListing(listingId: string): Promise<{
     rwa_resale_badge: badge
   })
 
+  const broadcast = buildInvestorBroadcast({ ...listing, syndication_portals: portals })
+  const delivery = await deliverSyndicationPayloads(listing, payloads, broadcast)
+
   const patch = {
     status: 'SYNDICATED' as const,
     syndication_portals: portals,
-    syndication_payload: payloads,
+    syndication_payload: { payloads, delivery, broadcast },
     rwa_resale_badge: badge,
     broadcast_sent_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
@@ -357,7 +366,78 @@ export async function publishAndSyndicateListing(listingId: string): Promise<{
     }
   }
 
-  return { listing: updated, broadcast: buildInvestorBroadcast(updated) }
+  return { listing: updated, broadcast, delivery }
+}
+
+async function deliverSyndicationPayloads(
+  listing: PropertyMarketListing,
+  payloads: SyndicationPortalPayload[],
+  broadcast: ReturnType<typeof buildInvestorBroadcast>
+) {
+  const { dispatchToN8n } = await import('../lib/n8nClient')
+  const results: Array<{ portal: string; ok: boolean; status?: number }> = []
+
+  for (const payload of payloads) {
+    const result = await dispatchToN8n({
+      eventId: `mailist-${listing.id}-${payload.portal.replace(/\s+/g, '-').toLowerCase()}`,
+      type: 'mailist.syndication',
+      societyId: listing.society_id,
+      flatNumber: listing.flat_number,
+      summary: `${payload.title} → ${payload.portal}`,
+      occurredAt: new Date().toISOString(),
+      message_body: broadcast.whatsapp,
+      metadata: {
+        listingId: listing.id,
+        portal: payload.portal,
+        payload,
+        zeroBrokerage: true
+      }
+    })
+
+    results.push({ portal: payload.portal, ok: result.ok, status: result.status })
+
+    const logPayload = {
+      society_id: listing.society_id,
+      listing_id: listing.id,
+      portal: payload.portal,
+      status: result.ok ? 'DELIVERED' : 'FAILED',
+      response_code: result.status ?? null,
+      response_body: result.error || null
+    }
+
+    if (localMode) continue
+    try {
+      await restPost('syndication_delivery_log', logPayload)
+    } catch {
+      // Non-blocking — listing still marks SYNDICATED with delivery metadata.
+    }
+  }
+
+  await dispatchToN8n({
+    eventId: `mailist-broadcast-${listing.id}`,
+    type: 'mailist.investor_broadcast',
+    societyId: listing.society_id,
+    flatNumber: listing.flat_number,
+    summary: broadcast.email.subject,
+    occurredAt: new Date().toISOString(),
+    message_body: broadcast.whatsapp,
+    metadata: { listingId: listing.id, email: broadcast.email, audience: broadcast.audience }
+  })
+
+  return results
+}
+
+export async function listListingInquiries(listingId: string): Promise<PropertyListingInquiry[]> {
+  if (localMode) return localInquiries.filter((i) => i.listing_id === listingId)
+  try {
+    return await restGet<PropertyListingInquiry[]>(
+      `property_listing_inquiries?listing_id=eq.${listingId}&order=created_at.desc`
+    )
+  } catch (err) {
+    if (!shouldUseLocalFallback(err)) throw err
+    localMode = true
+    return listListingInquiries(listingId)
+  }
 }
 
 async function getListingById(listingId: string): Promise<PropertyMarketListing | null> {

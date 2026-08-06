@@ -12,7 +12,8 @@
     "start": "next start",
     "lint": "next lint",
     "migrate:saas-billing": "tsx scripts/apply-saas-billing-telemetry-migration.ts",
-    "cap:sync": "CAPACITOR_BUILD=1 npm run build && npx cap sync android"
+    "cap:sync": "CAPACITOR_BUILD=1 npm run build && npx cap sync android",
+    "cap:inject-delivery-listener": "bash scripts/inject-delivery-listener-android.sh"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.0",

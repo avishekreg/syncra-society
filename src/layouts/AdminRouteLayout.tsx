@@ -1,5 +1,6 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import DashboardLayout from './DashboardLayout'
+import AutonomousJobsBootstrap from '../components/mobile/AutonomousJobsBootstrap'
 
 const ADMIN_PAGE_TITLES: Record<string, string | null> = {
   '/admin/dashboard': 'Analytics Overview',
@@ -29,6 +30,7 @@ export default function AdminRouteLayout() {
 
   return (
     <DashboardLayout title={title}>
+      <AutonomousJobsBootstrap />
       <Outlet />
     </DashboardLayout>
   )

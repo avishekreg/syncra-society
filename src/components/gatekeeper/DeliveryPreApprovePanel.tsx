@@ -15,6 +15,13 @@ import {
 } from '../../api/deliveryApprovalService'
 import type { DeliveryPreApproval, DeliveryServiceProvider } from '../../types/db'
 import { ui } from '../../lib/ui'
+import { isDeliveryListenerAvailable, DeliveryListener } from '../../plugins/deliveryListener'
+import {
+  DELIVERY_AUTO_PREAPPROVED_EVENT,
+  getDeliverySmsConsent,
+  setDeliverySmsConsentLocal
+} from '../../services/backgroundDeliveryInterceptor'
+import SMSConsentModal from '../delivery/SMSConsentModal'
 
 type Props = {
   societyId: string
@@ -37,6 +44,9 @@ export default function DeliveryPreApprovePanel({ societyId, flatNumber, userId,
   const [error, setError] = useState<string | null>(null)
   const [manualProvider, setManualProvider] = useState<DeliveryServiceProvider>('Generic Courier / Parcel')
   const [alertPaste, setAlertPaste] = useState('')
+  const [consentOpen, setConsentOpen] = useState(false)
+  const [smsConsent, setSmsConsent] = useState(getDeliverySmsConsent)
+  const autoListenAvailable = isDeliveryListenerAvailable()
 
   const catalog = useMemo(
     () =>
@@ -59,6 +69,15 @@ export default function DeliveryPreApprovePanel({ societyId, flatNumber, userId,
 
   useEffect(() => {
     void refresh()
+  }, [societyId, flatNumber])
+
+  useEffect(() => {
+    const onAuto = () => {
+      setMessage('Automatic delivery SMS pre-approval saved for your flat.')
+      void refresh()
+    }
+    window.addEventListener(DELIVERY_AUTO_PREAPPROVED_EVENT, onAuto)
+    return () => window.removeEventListener(DELIVERY_AUTO_PREAPPROVED_EVENT, onAuto)
   }, [societyId, flatNumber])
 
   async function handleQuickApprove(provider: DeliveryServiceProvider) {
@@ -193,11 +212,42 @@ export default function DeliveryPreApprovePanel({ societyId, flatNumber, userId,
           </div>
 
           <div className="rounded-2xl border border-dashed border-slate-300 p-4">
-            <p className="text-sm font-semibold text-syncra-primary">Paste SMS / WhatsApp / app alert</p>
-            <p className={`mt-1 text-sm ${ui.body}`}>
-              Universal parser looks for brand names plus triggers like “out for delivery”, “arriving today”,
-              “courier”, “speed post”, “delivery agent”, and “shipment”.
-            </p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-syncra-primary">Paste SMS / WhatsApp / app alert</p>
+                <p className={`mt-1 text-sm ${ui.body}`}>
+                  Universal parser looks for brand names plus triggers like “out for delivery”, “arriving today”,
+                  “courier”, “speed post”, “delivery agent”, and “shipment”.
+                  {autoListenAvailable && smsConsent !== 'granted'
+                    ? ' Manual paste stays available if automatic SMS listening is off.'
+                    : null}
+                </p>
+              </div>
+              {autoListenAvailable ? (
+                <button
+                  type="button"
+                  className={ui.btnGhost}
+                  onClick={() => {
+                    if (smsConsent === 'granted') {
+                      setDeliverySmsConsentLocal('denied')
+                      setSmsConsent('denied')
+                      void DeliveryListener.setConsent({ consent: 'denied' }).catch(() => undefined)
+                      void DeliveryListener.stopListening().catch(() => undefined)
+                      setMessage('Automatic SMS listening turned off. Use 1-tap or paste below.')
+                    } else {
+                      setConsentOpen(true)
+                    }
+                  }}
+                >
+                  {smsConsent === 'granted' ? 'Disable auto listen' : 'Enable auto SMS listen'}
+                </button>
+              ) : null}
+            </div>
+            {autoListenAvailable && smsConsent === 'granted' ? (
+              <p className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+                Automatic gate pre-approval is on — delivery SMS / courier alerts are filtered on-device.
+              </p>
+            ) : null}
             <textarea
               className={`${ui.input} mt-3 min-h-[88px]`}
               value={alertPaste}
@@ -213,6 +263,19 @@ export default function DeliveryPreApprovePanel({ societyId, flatNumber, userId,
               {busy === 'parse' ? 'Parsing…' : 'Detect & pre-approve'}
             </button>
           </div>
+
+          <SMSConsentModal
+            open={consentOpen}
+            onClose={() => setConsentOpen(false)}
+            onGranted={() => {
+              setSmsConsent('granted')
+              setMessage('Automatic delivery listening enabled for this device.')
+            }}
+            onDenied={() => {
+              setSmsConsent('denied')
+              setMessage('Continuing with manual 1-tap / paste pre-approval.')
+            }}
+          />
 
           <div className="space-y-4">
             {catalog.map((group) => (

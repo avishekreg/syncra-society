@@ -1,13 +1,26 @@
 import type { KidExitApproval } from '../types/db'
-import { restGet, restPatch, restPost } from './supabaseClient'
+import { restGet, restPatch, restPost, supabaseRestUrl, getSupabaseRestHeaders } from './supabaseClient'
 import { shouldUseLocalFallback } from './apiErrors'
 import { ensureSocietyFlatId } from './flatRegistry'
+import { dispatchPushNotification } from '../lib/pushNotifications'
 
 let localMode = false
 let localApprovals: KidExitApproval[] = []
+let localOverrides: KidExitOverride[] = []
 
-function rid() {
-  return `kid-${Math.random().toString(36).slice(2, 10)}`
+export type KidExitOverride = {
+  id: string
+  society_id: string
+  flat_number: string
+  kid_name?: string | null
+  override_by: 'PARENT' | 'GUARD'
+  override_user_id?: string | null
+  reason: string
+  created_at: string
+}
+
+function rid(prefix = 'kid') {
+  return `${prefix}-${Math.random().toString(36).slice(2, 10)}`
 }
 
 async function expireStale(societyId: string) {
@@ -21,11 +34,19 @@ async function expireStale(societyId: string) {
     return
   }
   try {
-    await restPatch(`kid_exit_approvals?society_id=eq.${societyId}&status=eq.APPROVED&valid_until=lt.${now}`, {
-      status: 'EXPIRED'
+    await fetch(supabaseRestUrl('rpc/expire_kid_exit_approvals'), {
+      method: 'POST',
+      headers: getSupabaseRestHeaders(),
+      body: '{}'
     })
   } catch {
-    // best effort
+    try {
+      await restPatch(`kid_exit_approvals?society_id=eq.${societyId}&status=eq.APPROVED&valid_until=lt.${now}`, {
+        status: 'EXPIRED'
+      })
+    } catch {
+      // best effort
+    }
   }
 }
 
@@ -92,16 +113,21 @@ export type KidExitCheckResult = {
   allowed: boolean
   approval: KidExitApproval | null
   alertParents: boolean
+  /** Gate clearance frozen until parent/guard human override. */
+  gateFrozen: boolean
+  parentNotified: boolean
   message: string
 }
 
 /**
- * Guard checkout for a minor. Missing/expired approval → high-priority parent alert (do not hard-block).
+ * Guard checkout for a minor.
+ * Missing approval → loud parent push + freeze clearance until human override.
  */
 export async function checkKidExitApproval(input: {
   societyId: string
   flatNumber: string
   kidName?: string
+  notifyParents?: boolean
 }): Promise<KidExitCheckResult> {
   await expireStale(input.societyId)
   const now = Date.now()
@@ -132,11 +158,32 @@ export async function checkKidExitApproval(input: {
     : rows[0]
 
   if (!match) {
+    let parentNotified = false
+    if (input.notifyParents !== false) {
+      try {
+        await dispatchPushNotification({
+          societyId: input.societyId,
+          type: 'system.alert',
+          title: 'Kid Safety — unapproved exit attempt',
+          body: `Gate freeze: Flat ${input.flatNumber}${input.kidName ? ` · ${input.kidName}` : ''} has no active exit pre-approval. Parent or guard override required.`,
+          url: '/resident/kid-safety',
+          audience: 'flat',
+          flatId: input.flatNumber,
+          metadata: { silent: false, priority: 'high', kind: 'kid_exit_block' }
+        })
+        parentNotified = true
+      } catch {
+        parentNotified = false
+      }
+    }
+
     return {
       allowed: false,
       approval: null,
       alertParents: true,
-      message: `No active kid exit approval for Flat ${input.flatNumber}. Triggering high-priority parent alert.`
+      gateFrozen: true,
+      parentNotified,
+      message: `No active kid exit approval for Flat ${input.flatNumber}. Gate clearance frozen until parent or guard override.`
     }
   }
 
@@ -144,6 +191,8 @@ export async function checkKidExitApproval(input: {
     allowed: true,
     approval: match,
     alertParents: false,
+    gateFrozen: false,
+    parentNotified: false,
     message: `Pre-approved: ${match.kid_name} with ${match.accompanied_by} until ${new Date(match.valid_until).toLocaleTimeString()}.`
   }
 }
@@ -162,4 +211,42 @@ export async function markKidExitUsed(approvalId: string): Promise<KidExitApprov
     localMode = true
     return markKidExitUsed(approvalId)
   }
+}
+
+/** Human-in-the-loop override — required before unapproved child exit can proceed. */
+export async function grantKidExitOverride(input: {
+  societyId: string
+  flatNumber: string
+  kidName?: string
+  overrideBy: 'PARENT' | 'GUARD'
+  reason: string
+  userId?: string
+}): Promise<KidExitOverride> {
+  if (!input.reason.trim()) throw new Error('Override reason is required')
+
+  const payload = {
+    society_id: input.societyId,
+    flat_number: input.flatNumber.trim(),
+    kid_name: input.kidName?.trim() || null,
+    override_by: input.overrideBy,
+    override_user_id: input.userId || null,
+    reason: input.reason.trim()
+  }
+
+  if (localMode) {
+    const row: KidExitOverride = { id: rid('ovr'), created_at: new Date().toISOString(), ...payload }
+    localOverrides.unshift(row)
+    return row
+  }
+  try {
+    return await restPost<KidExitOverride>('kid_exit_overrides', payload)
+  } catch (err) {
+    if (!shouldUseLocalFallback(err)) throw err
+    localMode = true
+    return grantKidExitOverride(input)
+  }
+}
+
+export async function autonomousExpireKidExits(societyId: string) {
+  await expireStale(societyId)
 }

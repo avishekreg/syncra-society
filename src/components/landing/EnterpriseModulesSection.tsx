@@ -134,7 +134,7 @@ const MODULES = [
     id: 'mailist-rent',
     icon: '🔑',
     title: 'maiList Rental Syndication',
-    blurb: '1-click rent listings pushed to MagicBricks, 99acres, Housing.com, and NoBroker.',
+    blurb: '1-click rent listings pushed to major property portals and zero-brokerage networks.',
     detail: 'Owners publish once; maiList formats portal payloads and broadcasts to society renter networks.'
   },
   {

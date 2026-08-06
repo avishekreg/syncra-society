@@ -20,6 +20,7 @@ export type PushEventType =
   | 'election.open'
   | 'election.closed'
   | 'election.published'
+  | 'delivery.pre_approved'
   | 'system.alert'
 
 export type PushAudience = 'society' | 'admins' | 'flat' | 'residents'
@@ -96,7 +97,7 @@ function emitBanner(title: string, body: string, url?: string) {
   publishAdminAlert(message)
 }
 
-async function tryWebNotification(title: string, body: string, url?: string) {
+async function tryWebNotification(title: string, body: string, url?: string, silent = false) {
   if (typeof window === 'undefined' || !('Notification' in window)) return false
 
   let permission = Notification.permission
@@ -118,7 +119,8 @@ async function tryWebNotification(title: string, body: string, url?: string) {
           icon: '/logo.png',
           badge: '/favicon-32.png',
           data: { url: url || '/' },
-          tag: `mai-${Date.now()}`
+          tag: `mai-${Date.now()}`,
+          silent
         })
         return true
       }
@@ -127,7 +129,8 @@ async function tryWebNotification(title: string, body: string, url?: string) {
     const n = new Notification(title, {
       body,
       icon: '/logo.png',
-      data: { url: url || '/' }
+      data: { url: url || '/' },
+      silent
     })
     n.onclick = () => {
       window.focus()
@@ -175,7 +178,8 @@ export async function dispatchPushNotification(input: PushDispatchInput): Promis
   let channel: PushLogEntry['channel'] = 'banner'
   let status: PushLogEntry['status'] = 'fallback'
 
-  const webOk = await tryWebNotification(input.title, input.body, input.url)
+  const silent = Boolean(input.metadata?.silent)
+  const webOk = await tryWebNotification(input.title, input.body, input.url, silent)
   if (webOk) {
     channel = 'web_push'
     status = 'dispatched'

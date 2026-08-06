@@ -33,7 +33,7 @@ export default function AutonomousIntelligenceShowcase() {
         <h3 className="mx-auto max-w-3xl text-balance text-2xl font-semibold leading-snug text-syncra-primary whitespace-normal break-words sm:text-3xl md:text-4xl md:leading-tight">
           Autonomous Society Intelligence
           <span className="mt-2 block text-lg font-medium text-slate-600 sm:text-xl">
-            Things Competitors Can&apos;t Do
+            Competitive Edge vs Legacy Platforms
           </span>
         </h3>
         <p className={`mx-auto max-w-2xl text-pretty whitespace-normal break-words ${ui.body}`}>

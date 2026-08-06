@@ -5,7 +5,7 @@ const ITEMS = [
   {
     icon: '🏘️',
     title: '1-Click Dual Engine',
-    description: 'Publish flats for rent or resale once — syndicate to MagicBricks, 99acres, Housing.com, and NoBroker.'
+    description: 'Publish flats for rent or resale once — syndicate to major property portals and zero-brokerage networks.'
   },
   {
     icon: '📜',

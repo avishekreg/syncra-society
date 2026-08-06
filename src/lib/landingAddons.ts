@@ -183,7 +183,7 @@ export const LANDING_ADDONS: LandingAddon[] = [
     moduleName: 'mai_list',
     label: 'maiList Rental & Resale Syndication',
     shortLabel: 'maiList',
-    description: '1-click rent + resale syndication across MagicBricks, 99acres, Housing, NoBroker.',
+    description: '1-click rent + resale syndication across major property portals and zero-brokerage networks.',
     monthlyPriceInr: 299
   }
 ]

@@ -82,7 +82,7 @@ export default function ResidentRentOutPage() {
         <p className={ui.eyebrow}>maiList</p>
         <h2 className={`mt-2 ${ui.headingLg}`}>Rent out or sell Flat {user.flatNumber}</h2>
         <p className={`mt-2 ${ui.body}`}>
-          1-click dual engine for rental & resale syndication across MagicBricks, 99acres, Housing.com, and NoBroker —
+          1-click dual engine for rental & resale syndication across major property portals and zero-brokerage networks —
           with Verified RWA Resale Certificate for sale listings.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">

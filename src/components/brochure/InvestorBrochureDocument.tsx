@@ -206,11 +206,12 @@ export default function InvestorBrochureDocument() {
         <BrochureEyebrow>03 · Why older tools struggle to catch up</BrochureEyebrow>
         <BrochureTitle size="md">Not a feature race — a different foundation</BrochureTitle>
         <BrochureLead>
-          Older society apps were built mainly to collect dues. New needs (smart gates, WhatsApp help, plant care, flat
-          resale) get bolted on later. mAI Society was designed as a full community operating system from day one.
+          Traditional gatekeeper apps were built mainly to collect dues. New needs (smart gates, WhatsApp help, plant
+          care, flat resale) get bolted on later. mAI Society was designed as a full community operating system from day
+          one.
         </BrochureLead>
         <ComparisonTable
-          headers={['Topic', 'Typical older tools', 'mAI Society']}
+          headers={['Topic', 'Legacy Society Apps', 'mAI Society']}
           rows={[
             ['Hardware', 'Often needs devices at the gate', 'Phone + WhatsApp first — no gadgets required'],
             ['Focus', 'Mostly billing and notices', 'Gate, money, elections, green, home, listings'],
@@ -527,7 +528,7 @@ export default function InvestorBrochureDocument() {
             'Open My Flat → choose “Rent out” or “Sell”.',
             'Add rent or expected sale price, parking, area, and documents if selling.',
             'For sale, the listing can show a Verified Society badge when dues are clear and NOC status is recorded.',
-            'One-click publish prepares the listing for MagicBricks, 99acres, Housing.com, and NoBroker (rent or resale feeds).',
+            'One-click publish prepares the listing for major property portals and leading zero-brokerage rent/resale networks.',
             'An alert can go to interested buyers and verified resident networks inside the society.',
             'Buyers/renters browse the marketplace, estimate loan EMI for sale flats, and contact the owner directly — zero brokerage inside the society board.'
           ]}
@@ -618,14 +619,15 @@ export default function InvestorBrochureDocument() {
 
       {/* 15. Competitive */}
       <BrochurePage tone="surface">
-        <BrochureEyebrow>14 · Why choose mAI Society</BrochureEyebrow>
+        <BrochureEyebrow>14 · Competitive Edge vs Legacy Platforms</BrochureEyebrow>
         <BrochureTitle size="md">How we compare when you are buying</BrochureTitle>
         <BrochureLead>
-          Many tools are excellent at one job (billing or visitors). When a society shortlists software, mAI Society wins
-          on breadth with clarity: one society picture, optional modules, and no forced hardware.
+          Other market platforms are often excellent at one job (billing or visitors). When a society shortlists
+          software, mAI Society wins on breadth with clarity: one society picture, optional modules, and no forced
+          hardware.
         </BrochureLead>
         <ComparisonTable
-          headers={['Question', 'Single-purpose tools', 'mAI Society']}
+          headers={['Question', 'Traditional Gatekeeper Apps', 'mAI Society']}
           rows={[
             ['Can one system cover gate + money + elections?', 'Usually no', 'Yes, in one workspace'],
             ['Do we need gadgets to start?', 'Often yes', 'No — phones are enough'],

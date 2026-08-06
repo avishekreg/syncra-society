@@ -1,6 +1,8 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import DashboardLayout from './DashboardLayout'
 import GatekeeperAlert from '../components/GatekeeperAlert'
+import DeliveryListenerBootstrap from '../components/mobile/DeliveryListenerBootstrap'
+import AutonomousJobsBootstrap from '../components/mobile/AutonomousJobsBootstrap'
 import { useAuth } from '../providers/AuthProvider'
 import { useResolvedSocietyUuid } from '../hooks/useResolvedSocietyUuid'
 
@@ -42,6 +44,8 @@ export default function ResidentRouteLayout() {
 
   return (
     <DashboardLayout title={title}>
+      <DeliveryListenerBootstrap />
+      <AutonomousJobsBootstrap />
       {societyUuid && flatNumber ? (
         <GatekeeperAlert societyId={societyUuid} myFlatNo={flatNumber} />
       ) : null}

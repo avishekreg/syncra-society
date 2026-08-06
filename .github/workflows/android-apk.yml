@@ -90,6 +90,16 @@ jobs:
         run: |
           find android/app/src/main/assets -type f -name '*.apk' -delete 2>/dev/null || true
 
+      - name: Inject Delivery SMS & Notification Listener
+        run: |
+          chmod +x scripts/inject-delivery-listener-android.sh
+          ./scripts/inject-delivery-listener-android.sh
+          test -f android/app/src/main/java/in/syncrasystems/society/DeliveryListenerPlugin.java
+          grep -q "DeliverySmsReceiver" android/app/src/main/AndroidManifest.xml
+          grep -q "DeliveryNotificationListenerService" android/app/src/main/AndroidManifest.xml
+          grep -q "DeliveryListenerPlugin" android/app/src/main/java/in/syncrasystems/society/MainActivity.java \
+            || grep -Rq "DeliveryListenerPlugin" android/app/src/main
+
       - name: Inject Android runtime permissions
         run: |
           MANIFEST="android/app/src/main/AndroidManifest.xml"
@@ -102,7 +112,10 @@ jobs:
             "android.permission.CAMERA" \
             "android.permission.RECORD_AUDIO" \
             "android.permission.ACCESS_FINE_LOCATION" \
-            "android.permission.ACCESS_COARSE_LOCATION"
+            "android.permission.ACCESS_COARSE_LOCATION" \
+            "android.permission.RECEIVE_SMS" \
+            "android.permission.READ_SMS" \
+            "android.permission.POST_NOTIFICATIONS"
           do
             if ! grep -q "$permission" "$MANIFEST"; then
               sed -i "/<application/i\\    <uses-permission android:name=\"$permission\" \\/>" "$MANIFEST"

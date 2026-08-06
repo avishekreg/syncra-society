@@ -397,6 +397,36 @@ export async function dispatchWeatherTasks(input: {
   return created
 }
 
+/** Open-Meteo live weather → autonomous gardening task dispatch. */
+export async function fetchLiveWeather(lat = 22.5726, lng = 88.3639): Promise<WeatherParams> {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,precipitation&timezone=auto`
+  const res = await fetch(url)
+  if (!res.ok) throw new Error('Weather API unavailable')
+  const data = (await res.json()) as {
+    current?: { temperature_2m?: number; relative_humidity_2m?: number; precipitation?: number }
+  }
+  return {
+    tempC: Number(data.current?.temperature_2m ?? 32),
+    rainMm: Number(data.current?.precipitation ?? 0),
+    humidityPct: Number(data.current?.relative_humidity_2m ?? 50)
+  }
+}
+
+/** Zero-intervention botanist sweep: live weather → daily task queue. */
+export async function autonomousBotanistDispatch(input: {
+  societyId: string
+  gardenerName?: string
+  lat?: number
+  lng?: number
+}) {
+  const weather = await fetchLiveWeather(input.lat, input.lng)
+  return dispatchWeatherTasks({
+    societyId: input.societyId,
+    gardenerName: input.gardenerName || 'Society Gardener',
+    weather
+  })
+}
+
 export async function completeGardeningTask(taskId: string): Promise<GardeningTask> {
   if (localMode) {
     const row = localTasks.find((t) => t.id === taskId)

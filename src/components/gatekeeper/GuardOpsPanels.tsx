@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import {
   checkKidExitApproval,
+  grantKidExitOverride,
   markKidExitUsed,
   type KidExitCheckResult
 } from '../../api/kidSafetyService'
@@ -24,10 +25,12 @@ export default function GuardOpsPanels({ societyId }: Props) {
   const [flatNumber, setFlatNumber] = useState('')
   const [kidName, setKidName] = useState('')
   const [kidResult, setKidResult] = useState<KidExitCheckResult | null>(null)
+  const [overrideReason, setOverrideReason] = useState('')
   const [overstays, setOverstays] = useState<OverstayVisitorAlert[]>([])
   const [sosAlerts, setSosAlerts] = useState<EmergencySosAlert[]>([])
   const [threshold, setThreshold] = useState(getOverstayThresholdMinutes())
   const [error, setError] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
 
   useEffect(() => {
     const stopSos = startSosPolling(societyId, setSosAlerts)
@@ -45,15 +48,45 @@ export default function GuardOpsPanels({ societyId }: Props) {
   async function handleKidCheck(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
+    setBusy(true)
     try {
       const result = await checkKidExitApproval({
         societyId,
         flatNumber,
-        kidName: kidName || undefined
+        kidName: kidName || undefined,
+        notifyParents: true
       })
       setKidResult(result)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Kid check failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function handleGuardOverride() {
+    if (!kidResult?.gateFrozen) return
+    if (!overrideReason.trim()) {
+      setError('Guard override requires an explicit reason (human-in-the-loop).')
+      return
+    }
+    setBusy(true)
+    setError(null)
+    try {
+      await grantKidExitOverride({
+        societyId,
+        flatNumber,
+        kidName: kidName || undefined,
+        overrideBy: 'GUARD',
+        reason: overrideReason,
+        userId: user?.id
+      })
+      setKidResult(null)
+      setOverrideReason('')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Override failed')
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -95,7 +128,7 @@ export default function GuardOpsPanels({ societyId }: Props) {
       <section className={ui.card}>
         <h3 className={ui.heading}>Kid safety check</h3>
         <p className={`mt-2 text-sm ${ui.body}`}>
-          Verify minor exit approvals. Missing approval opens a parent-alert warning.
+          Missing approval freezes gate clearance, pushes a loud parent alert, and requires parent or guard override.
         </p>
         <form onSubmit={handleKidCheck} className="mt-4 grid gap-3 sm:grid-cols-2">
           <input
@@ -111,8 +144,8 @@ export default function GuardOpsPanels({ societyId }: Props) {
             value={kidName}
             onChange={(e) => setKidName(e.target.value)}
           />
-          <button type="submit" className={ui.btnPrimary}>
-            Check exit approval
+          <button type="submit" className={ui.btnPrimary} disabled={busy}>
+            {busy ? 'Checking…' : 'Check exit approval'}
           </button>
         </form>
         {error ? <p className="mt-3 text-sm text-rose-600">{error}</p> : null}
@@ -121,10 +154,16 @@ export default function GuardOpsPanels({ societyId }: Props) {
       {kidResult ? (
         <div className={ui.overlay}>
           <div className={ui.modal}>
-            <h3 className={`text-xl font-semibold ${kidResult.alertParents ? 'text-rose-700' : 'text-emerald-700'}`}>
-              {kidResult.alertParents ? 'Kid Safety Warning' : 'Exit pre-approved'}
+            <h3 className={`text-xl font-semibold ${kidResult.gateFrozen ? 'text-rose-700' : 'text-emerald-700'}`}>
+              {kidResult.gateFrozen ? 'GATE FROZEN — Kid Safety Hold' : 'Exit pre-approved'}
             </h3>
             <p className={`mt-3 ${ui.body}`}>{kidResult.message}</p>
+            {kidResult.parentNotified ? (
+              <p className="mt-2 text-sm font-semibold text-rose-700">
+                Loud parent push dispatched. Clearance remains frozen until override.
+              </p>
+            ) : null}
+
             <div className="mt-6 flex flex-wrap gap-2">
               {kidResult.approval ? (
                 <button
@@ -137,13 +176,30 @@ export default function GuardOpsPanels({ societyId }: Props) {
                   Log exit & close
                 </button>
               ) : (
-                <button type="button" className={ui.btnDanger} onClick={() => setKidResult(null)}>
-                  Parent alerted — continue with caution
-                </button>
+                <div className="w-full space-y-3">
+                  <label className={ui.label}>Guard override reason (required)</label>
+                  <textarea
+                    className={`${ui.input} min-h-[72px]`}
+                    value={overrideReason}
+                    onChange={(e) => setOverrideReason(e.target.value)}
+                    placeholder="e.g. Parent confirmed verbally on recorded call · ID verified"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className={ui.btnDanger}
+                    disabled={busy || !overrideReason.trim()}
+                    onClick={() => void handleGuardOverride()}
+                  >
+                    Record guard override & release freeze
+                  </button>
+                </div>
               )}
-              <button type="button" className={ui.btnGhost} onClick={() => setKidResult(null)}>
-                Dismiss
-              </button>
+              {!kidResult.gateFrozen ? (
+                <button type="button" className={ui.btnGhost} onClick={() => setKidResult(null)}>
+                  Dismiss
+                </button>
+              ) : null}
             </div>
           </div>
         </div>
@@ -154,7 +210,8 @@ export default function GuardOpsPanels({ societyId }: Props) {
           <div>
             <h3 className={ui.heading}>Overstay alerts</h3>
             <p className={`mt-1 text-sm ${ui.body}`}>
-              Vendors / visitors still inside after {threshold} minutes (approved, not exited).
+              Vendors / visitors still inside after {threshold} minutes (approved, not exited). Autonomous scan pushes
+              admin alerts; release remains a human guard action.
             </p>
           </div>
           <div className="space-y-1">
