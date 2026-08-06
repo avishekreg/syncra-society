@@ -1,352 +1,287 @@
-import React from 'react'
+import React, { useId, useMemo } from 'react'
+import QRCode from 'qrcode'
 import { getExecDeckCopy, type BrochureLocale } from '../../lib/brochureI18n'
 import { MAI_PRODUCTION_ORIGIN, SYNCRA_LEGAL_ENTITY } from '../../lib/brandConstants'
 
-type Props = {
-  locale?: BrochureLocale
-}
+type Props = { locale?: BrochureLocale }
 
 const NAVY = '#0f172a'
 const BLUE = '#2563eb'
 const SLATE = '#f8fafc'
 const EMERALD = '#10b981'
 
-function ExecPageChrome({
+/** Crisp SVG mark — print-safe, no external assets. */
+function MaiLogoMark({ size = 28 }: { size?: number }) {
+  const uid = useId().replace(/:/g, '')
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id={`s${uid}`} x1="6" y1="26" x2="26" y2="6" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#38bdf8" />
+          <stop offset="0.55" stopColor="#2563eb" />
+          <stop offset="1" stopColor="#1d4ed8" />
+        </linearGradient>
+        <linearGradient id={`a${uid}`} x1="14" y1="8" x2="22" y2="16" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#FFB347" />
+          <stop offset="1" stopColor="#E67E00" />
+        </linearGradient>
+      </defs>
+      <rect width="32" height="32" rx="8" fill="#fff" />
+      <path
+        d="M10 22.5V12.5L16 9.5L22 12.5V22.5"
+        stroke={`url(#s${uid})`}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M13.5 22.5V15.2L16 13.9L18.5 15.2V22.5"
+        stroke={`url(#s${uid})`}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="16" cy="18.8" r="1.35" fill="#0052CC" />
+      <path d="M21.5 10.5L23.5 8.5L25 10.5L23 12.5Z" fill={`url(#a${uid})`} />
+    </svg>
+  )
+}
+
+function MaiWordmark({ onDark }: { onDark?: boolean }) {
+  return (
+    <span className="exec-wordmark" style={{ color: onDark ? '#fff' : NAVY }}>
+      <span style={{ color: onDark ? '#7dd3fc' : BLUE }}>m</span>
+      <span style={{ color: '#E67E00' }}>AI</span>
+      <span style={{ color: onDark ? '#e2e8f0' : NAVY }}>Society</span>
+    </span>
+  )
+}
+
+function ExecQr({ url, size = 96 }: { url: string; size?: number }) {
+  const modules = useMemo(() => QRCode.create(url, { errorCorrectionLevel: 'M' }).modules, [url])
+  const n = modules.size
+  const cells: React.ReactNode[] = []
+  for (let y = 0; y < n; y += 1) {
+    for (let x = 0; x < n; x += 1) {
+      if (modules.get(x, y)) {
+        cells.push(<rect key={`${x}-${y}`} x={x} y={y} width={1} height={1} fill={NAVY} />)
+      }
+    }
+  }
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${n} ${n}`}
+      shapeRendering="crispEdges"
+      role="img"
+      aria-label={`QR code for ${url}`}
+    >
+      <rect width={n} height={n} fill="#fff" />
+      {cells}
+    </svg>
+  )
+}
+
+function PageShell({
   brand,
+  pitchTag,
   page,
   total,
   pageLabel,
-  children,
-  variant = 'light'
+  children
 }: {
   brand: string
+  pitchTag: string
   page: number
   total: number
   pageLabel: string
   children: React.ReactNode
-  variant?: 'light' | 'dark'
 }) {
-  const dark = variant === 'dark'
   return (
-    <article
-      className={`brochure-page exec-deck-page relative overflow-hidden ${dark ? 'exec-deck-page--dark' : 'exec-deck-page--light'}`}
-      data-brochure-page
-      style={{ backgroundColor: dark ? NAVY : '#ffffff' }}
-    >
-      {/* Brand header banner */}
-      <header
-        className="exec-deck-banner flex items-center justify-between gap-3 px-5 py-2.5 sm:px-7"
-        style={{
-          background: dark
-            ? 'linear-gradient(90deg, rgba(37,99,235,0.35), rgba(15,23,42,0.2))'
-            : `linear-gradient(90deg, ${NAVY} 0%, ${BLUE} 100%)`
-        }}
-      >
-        <div className="flex items-center gap-2.5">
-          <span
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-[11px] font-black tracking-tight text-white shadow-lg"
-            style={{
-              background: `radial-gradient(circle at 30% 30%, #60a5fa, ${BLUE} 55%, ${NAVY})`,
-              boxShadow: '0 0 18px rgba(37,99,235,0.55)'
-            }}
-          >
-            mAI
-          </span>
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white sm:text-[11px]">{brand}</p>
+    <article className="brochure-page exec-a4" data-brochure-page>
+      <header className="exec-hdr">
+        <div className="exec-hdr-brand">
+          <MaiLogoMark size={30} />
+          <div>
+            <MaiWordmark onDark />
+            <p className="exec-hdr-sub">by Syncra Systems</p>
+          </div>
         </div>
-        <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-blue-100/90 sm:text-[10px]">
-          Enterprise SaaS · RWA
-        </p>
+        <span className="exec-pill">{pitchTag}</span>
       </header>
-
-      <div className="brochure-page-inner exec-deck-inner relative z-[1] flex flex-col">{children}</div>
-
-      <footer
-        className="exec-deck-footer mt-auto flex items-center justify-between border-t px-5 py-2.5 sm:px-7"
-        style={{
-          borderColor: dark ? 'rgba(255,255,255,0.12)' : '#e2e8f0',
-          backgroundColor: dark ? 'rgba(15,23,42,0.85)' : SLATE
-        }}
-      >
-        <span
-          className="text-[9px] font-semibold uppercase tracking-[0.14em] sm:text-[10px]"
-          style={{ color: dark ? '#94a3b8' : '#64748b' }}
-        >
-          {brand}
-        </span>
-        <span
-          className="text-[9px] font-bold uppercase tracking-[0.16em] sm:text-[10px]"
-          style={{ color: dark ? '#cbd5e1' : NAVY }}
-        >
-          {pageLabel} {page} / {total}
+      <div className="exec-body">{children}</div>
+      <footer className="exec-ftr">
+        <span>{brand}</span>
+        <span>
+          {pageLabel} {page}/{total}
         </span>
       </footer>
     </article>
   )
 }
 
-function SectionTag({ children, tone = 'blue' }: { children: React.ReactNode; tone?: 'blue' | 'emerald' | 'light' }) {
-  const styles =
-    tone === 'emerald'
-      ? { backgroundColor: 'rgba(16,185,129,0.12)', color: '#047857' }
-      : tone === 'light'
-        ? { backgroundColor: 'rgba(255,255,255,0.12)', color: '#bfdbfe' }
-        : { backgroundColor: 'rgba(37,99,235,0.1)', color: BLUE }
-  return (
-    <p
-      className="inline-flex rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.2em]"
-      style={styles}
-    >
-      {children}
-    </p>
-  )
-}
-
-/** Trademark-safe 4-page Quick Exec Deck — full-bleed branded pitch. */
+/** Dense, print-safe 4-page Quick Exec Deck. */
 export default function QuickExecDeck({ locale = 'en' }: Props) {
   const copy = getExecDeckCopy(locale)
-  const total = 4
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&margin=8&data=${encodeURIComponent(MAI_PRODUCTION_ORIGIN)}`
+  const byline =
+    copy.brandBanner.includes('by Syncra') || copy.brandBanner.includes('·')
+      ? copy.brandBanner
+      : `${copy.brandBanner}`
 
   return (
     <div className="brochure-document exec-deck-document" data-brochure-deck="exec-4" lang={locale}>
-      {/* ── PAGE 1: Cover & Executive Summary ── */}
-      <ExecPageChrome brand={copy.brandBanner} page={1} total={total} pageLabel={copy.pageLabel} variant="dark">
-        <div className="flex flex-1 flex-col">
-          <div
-            className="-mx-1 rounded-2xl px-4 py-6 sm:px-5 sm:py-7"
-            style={{
-              background: `linear-gradient(145deg, ${NAVY} 0%, #1e3a8a 42%, ${BLUE} 100%)`,
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12), 0 20px 50px rgba(37,99,235,0.25)'
-            }}
-          >
-            <SectionTag tone="light">{copy.cover.eyebrow}</SectionTag>
-            <h1 className="mt-3 text-[1.65rem] font-black leading-[1.15] tracking-tight text-white sm:text-[2.05rem]">
-              {copy.cover.title}
-            </h1>
-            <p className="mt-3 max-w-2xl text-[13px] leading-relaxed text-blue-100/95 sm:text-sm">{copy.cover.subtitle}</p>
-            <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {copy.cover.valueProps.map((prop) => (
-                <div
-                  key={prop}
-                  className="rounded-xl border border-white/15 bg-white/10 px-2.5 py-3 text-center backdrop-blur-sm"
-                >
-                  <p className="text-[10px] font-bold leading-snug text-white sm:text-[11px]">{prop}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div
-            className="mt-5 flex flex-1 flex-col rounded-2xl border p-4 sm:p-5"
-            style={{ backgroundColor: SLATE, borderColor: '#e2e8f0' }}
-          >
-            <SectionTag tone="emerald">{copy.cover.summaryTag}</SectionTag>
-            <h2 className="mt-2 text-lg font-bold leading-snug sm:text-xl" style={{ color: NAVY }}>
-              {copy.cover.summaryTitle}
-            </h2>
-            <p className="mt-2 text-[12.5px] leading-relaxed text-slate-600 sm:text-[13px]">{copy.cover.summaryBody}</p>
-            <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-200 pt-3">
-              <span
-                className="rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-white"
-                style={{ backgroundColor: EMERALD }}
-              >
-                Zero hardware
-              </span>
-              <span className="text-[11px] font-medium text-slate-500">{SYNCRA_LEGAL_ENTITY} · Kolkata HQ</span>
-            </div>
-          </div>
-        </div>
-      </ExecPageChrome>
-
-      {/* ── PAGE 2: Competitive Edge Matrix ── */}
-      <ExecPageChrome brand={copy.brandBanner} page={2} total={total} pageLabel={copy.pageLabel}>
-        <SectionTag>{copy.matrix.eyebrow}</SectionTag>
-        <h2 className="mt-2 text-[1.45rem] font-black leading-tight sm:text-[1.7rem]" style={{ color: NAVY }}>
-          {copy.matrix.title}
-        </h2>
-        <p className="mt-2 text-[12.5px] leading-relaxed text-slate-600 sm:text-sm">{copy.matrix.lead}</p>
-
-        <div className="mt-4 flex-1 overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
-          <table className="exec-matrix w-full border-collapse text-left">
-            <thead>
-              <tr style={{ backgroundColor: NAVY }}>
-                {copy.matrix.headers.map((h, i) => (
-                  <th
-                    key={h}
-                    className={`px-3 py-3 text-[9px] font-bold uppercase tracking-[0.14em] text-white sm:px-3.5 sm:text-[10px] ${
-                      i === 2 ? 'bg-blue-600' : ''
-                    }`}
-                    style={i === 2 ? { backgroundColor: BLUE } : undefined}
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {copy.matrix.rows.map((row, idx) => (
-                <tr
-                  key={row[0]}
-                  style={{ backgroundColor: idx % 2 === 0 ? '#ffffff' : SLATE }}
-                  className="border-b border-slate-100"
-                >
-                  <td className="px-3 py-2.5 text-[11px] font-bold sm:px-3.5 sm:text-[12px]" style={{ color: NAVY }}>
-                    {row[0]}
-                  </td>
-                  <td className="px-3 py-2.5 text-[11px] leading-snug text-slate-600 sm:px-3.5 sm:text-[12px]">{row[1]}</td>
-                  <td
-                    className="px-3 py-2.5 text-[11px] font-semibold leading-snug sm:px-3.5 sm:text-[12px]"
-                    style={{ color: BLUE, backgroundColor: 'rgba(37,99,235,0.06)' }}
-                  >
-                    {row[2]}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </ExecPageChrome>
-
-      {/* ── PAGE 3: 6 Core AI Modules ── */}
-      <ExecPageChrome brand={copy.brandBanner} page={3} total={total} pageLabel={copy.pageLabel}>
-        <SectionTag>{copy.modules.eyebrow}</SectionTag>
-        <h2 className="mt-2 text-[1.45rem] font-black leading-tight sm:text-[1.7rem]" style={{ color: NAVY }}>
-          {copy.modules.title}
-        </h2>
-        <p className="mt-2 text-[12.5px] leading-relaxed text-slate-600 sm:text-sm">{copy.modules.lead}</p>
-
-        <div className="mt-4 grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2">
-          {copy.modules.cards.map((card) => (
-            <div
-              key={card.title}
-              className="flex flex-col rounded-2xl border border-slate-200 p-3.5 shadow-sm sm:p-4"
-              style={{ backgroundColor: SLATE }}
-            >
-              <div className="flex items-start gap-2.5">
-                <span
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-lg"
-                  style={{ backgroundColor: 'rgba(37,99,235,0.12)' }}
-                >
-                  {card.icon}
-                </span>
-                <h3 className="pt-1 text-[12.5px] font-bold leading-snug sm:text-[13px]" style={{ color: NAVY }}>
-                  {card.title}
-                </h3>
+      {/* PAGE 1 */}
+      <PageShell brand={byline} pitchTag={copy.pitchTag} page={1} total={4} pageLabel={copy.pageLabel}>
+        <section className="exec-hero">
+          <p className="exec-kicker">{copy.cover.eyebrow}</p>
+          <h1 className="exec-h1">{copy.cover.title}</h1>
+          <p className="exec-lead">{copy.cover.subtitle}</p>
+          <div className="exec-metrics">
+            {copy.cover.metrics.map((m) => (
+              <div key={m} className="exec-metric">
+                {m}
               </div>
-              <ul className="mt-2.5 space-y-1.5 border-t border-slate-200/80 pt-2.5">
+            ))}
+          </div>
+        </section>
+
+        <section className="exec-block">
+          <p className="exec-kicker exec-kicker--green">{copy.cover.failTag}</p>
+          <h2 className="exec-h2">{copy.cover.failTitle}</h2>
+          <div className="exec-fail-grid">
+            {copy.cover.failCards.map((card) => (
+              <div key={card.title} className="exec-fail-card">
+                <span className="exec-fail-icon">{card.icon}</span>
+                <p className="exec-fail-title">{card.title}</p>
+                <p className="exec-fail-body">{card.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="exec-bottom-split">
+          <div className="exec-overview">
+            <p className="exec-kicker">{copy.cover.overviewTag}</p>
+            <h2 className="exec-h2">{copy.cover.overviewTitle}</h2>
+            <p className="exec-body-text">{copy.cover.overviewBody}</p>
+            <p className="exec-hq">{SYNCRA_LEGAL_ENTITY} · Kolkata HQ</p>
+          </div>
+          <div className="exec-arch">
+            <p className="exec-arch-title">{copy.cover.architectureTitle}</p>
+            <ul>
+              {copy.cover.architectureItems.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      </PageShell>
+
+      {/* PAGE 2 */}
+      <PageShell brand={byline} pitchTag={copy.pitchTag} page={2} total={4} pageLabel={copy.pageLabel}>
+        <p className="exec-kicker">{copy.matrix.eyebrow}</p>
+        <h2 className="exec-h2 exec-h2--lg">{copy.matrix.title}</h2>
+        <p className="exec-body-text">{copy.matrix.lead}</p>
+        <table className="exec-table">
+          <thead>
+            <tr>
+              {copy.matrix.headers.map((h, i) => (
+                <th key={h} className={i === 2 ? 'exec-th-accent' : undefined}>
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {copy.matrix.rows.map((row, idx) => (
+              <tr key={row[0]} className={idx % 2 === 0 ? 'exec-tr-even' : 'exec-tr-odd'}>
+                <td className="exec-td-key">{row[0]}</td>
+                <td>{row[1]}</td>
+                <td className="exec-td-win">{row[2]}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </PageShell>
+
+      {/* PAGE 3 */}
+      <PageShell brand={byline} pitchTag={copy.pitchTag} page={3} total={4} pageLabel={copy.pageLabel}>
+        <p className="exec-kicker">{copy.modules.eyebrow}</p>
+        <h2 className="exec-h2 exec-h2--lg">{copy.modules.title}</h2>
+        <p className="exec-body-text">{copy.modules.lead}</p>
+        <div className="exec-mod-grid">
+          {copy.modules.cards.map((card) => (
+            <article key={card.title} className="exec-mod-card">
+              <div className="exec-mod-head">
+                <span>{card.icon}</span>
+                <h3>{card.title}</h3>
+              </div>
+              <ul>
                 {card.bullets.map((b) => (
-                  <li key={b} className="flex gap-2 text-[11px] leading-snug text-slate-600 sm:text-[11.5px]">
-                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: EMERALD }} />
-                    <span>{b}</span>
-                  </li>
+                  <li key={b}>{b}</li>
                 ))}
               </ul>
-            </div>
+            </article>
           ))}
         </div>
-      </ExecPageChrome>
+      </PageShell>
 
-      {/* ── PAGE 4: Commercials, ROI & CTA ── */}
-      <ExecPageChrome brand={copy.brandBanner} page={4} total={total} pageLabel={copy.pageLabel}>
-        <SectionTag tone="emerald">{copy.close.eyebrow}</SectionTag>
-        <h2 className="mt-2 text-[1.4rem] font-black leading-tight sm:text-[1.65rem]" style={{ color: NAVY }}>
-          {copy.close.title}
-        </h2>
+      {/* PAGE 4 */}
+      <PageShell brand={byline} pitchTag={copy.pitchTag} page={4} total={4} pageLabel={copy.pageLabel}>
+        <p className="exec-kicker exec-kicker--green">{copy.close.eyebrow}</p>
+        <h2 className="exec-h2 exec-h2--lg">{copy.close.title}</h2>
+        <div className="exec-close-grid">
+          <section className="exec-close-col">
+            <h3 className="exec-col-title">{copy.close.monetizationTitle}</h3>
+            {copy.close.monetizationItems.map((item) => (
+              <div key={item.title} className="exec-roi-card">
+                <p className="exec-roi-title">{item.title}</p>
+                <p>{item.body}</p>
+              </div>
+            ))}
+          </section>
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <div>
-            <h3 className="text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: BLUE }}>
-              {copy.close.earnTitle}
-            </h3>
-            <div className="mt-2 space-y-2">
-              {copy.close.earnItems.map((item) => (
-                <div key={item.title} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-                  <p className="text-[12px] font-bold" style={{ color: NAVY }}>
-                    {item.title}
-                  </p>
-                  <p className="mt-1 text-[11px] leading-relaxed text-slate-600">{item.body}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: BLUE }}>
-              {copy.close.roadmapTitle}
-            </h3>
-            <ol className="mt-2 space-y-2">
+          <section className="exec-close-col">
+            <h3 className="exec-col-title">{copy.close.roadmapTitle}</h3>
+            <ol className="exec-steps">
               {copy.close.roadmap.map((step) => (
-                <li
-                  key={step.step}
-                  className="flex gap-2.5 rounded-xl border border-slate-200 p-3"
-                  style={{ backgroundColor: SLATE }}
-                >
-                  <span
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[11px] font-black text-white"
-                    style={{ backgroundColor: NAVY }}
-                  >
-                    {step.step}
-                  </span>
+                <li key={step.step}>
+                  <span className="exec-step-num">{step.step}</span>
                   <div>
-                    <p className="text-[12px] font-bold" style={{ color: NAVY }}>
-                      {step.title}
-                    </p>
-                    <p className="mt-0.5 text-[11px] leading-relaxed text-slate-600">{step.body}</p>
+                    <p className="exec-roi-title">{step.title}</p>
+                    <p>{step.body}</p>
                   </div>
                 </li>
               ))}
             </ol>
-          </div>
-        </div>
+          </section>
 
-        <div
-          className="mt-4 rounded-2xl px-4 py-4 text-white sm:px-5"
-          style={{
-            background: `linear-gradient(120deg, ${NAVY} 0%, ${BLUE} 100%)`,
-            boxShadow: '0 12px 32px rgba(37,99,235,0.28)'
-          }}
-        >
-          <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-blue-200">Call to action</p>
-          <h3 className="mt-1 text-base font-black leading-snug sm:text-lg">{copy.close.ctaTitle}</h3>
-          <p className="mt-2 text-[12px] leading-relaxed text-blue-50 sm:text-[13px]">{copy.close.ctaBody}</p>
+          <section className="exec-close-col exec-close-cta">
+            <div className="exec-cta-box">
+              <h3>{copy.close.ctaTitle}</h3>
+              <p>{copy.close.ctaBody}</p>
+            </div>
+            <div className="exec-contact-row">
+              <div>
+                <h3 className="exec-col-title">{copy.close.contactTitle}</h3>
+                {copy.close.contactLines.map((line) => (
+                  <p key={line} className="exec-contact-line">
+                    {line}
+                  </p>
+                ))}
+                <a className="exec-wa" href={copy.close.whatsappUrl} target="_blank" rel="noreferrer">
+                  {copy.close.whatsappLabel}
+                </a>
+              </div>
+              <div className="exec-qr-wrap">
+                <ExecQr url={MAI_PRODUCTION_ORIGIN} size={88} />
+                <p>{copy.close.qrCaption}</p>
+              </div>
+            </div>
+          </section>
         </div>
-
-        <div className="mt-4 grid flex-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
-          <div className="rounded-2xl border border-slate-200 p-3.5" style={{ backgroundColor: SLATE }}>
-            <h3 className="text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: NAVY }}>
-              {copy.close.contactTitle}
-            </h3>
-            <ul className="mt-2 space-y-1 text-[12px] text-slate-700">
-              {copy.close.contactLines.map((line) => (
-                <li key={line}>{line}</li>
-              ))}
-            </ul>
-            <a
-              href={copy.close.whatsappUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-3 inline-flex items-center gap-2 rounded-xl px-3 py-2 text-[11px] font-bold text-white"
-              style={{ backgroundColor: EMERALD }}
-            >
-              {copy.close.whatsappLabel} →
-            </a>
-          </div>
-          <div className="flex flex-col items-center rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-            <img
-              src={qrUrl}
-              alt="QR code to maiSociety"
-              width={112}
-              height={112}
-              className="h-28 w-28 rounded-lg"
-              crossOrigin="anonymous"
-            />
-            <p className="mt-2 text-center text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-500">
-              {copy.close.qrCaption}
-            </p>
-          </div>
-        </div>
-      </ExecPageChrome>
+      </PageShell>
     </div>
   )
 }
