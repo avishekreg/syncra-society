@@ -5,12 +5,12 @@ const ITEMS = [
   {
     icon: '📐',
     title: 'Smart TV & Sound Sizing',
-    description: 'Photo-based room analysis for optimal display inches & acoustic setup.'
+    description: 'Enter viewing distance for recommended display inches and speaker tips — no room cameras.'
   },
   {
     icon: '🛋️',
     title: 'Furniture Layout Intelligence',
-    description: 'Walkway-aware sofa & decor sizing before buying.'
+    description: 'Walkway-aware sofa & decor sizing from room dimensions you type in.'
   },
   {
     icon: '🎨',
@@ -29,7 +29,7 @@ export default function MaiSpaceShowcase() {
         </h3>
         <p className={`mx-auto max-w-2xl text-pretty whitespace-normal break-words ${ui.body}`}>
           Guide residents on TV sizing, room acoustics, furniture fit, and verified interior vendor matching —
-          before a single wrong purchase.
+          before a single wrong purchase. Tape measure + phone is enough.
         </p>
       </div>
 

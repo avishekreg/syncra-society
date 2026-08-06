@@ -6,17 +6,17 @@ const ITEMS = [
     icon: '🕵️',
     title: 'mAI Asset Finder',
     description:
-      'Community Bluetooth mesh to locate lost phones, keys, and track unauthorized vehicle motion.'
+      'Community tip board for lost phones, keys, and vehicles — neighbors report last-seen spots in the app (phones only).'
   },
   {
     icon: '📊',
     title: 'mAI Auditor',
-    description: 'AI predictive financial leakage detection & vendor invoice auditing.'
+    description: 'Invoice & utility MoM variance flags from the society expense ledger — before human payment approval.'
   },
   {
     icon: '⚖️',
     title: 'mAI Nyaya',
-    description: 'Automated dispute resolution & community mediation based on society bylaws.'
+    description: 'Dispute drafts grounded in your society rulebook, finalized only when both flats digitally sign.'
   },
   {
     icon: '🗳️',
@@ -37,8 +37,8 @@ export default function AutonomousIntelligenceShowcase() {
           </span>
         </h3>
         <p className={`mx-auto max-w-2xl text-pretty whitespace-normal break-words ${ui.body}`}>
-          Predictive finance, peer energy credits, cryptographic recall votes, geofence guardianship, AI mediation,
-          and a society-wide Bluetooth asset mesh — zero hardware lock-in.
+          Predictive finance flags, peer energy credits, cryptographic recall votes, family check-in watchlists, AI
+          mediation, and a neighbor tip board for lost items — all phone-first, with no gadgets to buy.
         </p>
       </div>
 

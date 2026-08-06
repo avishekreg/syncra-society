@@ -4,7 +4,8 @@ import FooterAndroidQr from '../landing/FooterAndroidQr'
 import FooterAppStoreBadges from '../landing/FooterAppStoreBadges'
 import MaiSocietyWordmark from '../brand/MaiSocietyWordmark'
 import { SyncraInsignia } from '../brand/SyncraBrandLogo'
-import { SYNCRA_LEGAL_ENTITY, MAI_PRODUCT_BROCHURE_PDF, MAI_PRODUCT_BROCHURE_FILENAME } from '../../lib/brandConstants'
+import { BrochureDownloadTrigger } from '../brochure/BrochureDownloadModal'
+import { SYNCRA_LEGAL_ENTITY } from '../../lib/brandConstants'
 
 const complianceLinks = [
   { to: '/legal/terms', label: 'Terms & Conditions' },
@@ -79,13 +80,12 @@ export default function SyncraFooter({ className = '', showAppBadges = true }: S
               {platformLinks.map((link) => (
                 <FooterLink key={link.to} {...link} />
               ))}
-              <a
-                href={MAI_PRODUCT_BROCHURE_PDF}
-                download={MAI_PRODUCT_BROCHURE_FILENAME}
-                className="block text-sm font-medium leading-snug text-slate-600 transition hover:text-syncra-blue"
+              <BrochureDownloadTrigger
+                className="block text-left text-sm font-medium leading-snug text-slate-600 transition hover:text-syncra-blue"
+                defaultFormat="exec"
               >
                 Download brochure (PDF)
-              </a>
+              </BrochureDownloadTrigger>
             </nav>
           </div>
 

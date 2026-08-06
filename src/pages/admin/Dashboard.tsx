@@ -5,6 +5,7 @@ import { isGlobalSuperAdmin } from '../../lib/roles'
 import { listComplaintsForSociety } from '../../api/complaints'
 import { listVisitorLogs } from '../../api/visitorLogs'
 import SocietyFeatureCards from '../../components/features/SocietyFeatureCards'
+import { BrochureDownloadTrigger } from '../../components/brochure/BrochureDownloadModal'
 import { ui } from '../../lib/ui'
 
 function StatCard({ label, value, hint }: { label: string; value: string | number; hint: string }) {
@@ -53,12 +54,17 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <p className={ui.eyebrow}>President console</p>
-        <h1 className={`mt-2 ${ui.headingLg}`}>Society overview</h1>
-        <p className={`mt-2 max-w-2xl ${ui.body}`}>
-          High-level operational pulse — open notices, finance, and onboarding from the sidebar sub-menus.
-        </p>
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className={ui.eyebrow}>President console</p>
+          <h1 className={`mt-2 ${ui.headingLg}`}>Society overview</h1>
+          <p className={`mt-2 max-w-2xl ${ui.body}`}>
+            High-level operational pulse — open notices, finance, and onboarding from the sidebar sub-menus.
+          </p>
+        </div>
+        <BrochureDownloadTrigger className={ui.btnSecondary} defaultFormat="exec">
+          Download brochure / exec deck
+        </BrochureDownloadTrigger>
       </header>
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

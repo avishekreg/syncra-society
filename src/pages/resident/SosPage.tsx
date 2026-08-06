@@ -5,7 +5,7 @@ import type { SosAlertType } from '../../types/db'
 import { ui } from '../../lib/ui'
 
 const TYPES: Array<{ id: SosAlertType; label: string; hint: string }> = [
-  { id: 'MEDICAL', label: 'Medical emergency', hint: 'Senior / medical response mesh' },
+  { id: 'MEDICAL', label: 'Medical emergency', hint: 'Senior / medical response alert' },
   { id: 'SECURITY', label: 'Security threat', hint: 'Guards + RWA dispatch' },
   { id: 'FIRE', label: 'Fire / smoke', hint: 'Priority society alert' }
 ]

@@ -68,7 +68,7 @@ export default function ResidentIntelligencePage() {
         <p className={ui.eyebrow}>Autonomous intelligence</p>
         <h2 className={`mt-2 ${ui.headingLg}`}>Society intelligence & governance</h2>
         <p className={`mt-2 ${ui.body}`}>
-          maiEnergy, mAI Nyaya mediation, cryptographic recall votes, and guardian mesh — capabilities legacy society apps rarely ship together.
+          maiEnergy, mAI Nyaya mediation, cryptographic recall votes, and Guardian Watch — phone-first capabilities legacy society apps rarely ship together.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Link to="/resident/find-asset" className={ui.btnSecondary}>
@@ -287,8 +287,10 @@ export default function ResidentIntelligencePage() {
 
       {tab === 'guardian' ? (
         <section className={ui.card}>
-          <h3 className={ui.heading}>Guardian mesh alerts</h3>
-          <p className={`mt-2 text-sm ${ui.body}`}>Kid/senior geofence and vehicle unauthorized-motion events for your society.</p>
+          <h3 className={ui.heading}>Guardian watch alerts</h3>
+          <p className={`mt-2 text-sm ${ui.body}`}>
+            Family check-in watchlists and guard-logged vehicle flags for your society — no GPS tags or cameras.
+          </p>
           <ul className="mt-4 space-y-2">
             {guardian.length === 0 ? <li className={ui.body}>No active guardian alerts.</li> : null}
             {guardian.map((g) => (

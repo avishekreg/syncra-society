@@ -7,6 +7,7 @@ let localMode = false
 let localAssets: LostAssetSignal[] = []
 let localQueue: BleSignalQueueItem[] = []
 
+/** Neighbor tip queue entry (legacy column name ble_fingerprint retained for schema compatibility). */
 export type BleSignalQueueItem = {
   id: string
   society_id: string
@@ -45,7 +46,7 @@ export async function markAssetLost(input: {
     owner_flat_number: input.ownerFlatNumber ?? null,
     asset_name: input.assetName.trim(),
     asset_type: input.assetType,
-    last_seen_location: input.lastSeenLocation?.trim() || 'Last known: Tower lobby mesh',
+    last_seen_location: input.lastSeenLocation?.trim() || 'Last known: Tower lobby',
     last_seen_at: new Date().toISOString(),
     ble_fingerprint: input.bleFingerprint || fingerprint(input.assetName, input.assetType),
     status: 'LOST' as const,
@@ -79,7 +80,7 @@ export async function listLostAssets(societyId: string): Promise<LostAssetSignal
   }
 }
 
-/** Community device / native BLE scanner enqueues a raw signal for background matching. */
+/** Enqueue a neighbor tip for background matching (schema retains ble_* column names). */
 export async function enqueueBleSignal(input: {
   societyId: string
   bleFingerprint: string
@@ -127,7 +128,7 @@ async function callRpcMatch(queueId: string): Promise<LostAssetSignal | null> {
   return JSON.parse(text) as LostAssetSignal
 }
 
-/** Community device reports a BLE sighting — notify owner by updating last-seen. */
+/** Neighbor reports a last-seen tip — notify owner by updating last-seen. */
 export async function reportAssetSighting(input: {
   assetId: string
   detectedByUserId: string
@@ -158,7 +159,7 @@ export async function reportAssetSighting(input: {
   await dispatchPushNotification({
     societyId: row.society_id,
     type: 'system.alert',
-    title: 'Asset mesh ping',
+    title: 'Asset tip logged',
     body: `${row.asset_name} spotted near ${input.locationLabel}.`,
     url: '/resident/find-asset',
     audience: 'flat',
@@ -170,7 +171,7 @@ export async function reportAssetSighting(input: {
 }
 
 /**
- * Drain pending BLE queue and auto-match fingerprints to LOST assets.
+ * Drain pending tip queue and match fingerprints to LOST assets.
  * Triggers owner location-pin push on match.
  */
 export async function processBleSignalQueue(societyId: string): Promise<LostAssetSignal[]> {
@@ -196,7 +197,7 @@ export async function processBleSignalQueue(societyId: string): Promise<LostAsse
           societyId,
           type: 'system.alert',
           title: 'Lost asset located',
-          body: `${asset.asset_name} matched on mesh near ${item.location_label}.`,
+          body: `${asset.asset_name} matched near ${item.location_label}.`,
           url: '/resident/find-asset',
           audience: 'flat',
           flatId: asset.owner_flat_number || undefined,
@@ -220,7 +221,7 @@ export async function processBleSignalQueue(societyId: string): Promise<LostAsse
             societyId,
             type: 'system.alert',
             title: 'Lost asset located',
-            body: `${asset.asset_name} matched on mesh near ${item.location_label}.`,
+            body: `${asset.asset_name} matched near ${item.location_label}.`,
             url: '/resident/find-asset',
             audience: 'flat',
             flatId: asset.owner_flat_number || undefined,

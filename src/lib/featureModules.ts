@@ -122,8 +122,8 @@ export const FEATURE_MODULE_CATALOG: FeatureModuleMeta[] = [
   },
   {
     key: 'mai_emergency_sos',
-    label: 'maiEmergency SOS Mesh',
-    description: '1-tap medical & security emergency dispatch to guards and volunteers.',
+    label: 'maiEmergency SOS',
+    description: '1-tap medical & security emergency dispatch to guards and volunteers — phones only.',
     tier: 'premium',
     defaultEnabled: false,
     routeHints: ['/resident/sos', '/admin/emergency-logs'],
@@ -158,8 +158,8 @@ export const FEATURE_MODULE_CATALOG: FeatureModuleMeta[] = [
   },
   {
     key: 'mai_guardian',
-    label: 'mAI Guardian Mesh',
-    description: 'Kid/senior geofence and unauthorized vehicle motion alerts.',
+    label: 'mAI Guardian Watch',
+    description: 'Family check-in windows and guard-desk vehicle flag alerts — phones only.',
     tier: 'premium',
     defaultEnabled: false,
     routeHints: ['/gatekeeper/intelligence', '/resident/intelligence'],
@@ -177,7 +177,7 @@ export const FEATURE_MODULE_CATALOG: FeatureModuleMeta[] = [
   {
     key: 'mai_find_asset',
     label: 'mAI Find Asset',
-    description: 'Community Bluetooth mesh for lost phones, keys, and vehicles.',
+    description: 'Neighbor tip board for lost phones, keys, and vehicles — phones only.',
     tier: 'premium',
     defaultEnabled: false,
     routeHints: ['/resident/find-asset'],

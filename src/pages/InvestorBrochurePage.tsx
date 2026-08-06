@@ -12,6 +12,7 @@ type DeckMode = 'full' | 'exec'
 export default function InvestorBrochurePage() {
   const [params, setParams] = useSearchParams()
   const printMode = params.get('print') === '1'
+  const autoPrint = params.get('autoprint') === '1'
   const initialLocale = (params.get('lang') as BrochureLocale) || 'en'
   const initialMode = (params.get('deck') as DeckMode) === 'exec' ? 'exec' : 'full'
   const [locale, setLocale] = useState<BrochureLocale>(
@@ -30,6 +31,14 @@ export default function InvestorBrochurePage() {
       document.documentElement.classList.remove('brochure-root', 'brochure-print-mode')
     }
   }, [printMode, mode])
+
+  useEffect(() => {
+    if (!autoPrint || !printMode) return
+    const timer = window.setTimeout(() => {
+      window.print()
+    }, 600)
+    return () => window.clearTimeout(timer)
+  }, [autoPrint, printMode, locale, mode])
 
   function updateQuery(next: { lang?: BrochureLocale; deck?: DeckMode }) {
     const lang = next.lang ?? locale

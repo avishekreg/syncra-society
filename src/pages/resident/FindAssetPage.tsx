@@ -2,11 +2,9 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../providers/AuthProvider'
 import {
-  enqueueBleSignal,
   listLostAssets,
   markAssetFound,
   markAssetLost,
-  processBleSignalQueue,
   reportAssetSighting,
   societyMapPins
 } from '../../api/assetFinderService'
@@ -33,23 +31,6 @@ export default function ResidentFindAssetPage() {
     void refresh().catch((err) => setError(err instanceof Error ? err.message : 'Load failed'))
   }, [currentSocietyId])
 
-  useEffect(() => {
-    if (!currentSocietyId) return
-    const tick = () => {
-      void processBleSignalQueue(currentSocietyId)
-        .then((matched) => {
-          if (matched.length) {
-            setMessage(`${matched.length} BLE mesh match(es) updated owner pins.`)
-            return refresh()
-          }
-        })
-        .catch(() => undefined)
-    }
-    tick()
-    const timer = window.setInterval(tick, 30_000)
-    return () => window.clearInterval(timer)
-  }, [currentSocietyId])
-
   const pins = societyMapPins(assets)
 
   if (!currentSocietyId || !user?.id) {
@@ -64,9 +45,10 @@ export default function ResidentFindAssetPage() {
     <div className="space-y-6">
       <section className={ui.card}>
         <p className={ui.eyebrow}>mAI Find Asset</p>
-        <h2 className={`mt-2 ${ui.headingLg}`}>Community Bluetooth mesh tracker</h2>
+        <h2 className={`mt-2 ${ui.headingLg}`}>Community tip board</h2>
         <p className={`mt-2 ${ui.body}`}>
-          Mark phones, watches, keys, or vehicles as lost. Neighbor devices report last-known sightings across the society.
+          Mark phones, watches, keys, or vehicles as lost. Neighbors log last-seen tips in the app — phones only, no
+          tags or beacons to buy.
         </p>
         <Link to="/resident/intelligence" className={`mt-3 inline-flex ${ui.btnGhost}`}>
           ← Intelligence hub
@@ -88,7 +70,7 @@ export default function ResidentFindAssetPage() {
             })
               .then(() => {
                 setName('')
-                setMessage('Asset marked LOST on the community mesh.')
+                setMessage('Asset marked LOST on the community tip board.')
                 return refresh()
               })
               .catch((err) => setError(err instanceof Error ? err.message : 'Failed'))
@@ -110,7 +92,12 @@ export default function ResidentFindAssetPage() {
           </div>
           <div className="space-y-2 sm:col-span-2">
             <label className={ui.label}>Last seen (optional)</label>
-            <input className={ui.input} value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Basement B2 · Column C" />
+            <input
+              className={ui.input}
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="Basement B2 · Column C"
+            />
           </div>
           <button type="submit" className={ui.btnPrimary}>
             Mark as lost
@@ -121,7 +108,7 @@ export default function ResidentFindAssetPage() {
       </section>
 
       <section className={ui.card}>
-        <h3 className={ui.heading}>Society signal map</h3>
+        <h3 className={ui.heading}>Society tip map</h3>
         <div className="relative mt-4 h-64 overflow-hidden rounded-2xl border border-slate-200 bg-[radial-gradient(circle_at_20%_20%,rgba(0,180,216,0.12),transparent_40%),linear-gradient(135deg,#f8fafc,#e2e8f0)]">
           {pins.map((pin) => (
             <div
@@ -134,7 +121,9 @@ export default function ResidentFindAssetPage() {
             </div>
           ))}
           {pins.length === 0 ? (
-            <p className="absolute inset-0 flex items-center justify-center text-sm text-slate-500">No active lost signals</p>
+            <p className="absolute inset-0 flex items-center justify-center text-sm text-slate-500">
+              No active lost tips
+            </p>
           ) : null}
         </div>
       </section>
@@ -148,7 +137,7 @@ export default function ResidentFindAssetPage() {
                   {asset.asset_name} · {asset.asset_type}
                 </h4>
                 <p className={`mt-1 text-sm ${ui.body}`}>
-                  {asset.last_seen_location || 'Awaiting mesh ping'}
+                  {asset.last_seen_location || 'Awaiting neighbor tip'}
                   {asset.last_seen_at ? ` · ${new Date(asset.last_seen_at).toLocaleString()}` : ''}
                 </p>
               </div>
@@ -160,37 +149,26 @@ export default function ResidentFindAssetPage() {
                   type="button"
                   className={ui.btnSecondary}
                   onClick={() =>
-                    void enqueueBleSignal({
-                      societyId: currentSocietyId,
-                      bleFingerprint: asset.ble_fingerprint || '',
-                      locationLabel: location.trim() || 'Neighbor mesh ping · Clubhouse walkway',
-                      detectedByUserId: user.id
-                    })
-                      .then(() => processBleSignalQueue(currentSocietyId))
-                      .then(() => {
-                        setMessage('BLE signal queued and matched against lost tags.')
-                        return refresh()
-                      })
-                      .catch((err) => setError(err instanceof Error ? err.message : 'Mesh ping failed'))
-                  }
-                >
-                  Log BLE mesh ping
-                </button>
-                <button
-                  type="button"
-                  className={ui.btnGhost}
-                  onClick={() =>
                     void reportAssetSighting({
                       assetId: asset.id,
                       detectedByUserId: user.id,
-                      locationLabel: location.trim() || 'Neighbor mesh ping · Clubhouse walkway'
-                    }).then(refresh)
+                      locationLabel: location.trim() || 'Neighbor tip · Clubhouse walkway'
+                    })
+                      .then(() => {
+                        setMessage('Tip logged — owner notified with the last-seen location.')
+                        return refresh()
+                      })
+                      .catch((err) => setError(err instanceof Error ? err.message : 'Tip failed'))
                   }
                 >
-                  Report sighting
+                  I spotted it (log tip)
                 </button>
                 {asset.owner_user_id === user.id ? (
-                  <button type="button" className={ui.btnGhost} onClick={() => void markAssetFound(asset.id).then(refresh)}>
+                  <button
+                    type="button"
+                    className={ui.btnGhost}
+                    onClick={() => void markAssetFound(asset.id).then(refresh)}
+                  >
                     Mark found
                   </button>
                 ) : null}

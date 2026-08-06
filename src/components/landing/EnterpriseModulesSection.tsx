@@ -63,9 +63,9 @@ const MODULES = [
   {
     id: 'sos',
     icon: '🚨',
-    title: 'maiEmergency SOS Mesh',
+    title: 'maiEmergency SOS',
     blurb: '1-tap medical & security emergency dispatch to guards & community volunteers.',
-    detail: 'High-contrast SOS flash with flat location and one-tap call for responders.'
+    detail: 'High-contrast SOS flash with flat location and one-tap call for responders — no panic buttons to install.'
   },
   {
     id: 'amenities',
@@ -84,9 +84,10 @@ const MODULES = [
   {
     id: 'guardian',
     icon: '🛡️',
-    title: 'mAI Guardian Mesh',
-    blurb: 'Kid/senior geofence and unauthorized vehicle motion alerts.',
-    detail: 'Phone-based presence signals notify parents and security when a ward leaves a safe zone or a parked vehicle moves.'
+    title: 'mAI Guardian Watch',
+    blurb: 'Family check-in windows and manual vehicle flag alerts for the guard desk.',
+    detail:
+      'Parents set expected return windows in the app; guards log plate flags by hand. No GPS tags, beacons, or cameras required.'
   },
   {
     id: 'botanist',
@@ -113,8 +114,8 @@ const MODULES = [
     id: 'tv-sizing',
     icon: '📐',
     title: 'Smart TV & Sound Sizing',
-    blurb: 'Photo-based room analysis for optimal display inches & acoustic setup.',
-    detail: 'Viewing-distance formula (distance″ / 1.6) snaps to retail sizes like 43", 55", and 65".'
+    blurb: 'Enter viewing distance for recommended display inches and speaker tips.',
+    detail: 'Simple distance ÷ 1.6 formula snaps to retail sizes like 43", 55", and 65" — tape measure or phone ruler, no room cameras.'
   },
   {
     id: 'furniture-fit',

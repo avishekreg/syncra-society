@@ -68,7 +68,7 @@ const EN: ExecDeckCopy = {
     {
       eyebrow: '04 · Next step',
       title: 'Request a board demo',
-      lead: 'Share this 4-page deck with your RWA committee. Ask for a custom 90-sec video pitch tailored to your society.',
+      lead: 'Share this 4-page deck with your RWA committee. Ask for a live product walkthrough tailored to your society.',
       bullets: [
         'Transparent per-flat pricing',
         'Modular enterprise add-ons',

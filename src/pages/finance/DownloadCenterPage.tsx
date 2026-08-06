@@ -2,6 +2,7 @@ import React from 'react'
 import { useAuth } from '../../providers/AuthProvider'
 import { useLedger } from '../../hooks/useLedger'
 import { useShowcaseWorkspace } from '../../hooks/useShowcaseWorkspace'
+import { BrochureDownloadTrigger } from '../../components/brochure/BrochureDownloadModal'
 import { ui } from '../../lib/ui'
 
 function downloadTextFile(filename: string, content: string) {
@@ -76,6 +77,20 @@ export default function FinanceDownloadCenterPage() {
           <button type="button" onClick={exportStatementSummary} className={`mt-4 ${ui.btnSecondary}`}>
             Download statement CSV
           </button>
+        </article>
+
+        <article className={`${ui.cardFill} md:col-span-2`}>
+          <header className={ui.cardHeader}>
+            <p className={ui.eyebrow}>Sales collateral</p>
+            <h2 className={`mt-1 ${ui.heading}`}>Product brochure &amp; Quick Exec Deck</h2>
+          </header>
+          <p className={ui.body}>
+            Download the 4-page regional language board brief (EN / हिंदी / বাংলা / मराठी / தமிழ் / తెలుగు) or the full
+            English technical guide — phone-only product, no hardware pitch.
+          </p>
+          <BrochureDownloadTrigger className={`mt-4 ${ui.btnPrimary}`} defaultFormat="exec">
+            Download brochure / exec deck
+          </BrochureDownloadTrigger>
         </article>
       </section>
     </div>

@@ -47,7 +47,7 @@ function variancePct(amount: number, prior: number) {
 function recommend(category: AiAuditCategory, variance: number) {
   if (variance < 12) return 'Within expected band — continue monthly trend monitoring.'
   if (category === 'WATER') {
-    return 'Investigate tank overflow sensors, common-area tap leaks, and tanker surcharge spikes. Hold payment pending dual-signatory finance review.'
+    return 'Investigate common-area taps, tank overflow, and tanker surcharge spikes. Hold payment pending dual-signatory finance review.'
   }
   if (category === 'ELECTRICITY') {
     return 'Audit clubhouse HVAC runtime and corridor lighting schedules. Escalate >20% variance to RWA Treasurer before disbursement.'

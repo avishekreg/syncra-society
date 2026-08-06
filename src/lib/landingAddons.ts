@@ -109,9 +109,9 @@ export const LANDING_ADDONS: LandingAddon[] = [
   {
     id: 'mai_emergency_sos',
     moduleName: 'mai_emergency_sos',
-    label: 'maiEmergency SOS Mesh',
+    label: 'maiEmergency SOS',
     shortLabel: 'Emergency SOS',
-    description: '1-tap medical & security emergency dispatch to guards & volunteers.',
+    description: '1-tap medical & security emergency dispatch to guards & volunteers — phones only.',
     monthlyPriceInr: 249
   },
   {
@@ -127,7 +127,7 @@ export const LANDING_ADDONS: LandingAddon[] = [
     moduleName: 'mai_find_asset',
     label: 'mAI Find Asset',
     shortLabel: 'Find Asset',
-    description: 'Community Bluetooth mesh to locate lost phones, keys, and vehicles.',
+    description: 'Neighbor tip board to report last-seen spots for lost phones, keys, and vehicles.',
     monthlyPriceInr: 149
   },
   {
@@ -157,9 +157,9 @@ export const LANDING_ADDONS: LandingAddon[] = [
   {
     id: 'mai_guardian',
     moduleName: 'mai_guardian',
-    label: 'mAI Guardian Mesh',
+    label: 'mAI Guardian Watch',
     shortLabel: 'Guardian',
-    description: 'Kid/senior geofence and unauthorized vehicle motion alerts.',
+    description: 'Family check-in windows and guard-desk vehicle flag alerts — phones only.',
     monthlyPriceInr: 229
   },
   {

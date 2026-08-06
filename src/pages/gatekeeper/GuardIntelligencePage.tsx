@@ -47,8 +47,8 @@ export default function GuardIntelligencePage() {
         <p className={ui.eyebrow}>Guard intelligence</p>
         <h2 className={`mt-2 ${ui.headingLg}`}>{societyName} · mAI Guardian</h2>
         <p className={`mt-2 ${ui.body}`}>
-          Unauthorized vehicle motion and geofence events. Flagged vehicles without owner proximity trigger an exit
-          warning.
+          Manual vehicle exit checks for the guard desk. Flag a plate when the owner is not confirmed present — no GPS
+          tags or cameras required.
         </p>
       </section>
 
@@ -76,7 +76,7 @@ export default function GuardIntelligencePage() {
           <input className={ui.input} placeholder="Vehicle / plate" value={vehicle} onChange={(e) => setVehicle(e.target.value)} />
           <label className="flex items-center gap-2 text-sm font-medium text-slate-700 sm:col-span-2">
             <input type="checkbox" checked={ownerNear} onChange={(e) => setOwnerNear(e.target.checked)} />
-            Owner phone proximity detected
+            Owner confirmed present (verbal / ID check)
           </label>
           <button type="submit" className={ui.btnPrimary}>
             Validate exit

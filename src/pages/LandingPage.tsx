@@ -15,7 +15,8 @@ import AddonPricingCalculator from '../components/landing/AddonPricingCalculator
 import ExperienceAiAuditModal from '../components/landing/ExperienceAiAuditModal'
 import SyncraFooter from '../components/layout/SyncraFooter'
 import FooterEnterpriseCta from '../components/layout/FooterEnterpriseCta'
-import { SYNCRA_LEGAL_ENTITY, MAI_PRODUCT_BROCHURE_PDF, MAI_PRODUCT_BROCHURE_FILENAME } from '../lib/brandConstants'
+import { BrochureDownloadTrigger } from '../components/brochure/BrochureDownloadModal'
+import { SYNCRA_LEGAL_ENTITY } from '../lib/brandConstants'
 import { usePlatformPricing } from '../hooks/usePlatformPricing'
 import { formatInr } from '../lib/platformPricing'
 import { ui } from '../lib/ui'
@@ -49,13 +50,9 @@ export default function LandingPage() {
             <a href="#enterprise-modules" className={`w-full sm:w-auto ${ui.btnGhost}`}>
               Modules
             </a>
-            <a
-              href={MAI_PRODUCT_BROCHURE_PDF}
-              download={MAI_PRODUCT_BROCHURE_FILENAME}
-              className={`w-full sm:w-auto ${ui.btnGhost}`}
-            >
+            <BrochureDownloadTrigger className={`w-full sm:w-auto ${ui.btnGhost}`} defaultFormat="exec">
               Download Brochure
-            </a>
+            </BrochureDownloadTrigger>
             <Link to="/auth/login" className={`w-full sm:w-auto ${ui.btnGhost}`}>
               Login Now
             </Link>
@@ -88,10 +85,16 @@ export default function LandingPage() {
               >
                 Build your plan
               </a>
+              <BrochureDownloadTrigger
+                className={`inline-flex w-full items-center justify-center sm:w-auto ${ui.btnSecondary} px-8 py-4`}
+                defaultFormat="exec"
+              >
+                Download board brief
+              </BrochureDownloadTrigger>
               <button
                 type="button"
                 onClick={() => setAuditDemoOpen(true)}
-                className={`inline-flex w-full items-center justify-center sm:w-auto ${ui.btnSecondary} px-8 py-4`}
+                className={`inline-flex w-full items-center justify-center sm:w-auto ${ui.btnGhost} px-8 py-4`}
               >
                 Experience AI Audit
               </button>
